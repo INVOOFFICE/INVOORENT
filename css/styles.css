@@ -43,6 +43,16 @@
 .input-date-wrap:focus-within .input-date-hint{
  opacity:0;
 }
+/* Supprimer les flèches des champs number (spinner) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{
+ -webkit-appearance:none;
+ margin:0;
+}
+input[type="number"]{
+ -moz-appearance:textfield;
+ appearance:textfield;
+}
 @media (max-width:480px){
  .input-date-hint{font-size:0.83rem;left:11px}
 }
