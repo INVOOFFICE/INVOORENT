@@ -1473,7 +1473,7 @@ function printContratDirect(){
  y+=18;
  line(ml,y,W-mr,y,'#0C0E14');
  y+=6;
- rect(ml,y-4,cw,10,'rgba(45,212,191,0.12)','rgba(45,212,191,0.25)');
+ rect(ml,y-4,cw,10,'#E6FFFA','#99F6E4');
  setFont(8,'bold','#312E81');
  txt('CONTRAT DE LOCATION DE VÉHICULE',W / 2,y+2,{align: 'center'});
  y+=12;
