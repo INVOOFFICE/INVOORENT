@@ -1466,7 +1466,7 @@ function printContratDirect(){
  if(s.patente){setFont(7,'normal','#AAAAAA');txt('RC / Patente : '+s.patente,ml,y+14);}
  setFont(7,'normal','#777777');
  txt('N° Contrat',W-mr,y,{align: 'right'});
- setFont(11,'bold','#FFFFFF');
+ setFont(11,'bold','#0C0E14');
  txt(contratNum,W-mr,y+5,{align: 'right'});
  setFont(7,'normal','#777777');
  txt('Date : '+new Date().toLocaleDateString('fr-FR'),W-mr,y+10,{align: 'right'});
@@ -1493,7 +1493,7 @@ function printContratDirect(){
  const yy=y+row * 9;
  setFont(6.5,'normal','#777777');
  txt(pair[0],x,yy);
- setFont(8,'bold','#FFFFFF');
+ setFont(8,'bold','#0C0E14');
  txt(String(pair[1]||'—'),x,yy+4);
 });
  y+=Math.ceil(pairs.length / 2)* 9+2;
@@ -1543,7 +1543,7 @@ function printContratDirect(){
  const typeLabel=p.type==='avance'?'Avance':p.type==='solde'?'Solde':'Autre';
  setFont(7,'normal','#555555');
  txt(typeLabel+'('+p.mode+' · '+(p.date||'')+')',ml,y);
- setFont(7,'bold','#FFFFFF');
+ setFont(7,'bold','#0C0E14');
  txt(fmtNum(p.montant)+' MAD',W-mr,y,{align: 'right'});
  y+=6;
 });
@@ -1551,7 +1551,7 @@ function printContratDirect(){
  const cautionLbl=res.cautionStatut==='encaissee'?'Encaissée':res.cautionStatut==='restituee'?'Restituée':'En attente';
  setFont(7,'normal','#555555');
  txt('Caution('+cautionLbl+')',ml,y);
- setFont(7,'bold','#FFFFFF');
+ setFont(7,'bold','#0C0E14');
  txt(fmtNum(res.caution||0)+' MAD',W-mr,y,{align: 'right'});
  y+=6;
 }
@@ -1560,7 +1560,7 @@ function printContratDirect(){
  y+=4;
  setFont(7,'bold','#0C0E14');
  txt('Reste dû',ml,y);
- setFont(8,'bold',restedu===0 ? '#99f6e4' : '#fca5a5');
+ setFont(8,'bold',restedu===0 ? '#047857' : '#B91C1C');
  txt(fmtNum(restedu)+' MAD',W-mr,y,{align: 'right'});
  y+=8;
 }
