@@ -1,9 +1,10 @@
-const CACHE_NAME='INVOORENT-v22';
+const CACHE_NAME='INVOORENT-v23';
 const ASSETS=[
  '/index.html',
  '/manifest.json',
  '/assets/vendor/chart.umd.js',
  '/assets/vendor/xlsx.full.min.js',
+ '/assets/vendor/jspdf.umd.min.js',
  '/assets/autoloc-icon-192.png',
  '/assets/autoloc-icon-512.png',
  '/css/styles.css',

@@ -1,6 +1,7 @@
 const KEYS={veh:'autoloc_veh',cl:'autoloc_cl',res:'autoloc_res',log:'autoloc_log',maint:'autoloc_maint',settings:'autoloc_settings'};
 const SYNC_KEYS=[KEYS.veh,KEYS.cl,KEYS.res,KEYS.maint];
 if(typeof window!=='undefined')window.AUTOLOC_SYNC_KEYS=SYNC_KEYS.slice();
+const PHOTOS_ENABLED=false;
 const OPFS={
  _root: null,
  _ready: false,
@@ -607,10 +608,11 @@ function renderVehicules(){
  const dt=new Date(d);dt.setHours(0,0,0,0);
  return!isNaN(dt)&&(dt-today)/ 86400000<=30;
 });
- const docBadge=docWarn ? '<span title="Document à renouveler(assurance/vignette/visite)" style="background:#FEF9C3;color:#854D0E;padding:1px 6px;border-radius:8px;font-size:0.65rem;font-weight:700;margin-left:3px">📄</span>' : '';
-  return `<tr><td><strong>${esc(v.immat)}</strong></td><td>${esc(v.marque)}${esc(v.modele)}</td><td>${esc(v.cat)}</td><td>${esc(String(v.annee))}</td><td><strong>${esc(String(v.tarif))}MAD</strong></td><td><span class="badge ${v.statut==='disponible'?'badge-success':v.statut==='loué'?'badge-info':'badge-warning'}">${esc(v.statut)}</span>${docBadge}</td><td style="display:flex;gap:6px;"><button class="btn-icon" title="Photos" data-type="veh" data-id="${esc(v.id)}" data-title="${esc(v.marque)}${esc(v.modele)}(${esc(v.immat)})" onclick="openPhotosModalFromBtn(this)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+ const docBadge=docWarn ? '<span title="Document à renouveler(assurance/vignette/visite)" style="background:rgba(251,191,36,0.16);color:#fde68a;padding:1px 6px;border-radius:8px;font-size:0.65rem;font-weight:700;margin-left:3px;border:1px solid rgba(251,191,36,0.35)">📄</span>' : '';
+ const photosBtn=PHOTOS_ENABLED ? `<button class="btn-icon" title="Photos" data-type="veh" data-id="${esc(v.id)}" data-title="${esc(v.marque)}${esc(v.modele)}(${esc(v.immat)})" onclick="openPhotosModalFromBtn(this)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${countPhotos('veh',v.id)>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${countPhotos('veh',v.id)}</span>`:''}
-</button><button class="btn-icon" title="Historique" onclick="showHistVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" title="Maintenance" onclick="openMaintModal();document.getElementById('maint-veh').value='${esc(v.id)}'"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></button><button class="btn-icon" title="Modifier" onclick="editVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
+</button>` : '';
+  return `<tr><td><strong>${esc(v.immat)}</strong></td><td>${esc(v.marque)}${esc(v.modele)}</td><td>${esc(v.cat)}</td><td>${esc(String(v.annee))}</td><td><strong>${esc(String(v.tarif))}MAD</strong></td><td><span class="badge ${v.statut==='disponible'?'badge-success':v.statut==='loué'?'badge-info':'badge-warning'}">${esc(v.statut)}</span>${docBadge}</td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" title="Maintenance" onclick="openMaintModal();document.getElementById('maint-veh').value='${esc(v.id)}'"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></button><button class="btn-icon" title="Modifier" onclick="editVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteVeh('${esc(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
 }).join('');
 }
 function saveVehicule(){
@@ -694,9 +696,10 @@ function renderClients(){
  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 48 48" fill="none"><circle cx="20" cy="18" r="8" fill="#F5F5F7" stroke="#D0D0D8" stroke-width="1.5"/><path d="M6 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#D0D0D8" stroke-width="1.5" stroke-linecap="round"/><circle cx="38" cy="12" r="8" fill="#0C0E14"/><path d="M35 12h6M38 9v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Aucun client</h4><p>Ajoutez votre premier client</p></div></td></tr>`;return;}
  tbody.innerHTML=data.map(c=>{
  const locs=resData.filter(r=>r.clientId===c.id).length;
-  return `<tr><td><strong>${esc(c.prenom)}${esc(c.nom)}</strong></td><td>${esc(c.tel)}</td><td>${esc(c.cin)}</td><td>${esc(c.email||'—')}</td><td>${esc(c.permis||'—')}</td><td><span class="badge badge-info">${locs}location${locs>1?'s':''}</span></td><td style="display:flex;gap:6px;"><button class="btn-icon" title="Photos" data-type="cl" data-id="${esc(c.id)}" data-title="${esc(c.prenom)}${esc(c.nom)}" onclick="openPhotosModalFromBtn(this)" style="position:relative"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+ const photosBtn=PHOTOS_ENABLED ? `<button class="btn-icon" title="Photos" data-type="cl" data-id="${esc(c.id)}" data-title="${esc(c.prenom)}${esc(c.nom)}" onclick="openPhotosModalFromBtn(this)" style="position:relative"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${countPhotos('cl',c.id)>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${countPhotos('cl',c.id)}</span>`:''}
-</button><button class="btn-icon" title="Historique" onclick="showHistClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" onclick="editClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" onclick="deleteClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
+</button>` : '';
+  return `<tr><td><strong>${esc(c.prenom)}${esc(c.nom)}</strong></td><td>${esc(c.tel)}</td><td>${esc(c.cin)}</td><td>${esc(c.email||'—')}</td><td>${esc(c.permis||'—')}</td><td><span class="badge badge-info">${locs}location${locs>1?'s':''}</span></td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" onclick="editClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" onclick="deleteClient('${esc(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
 }).join('');
 }
 function saveClient(){
@@ -831,7 +834,7 @@ function renderReservations(){
  : `<span class="pay-badge-partial">${payPct}% payé</span>`;
  return `<div class="rental-card"><div class="rental-card-header"><div><h4>${c ? esc(c.prenom)+' '+esc(c.nom): 'Client inconnu'}</h4><div style="margin-top:4px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><span class="badge ${badgeCls}">${esc(r.statut)}</span>
  ${payBadge}
- ${caution>0?`<span style="background:#F0EEE9;color:#5A5A5A;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;">Caution: ${caution}MAD</span>`:''}
+ ${caution>0?`<span style="background:rgba(45,212,191,0.14);color:#99f6e4;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;border:1px solid rgba(45,212,191,0.3);">Caution: ${caution}MAD</span>`:''}
 </div></div><span class="total-badge">${total||'—'}MAD</span></div><div class="rental-info"><strong>Véhicule :</strong>${v ? esc(v.marque)+' '+esc(v.modele)+'('+esc(v.immat)+')' : '—'}<br><strong>Période :</strong>${esc(r.debut)}→ ${esc(r.fin)}<br><strong>Lieu :</strong>${esc(r.lieu||'—')}<br>
  ${r.notes ? `<strong>Notes :</strong>${esc(r.notes)}` : ''}
 </div><div class="rental-actions">
@@ -1063,8 +1066,8 @@ function renderAlerts(){
  if(total===0){wrap.innerHTML='';return;}
  const all=[
  ...retards.map(i=>({...i,type:'retard',label:`Retard de ${i.diffDays}jour${i.diffDays>1?'s':''}`,badgeCls:'alert-badge-retard',bg:'#FDEDEC',ic:'#C0392B'})),
- ...today24h.map(i=>({...i,type:'today',label:"Retour aujourd'hui",badgeCls:'alert-badge-retard',bg:'#FEF9E7',ic:'#D68910'})),
- ...soon48h.map(i=>({...i,type:'soon',label:`Retour le ${i.finStr}`,badgeCls:'alert-badge-soon',bg:'#FEF9E7',ic:'#D68910'})),
+...today24h.map(i=>({...i,type:'today',label:"Retour aujourd'hui",badgeCls:'alert-badge-retard',bg:'rgba(251,191,36,0.12)',ic:'#f59e0b'})),
+...soon48h.map(i=>({...i,type:'soon',label:`Retour le ${i.finStr}`,badgeCls:'alert-badge-soon',bg:'rgba(251,191,36,0.12)',ic:'#f59e0b'})),
 ];
  wrap.innerHTML=`
 <div class="alert-card" id="alerts-section"><div class="alert-card-header"><svg fill="none" viewBox="0 0 24 24" stroke="#C0392B" stroke-width="2" style="width:18px;height:18px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><h4>Alertes — Retards&Retours imminents</h4><span class="badge badge-danger">${total}</span></div>
@@ -1128,14 +1131,14 @@ function renderDocsAlerts(){
  return isNaN(d)? dateStr : d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 };
  const rowHtml=a=>{
- const bg=a.level==='expired' ? '#FEF2F2' : a.level==='urgent' ? '#FFF7ED' : '#FFFBEB';
- const color=a.level==='expired' ? '#991B1B' : a.level==='urgent' ? '#9A3412' : '#92400E';
+ const bg=a.level==='expired' ? 'rgba(239,68,68,0.12)' : a.level==='urgent' ? 'rgba(251,191,36,0.14)' : 'rgba(45,212,191,0.12)';
+ const color=a.level==='expired' ? '#fecaca' : a.level==='urgent' ? '#fde68a' : '#99f6e4';
  const badge=a.level==='expired'
- ? `<span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">Expiré</span>`
+ ? `<span style="background:rgba(239,68,68,0.16);color:#fecaca;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;border:1px solid rgba(248,113,113,0.35)">Expiré</span>`
  : a.level==='urgent'
- ? `<span style="background:#FED7AA;color:#9A3412;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">Dans ${a.diffDays}j</span>`
- : `<span style="background:#FEF9C3;color:#854D0E;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700">Dans ${a.diffDays}j</span>`;
- return `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(0,0,0,0.05);background:${bg}"><span style="font-size:1rem">${a.icon}</span><div style="flex:1;min-width:0"><strong style="font-size:0.83rem;color:${color};display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.name)}</strong><span style="font-size:0.75rem;color:var(--text3)">${esc(a.label)}— expire le ${esc(fmt(a.dateStr))}</span></div>
+ ? `<span style="background:rgba(251,191,36,0.16);color:#fde68a;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;border:1px solid rgba(251,191,36,0.35)">Dans ${a.diffDays}j</span>`
+ : `<span style="background:rgba(45,212,191,0.14);color:#99f6e4;padding:2px 8px;border-radius:10px;font-size:0.68rem;font-weight:700;border:1px solid rgba(45,212,191,0.32)">Dans ${a.diffDays}j</span>`;
+ return `<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(45,212,191,0.12);background:${bg}"><span style="font-size:1rem">${a.icon}</span><div style="flex:1;min-width:0"><strong style="font-size:0.83rem;color:${color};display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.name)}</strong><span style="font-size:0.75rem;color:var(--text3)">${esc(a.label)}— expire le ${esc(fmt(a.dateStr))}</span></div>
  ${badge}
 <button class="btn btn-sm btn-outline" style="flex-shrink:0;font-size:0.72rem;padding:4px 10px" onclick="editVeh('${esc(a.vehId)}')">Modifier</button></div>`;
 };
@@ -1168,11 +1171,11 @@ function renderDashboard(){
  return dispo+' dispo · '+loues+' en location'+(docsExp>0?' · ⚠️ '+docsExp+' doc'+(docsExp>1?'s':''):'');
 })(),color:'rgba(45,212,191,0.15)',iconColor:'#2dd4bf',
  icon:'<path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>'},
-{label:'Clients',val:cls.length,sub:'clients enregistrés',color:'#ECFDF5',iconColor:'#059669',
+{label:'Clients',val:cls.length,sub:'clients enregistrés',color:'rgba(45,212,191,0.12)',iconColor:'#2dd4bf',
  icon:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>'},
-{label:'Locations en cours',val:enCours,sub:`${res.length}au total`,color:'#FFFBEB',iconColor:'#D97706',
+{label:'Locations en cours',val:enCours,sub:`${res.length}au total`,color:'rgba(251,191,36,0.14)',iconColor:'#f59e0b',
  icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
-{label:'CA réalisé',val:ca.toLocaleString('fr-FR')+' MAD',sub:'locations terminées',color:'#F0FDF4',iconColor:'#16A34A',
+{label:'CA réalisé',val:ca.toLocaleString('fr-FR')+' MAD',sub:'locations terminées',color:'rgba(94,234,212,0.12)',iconColor:'#5eead4',
  icon:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'},
 ];
  function sparkline(val,color){
@@ -1260,15 +1263,15 @@ function renderPayModal(){
  ${(avancePaid>0||soldePaid>0)? `
 <div class="pay-breakdown"><div class="pay-breakdown-item"><span>Avances versées</span><strong style="color:var(--accent2)">${avancePaid.toLocaleString('fr-FR')}MAD</strong></div><div class="pay-breakdown-item"><span>Soldes versés</span><strong style="color:var(--success)">${soldePaid.toLocaleString('fr-FR')}MAD</strong></div></div>` : ''}
 <div class="pay-section-title">Caution</div><div class="caution-row"><label>Montant</label><input type="number" id="caution-input" value="${caution}" placeholder="0" style="width:90px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:inherit;background:var(--bg);"><span style="font-size:0.83rem;color:var(--text2)">MAD</span><div class="caution-status"><button class="caution-btn ${cautionStatut==='encaissee'?'active-encaissee':''}" onclick="setCautionStatut('encaissee')">Encaissée</button><button class="caution-btn ${cautionStatut==='restituee'?'active-restituee':''}" onclick="setCautionStatut('restituee')">Restituée</button></div><button class="btn btn-sm btn-outline" onclick="saveCaution()">Enreg.</button></div>
- ${caution>0 ? `<p style="font-size:0.74rem;color:var(--text3);margin:-4px 0 10px;padding-left:4px">Statut caution :<strong style="color:${cautionStatut==='restituee'?'#2E86C1':cautionStatut==='encaissee'?'#1E8449':'#9A9A9A'}">${cautionStatut==='restituee'?'Restituée':cautionStatut==='encaissee'?'Encaissée':'En attente'}</strong></p>` : ''}
+ ${caution>0 ? `<p style="font-size:0.74rem;color:var(--text3);margin:-4px 0 10px;padding-left:4px">Statut caution :<strong style="color:${cautionStatut==='restituee'?'#93c5fd':cautionStatut==='encaissee'?'#99f6e4':'#94a3b8'}">${cautionStatut==='restituee'?'Restituée':cautionStatut==='encaissee'?'Encaissée':'En attente'}</strong></p>` : ''}
 <div class="pay-section-title">Versements(${paiements.length})</div><div class="pay-list" id="pay-list">
  ${paiements.length===0
  ? '<p style="text-align:center;color:var(--text3);font-size:0.83rem;padding:12px">Aucun versement enregistré</p>'
  : paiements.map((p,i)=>{
  const typeClass=p.type==='avance'?'pay-type-avance':p.type==='solde'?'pay-type-solde':'pay-type-autre';
  const typeLabel=p.type==='avance'?'Avance':p.type==='solde'?'Solde':'Autre';
- const iconColor=p.type==='avance'?'#2E86C1':p.type==='solde'?'#1E8449':'#888780';
- const iconBg=p.type==='avance'?'#EBF5FB':p.type==='solde'?'#D5F5E3':'#F0EEE9';
+ const iconColor=p.type==='avance'?'#93c5fd':p.type==='solde'?'#99f6e4':'#cbd5e1';
+ const iconBg=p.type==='avance'?'rgba(59,130,246,0.16)':p.type==='solde'?'rgba(45,212,191,0.15)':'rgba(148,163,184,0.14)';
  return `
 <div class="pay-item"><div class="pay-item-icon" style="background:${iconBg}"><svg fill="none" viewBox="0 0 24 24" stroke="${iconColor}" stroke-width="2">${modeIcons[p.mode]||modeIcons['Espèces']}</svg></div><div class="pay-item-info"><strong>${p.montant.toLocaleString('fr-FR')}MAD<span class="pay-type-tag ${typeClass}">${typeLabel}</span></strong><small>${esc(p.mode)}· ${esc(fmt(p.date))}${p.note?' · '+esc(p.note):''}</small></div><button class="pay-item-del" onclick="deletePaiement(${i})" title="Supprimer"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>`;}).join('')}
 </div><div class="pay-section-title">Ajouter un versement</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;"><div class="form-group"><label>Montant(MAD)</label><input type="number" id="pay-montant" placeholder="${reste>0?reste:''}" class="inline-input"></div><div class="form-group"><label>Type</label><select id="pay-type" class="inline-input"><option value="avance">Avance</option><option value="solde">Solde</option><option value="autre">Autre</option></select></div><div class="form-group"><label>Mode</label><select id="pay-mode" class="inline-input"><option>Espèces</option><option>Virement</option><option>Chèque</option></select></div><button class="btn btn-primary" onclick="addPaiement()" style="margin-bottom:0;align-self:flex-end;height:38px"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg></button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;"><div class="form-group"><label>Date du versement</label><input type="date" id="pay-date" value="${new Date().toISOString().slice(0,10)}" class="inline-input"></div><div class="form-group"><label>Note(optionnel)</label><input type="text" id="pay-note" placeholder="ex: solde final,reçu N°…" class="inline-input"></div></div>
@@ -1335,8 +1338,8 @@ function buildHistTimeline(reservations,vehs,clients){
  if(!reservations.length)return `
 <div class="hist-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Aucune location enregistrée</p></div>`;
  const sorted=[...reservations].sort((a,b)=>new Date(b.createdAt||b.debut)-new Date(a.createdAt||a.debut));
- const colors={'en cours':'#2E86C1','terminée':'#1E8449','annulée':'#C0392B'};
- const bgs={'en cours':'#EBF5FB','terminée':'#D5F5E3','annulée':'#FDEDEC'};
+ const colors={'en cours':'#93c5fd','terminée':'#99f6e4','annulée':'#fca5a5'};
+ const bgs={'en cours':'rgba(59,130,246,0.16)','terminée':'rgba(45,212,191,0.15)','annulée':'rgba(239,68,68,0.14)'};
  return `<div class="hist-timeline">${sorted.map(r=>{
  const v=vehs.find(x=>x.id===r.vehId);
  const c=clients.find(x=>x.id===r.clientId);
@@ -1362,7 +1365,7 @@ function showHistClient(id){
  const enCours=reservations.filter(r=>r.statut==='en cours').length;
  document.getElementById('hist-modal-title').textContent='Historique client';
  document.getElementById('hist-modal-body').innerHTML=`
-<div class="hist-hero"><div class="hist-hero-icon" style="background:#D5F5E3"><svg fill="none" viewBox="0 0 24 24" stroke="#1E8449" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="hist-hero-info"><h4>${esc(c.prenom)}${esc(c.nom)}</h4><p>${esc(c.tel)}${c.email?'· '+esc(c.email):''}</p><p style="margin-top:2px">CIN : ${esc(c.cin||'—')}· Permis : ${esc(c.permis||'—')}· ${esc(c.ville||'')}</p></div></div><div class="hist-stats"><div class="hist-stat"><strong>${reservations.length}</strong><span>Total locations</span></div><div class="hist-stat"><strong>${enCours}</strong><span>En cours</span></div><div class="hist-stat"><strong>${totalCA.toLocaleString('fr-FR')}MAD</strong><span>CA généré</span></div></div>
+<div class="hist-hero"><div class="hist-hero-icon" style="background:rgba(45,212,191,0.15)"><svg fill="none" viewBox="0 0 24 24" stroke="#99f6e4" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="hist-hero-info"><h4>${esc(c.prenom)}${esc(c.nom)}</h4><p>${esc(c.tel)}${c.email?'· '+esc(c.email):''}</p><p style="margin-top:2px">CIN : ${esc(c.cin||'—')}· Permis : ${esc(c.permis||'—')}· ${esc(c.ville||'')}</p></div></div><div class="hist-stats"><div class="hist-stat"><strong>${reservations.length}</strong><span>Total locations</span></div><div class="hist-stat"><strong>${enCours}</strong><span>En cours</span></div><div class="hist-stat"><strong>${totalCA.toLocaleString('fr-FR')}MAD</strong><span>CA généré</span></div></div>
  ${buildHistTimeline(reservations,vehs,load(KEYS.cl))}`;
  document.getElementById('hist-modal').classList.add('open');
 }
@@ -1375,7 +1378,7 @@ function showHistVeh(id){
  const totalJours=reservations.filter(r=>r.debut&&r.fin).reduce((s,r)=>s+Math.max(1,Math.round((new Date(r.fin)-new Date(r.debut))/(1000*60*60*24))),0);
  document.getElementById('hist-modal-title').textContent='Historique véhicule';
  document.getElementById('hist-modal-body').innerHTML=`
-<div class="hist-hero"><div class="hist-hero-icon" style="background:#EBF5FB"><svg fill="none" viewBox="0 0 24 24" stroke="#2E86C1" stroke-width="2"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div><div class="hist-hero-info"><h4>${esc(v.marque)}${esc(v.modele)}— ${esc(v.immat)}</h4><p>${esc(String(v.annee))}· ${esc(v.cat)}· ${esc(v.carburant)}· ${esc(v.couleur)}</p><p style="margin-top:2px">Kilométrage : ${(v.km||0).toLocaleString('fr-FR')}km · Tarif : ${esc(String(v.tarif||'—'))}MAD/j</p></div></div><div class="hist-stats"><div class="hist-stat"><strong>${reservations.length}</strong><span>Total locations</span></div><div class="hist-stat"><strong>${totalJours}</strong><span>Jours loués</span></div><div class="hist-stat"><strong>${totalCA.toLocaleString('fr-FR')}MAD</strong><span>CA généré</span></div></div>
+<div class="hist-hero"><div class="hist-hero-icon" style="background:rgba(59,130,246,0.16)"><svg fill="none" viewBox="0 0 24 24" stroke="#93c5fd" stroke-width="2"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div><div class="hist-hero-info"><h4>${esc(v.marque)}${esc(v.modele)}— ${esc(v.immat)}</h4><p>${esc(String(v.annee))}· ${esc(v.cat)}· ${esc(v.carburant)}· ${esc(v.couleur)}</p><p style="margin-top:2px">Kilométrage : ${(v.km||0).toLocaleString('fr-FR')}km · Tarif : ${esc(String(v.tarif||'—'))}MAD/j</p></div></div><div class="hist-stats"><div class="hist-stat"><strong>${reservations.length}</strong><span>Total locations</span></div><div class="hist-stat"><strong>${totalJours}</strong><span>Jours loués</span></div><div class="hist-stat"><strong>${totalCA.toLocaleString('fr-FR')}MAD</strong><span>CA généré</span></div></div>
  ${buildHistTimeline(reservations,load(KEYS.veh),clients)}`;
  document.getElementById('hist-modal').classList.add('open');
 }
@@ -1410,7 +1413,7 @@ function printContrat(id){
  return `<div class="contrat-field"><span>${esc(typeLabel)}(${esc(p.mode)}· ${esc(p.date||'')})</span><strong>${p.montant.toLocaleString('fr-FR')}MAD</strong></div>`;
 }).join('')}
  ${r.caution>0?`<div class="contrat-field"><span>Caution(${esc(r.cautionStatut==='encaissee'?'Encaissée':r.cautionStatut==='restituee'?'Restituée':'En attente')})</span><strong>${(r.caution||0).toLocaleString('fr-FR')}MAD</strong></div>`:''}
-<div class="contrat-field" style="border-top:1px solid #eee;margin-top:4px;padding-top:8px"><span><strong>Reste dû</strong></span><strong style="color:${Math.max(0,(r.total||0)-(r.paiements||[]).reduce((s,p)=>s+p.montant,0))===0?'#1E8449':'#C0392B'}">${Math.max(0,(r.total||0)-(r.paiements||[]).reduce((s,p)=>s+p.montant,0)).toLocaleString('fr-FR')}MAD</strong></div></div></div>` : ''}
+<div class="contrat-field" style="border-top:1px solid rgba(255,255,255,0.22);margin-top:4px;padding-top:8px"><span><strong>Reste dû</strong></span><strong style="color:${Math.max(0,(r.total||0)-(r.paiements||[]).reduce((s,p)=>s+p.montant,0))===0?'#99f6e4':'#fca5a5'}">${Math.max(0,(r.total||0)-(r.paiements||[]).reduce((s,p)=>s+p.montant,0)).toLocaleString('fr-FR')}MAD</strong></div></div></div>` : ''}
 <div class="contrat-section"><h4>Conditions générales</h4><div class="contrat-conditions">
  ${conditions.map((cl,i)=>`${i+1}. ${esc(cl)}`).join('<br>')}
 </div></div><div class="contrat-signatures"><div class="contrat-sig-box"><p>Signature du locataire</p><p style="margin-top:4px;font-size:0.7rem">${c ? esc(c.prenom)+' '+esc(c.nom): ''}</p></div><div class="contrat-sig-box"><p>Cachet et signature de l'agence</p><p style="margin-top:4px;font-size:0.7rem">${esc(agenceNom)}</p></div></div>
@@ -1463,7 +1466,7 @@ function printContratDirect(){
  if(s.patente){setFont(7,'normal','#AAAAAA');txt('RC / Patente : '+s.patente,ml,y+14);}
  setFont(7,'normal','#777777');
  txt('N° Contrat',W-mr,y,{align: 'right'});
- setFont(11,'bold','#1A1A1A');
+ setFont(11,'bold','#FFFFFF');
  txt(contratNum,W-mr,y+5,{align: 'right'});
  setFont(7,'normal','#777777');
  txt('Date : '+new Date().toLocaleDateString('fr-FR'),W-mr,y+10,{align: 'right'});
@@ -1490,7 +1493,7 @@ function printContratDirect(){
  const yy=y+row * 9;
  setFont(6.5,'normal','#777777');
  txt(pair[0],x,yy);
- setFont(8,'bold','#1A1A1A');
+ setFont(8,'bold','#FFFFFF');
  txt(String(pair[1]||'—'),x,yy+4);
 });
  y+=Math.ceil(pairs.length / 2)* 9+2;
@@ -1540,7 +1543,7 @@ function printContratDirect(){
  const typeLabel=p.type==='avance'?'Avance':p.type==='solde'?'Solde':'Autre';
  setFont(7,'normal','#555555');
  txt(typeLabel+'('+p.mode+' · '+(p.date||'')+')',ml,y);
- setFont(7,'bold','#1A1A1A');
+ setFont(7,'bold','#FFFFFF');
  txt(fmtNum(p.montant)+' MAD',W-mr,y,{align: 'right'});
  y+=6;
 });
@@ -1548,7 +1551,7 @@ function printContratDirect(){
  const cautionLbl=res.cautionStatut==='encaissee'?'Encaissée':res.cautionStatut==='restituee'?'Restituée':'En attente';
  setFont(7,'normal','#555555');
  txt('Caution('+cautionLbl+')',ml,y);
- setFont(7,'bold','#1A1A1A');
+ setFont(7,'bold','#FFFFFF');
  txt(fmtNum(res.caution||0)+' MAD',W-mr,y,{align: 'right'});
  y+=6;
 }
@@ -1557,7 +1560,7 @@ function printContratDirect(){
  y+=4;
  setFont(7,'bold','#0C0E14');
  txt('Reste dû',ml,y);
- setFont(8,'bold',restedu===0 ? '#1E8449' : '#C0392B');
+ setFont(8,'bold',restedu===0 ? '#99f6e4' : '#fca5a5');
  txt(fmtNum(restedu)+' MAD',W-mr,y,{align: 'right'});
  y+=8;
 }
@@ -1593,13 +1596,11 @@ function printContratDirect(){
  _generatePDF();
 }else{
  const script=document.createElement('script');
- script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+ script.src='/assets/vendor/jspdf.umd.min.js';
  script.onload=_generatePDF;
  script.onerror=()=>{
- const w=window.open('','_blank');
- w.document.write('<html><body>'+document.getElementById('contrat-body').innerHTML+'<scr'+'ipt>window.print();<\/scr'+'ipt></body></html>');
- w.document.close();w.print();w.close();
-};
+  alAlert('Impossible de générer le PDF pour le moment.\nVérifiez la connexion internet puis réessayez.');
+ };
  document.head.appendChild(script);
 }
 }
@@ -1739,11 +1740,11 @@ function renderMaintenance(){
  const kmAlert=m.kmSeuil&&m.km>=m.kmSeuil * 0.9;
  const badgeCls=m.statut==='effectuée' ? 'maint-badge-effectuee' : overdue ? 'maint-badge-alerte' : 'maint-badge-planifiee';
  const badgeLbl=m.statut==='effectuée' ? 'Effectuée' : overdue ? 'En retard' : 'Planifiée';
- return `<tr style="${overdue?'background:#FFFBF0;':''}"><td><strong>${v?esc(v.marque)+' '+esc(v.modele):'—'}</strong><br><span style="font-size:0.72rem;color:var(--text3)">${v?esc(v.immat):''}</span></td><td>${esc(m.type)}</td><td style="color:${overdue?'var(--danger)':'var(--text)'};font-weight:${overdue?'600':'400'}">${new Date(m.date).toLocaleDateString('fr-FR')}</td><td>${m.km ? m.km.toLocaleString('fr-FR')+' km' : '—'}</td><td>
- ${m.kmSeuil ? `<div style="font-size:0.8rem;color:${kmAlert?'#D68910':'var(--text2)'}">
+ return `<tr style="${overdue?'background:rgba(251,191,36,0.10);':''}"><td><strong>${v?esc(v.marque)+' '+esc(v.modele):'—'}</strong><br><span style="font-size:0.72rem;color:var(--text3)">${v?esc(v.immat):''}</span></td><td>${esc(m.type)}</td><td style="color:${overdue?'var(--danger)':'var(--text)'};font-weight:${overdue?'600':'400'}">${new Date(m.date).toLocaleDateString('fr-FR')}</td><td>${m.km ? m.km.toLocaleString('fr-FR')+' km' : '—'}</td><td>
+ ${m.kmSeuil ? `<div style="font-size:0.8rem;color:${kmAlert?'#fbbf24':'var(--text2)'}">
  ${m.kmSeuil.toLocaleString('fr-FR')}km
  ${kmAlert ? '<span class="maint-badge-alerte" style="margin-left:4px">⚠ Seuil!</span>' : ''}
-<div class="maint-km-bar-track" style="margin-top:4px"><div class="maint-km-bar-fill" style="width:${kmPct}%;background:${kmAlert?'#D68910':'#2E86C1'}"></div></div></div>` : '—'}
+<div class="maint-km-bar-track" style="margin-top:4px"><div class="maint-km-bar-fill" style="width:${kmPct}%;background:${kmAlert?'#f59e0b':'#2dd4bf'}"></div></div></div>` : '—'}
 </td><td><span class="${badgeCls}">${esc(badgeLbl)}</span></td><td style="font-size:0.78rem;color:var(--text2);max-width:150px">${esc(m.notes||'—')}</td><td style="display:flex;gap:5px;">
  ${m.statut!=='effectuée'?`<button class="btn btn-sm btn-outline" onclick="markMaintDone('${esc(m.id)}')" style="color:var(--success);border-color:var(--success);font-size:0.72rem">✓ Fait</button>`:''}
 <button class="btn-icon" title="Modifier" onclick="openMaintModal('${esc(m.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteMaintenance('${esc(m.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td></tr>`;
@@ -1766,10 +1767,10 @@ function renderMaintAlerts(){
  const wrap=document.getElementById('maint-alerts-wrap');
  if(!wrap)return;
  if(!alerts.length){wrap.innerHTML='';return;}
- wrap.innerHTML=`<div class="maint-alert-km"><div class="maint-alert-km-header"><svg fill="none" viewBox="0 0 24 24" stroke="#D68910" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><h4>${alerts.length}alerte${alerts.length>1?'s':''}maintenance</h4></div>
+ wrap.innerHTML=`<div class="maint-alert-km"><div class="maint-alert-km-header"><svg fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><h4>${alerts.length}alerte${alerts.length>1?'s':''}maintenance</h4></div>
  ${alerts.map(({m,v,overdue,kmAlert})=>`
 <div class="maint-km-row"><div><strong>${v?esc(v.marque)+' '+esc(v.modele):'—'}</strong><span style="color:var(--text3);font-size:0.72rem">${v?esc(v.immat):''}</span><br><span style="font-size:0.72rem;color:var(--text2)">${esc(m.type)}· ${new Date(m.date).toLocaleDateString('fr-FR')}</span></div><div class="maint-km-bar-wrap">
- ${kmAlert&&m.kmSeuil?`<div style="font-size:0.72rem;color:#D97706;margin-bottom:3px">${m.km.toLocaleString('fr-FR')}/ ${m.kmSeuil.toLocaleString('fr-FR')}km</div><div class="maint-km-bar-track"><div class="maint-km-bar-fill" style="width:${Math.min(100,Math.round(m.km/m.kmSeuil*100))}%"></div></div>` : ''}
+ ${kmAlert&&m.kmSeuil?`<div style="font-size:0.72rem;color:#fbbf24;margin-bottom:3px">${m.km.toLocaleString('fr-FR')}/ ${m.kmSeuil.toLocaleString('fr-FR')}km</div><div class="maint-km-bar-track"><div class="maint-km-bar-fill" style="width:${Math.min(100,Math.round(m.km/m.kmSeuil*100))}%"></div></div>` : ''}
 </div><span class="${overdue?'maint-badge-alerte':'maint-badge-planifiee'}">${overdue?'En retard':kmAlert?'⚠ Km seuil':''}</span><button class="btn btn-sm btn-primary" onclick="markMaintDone('${esc(m.id)}')" style="margin-left:8px;font-size:0.72rem">✓ Fait</button></div>`).join('')}
 </div>`;
 }
@@ -1797,7 +1798,7 @@ function renderCalendar(){
  const dow=new Date(calYear,calMonth,d).getDay();
  const isWeekend=dow===0||dow===6;
  const isToday=dateStr===todayStr;
- headHtml+=`<th class="${isToday?'today-col':''}" style="${isWeekend?'background:#FAF9F7;color:var(--text3)':''}">${d}<br><span style="font-size:0.62rem;font-weight:400">${JOURS_FR[(dow+6)%7]}</span></th>`;
+ headHtml+=`<th class="${isToday?'today-col':''}" style="${isWeekend?'background:rgba(45,212,191,0.10);color:#b6efe7':''}">${d}<br><span style="font-size:0.62rem;font-weight:400">${JOURS_FR[(dow+6)%7]}</span></th>`;
 }
  headHtml+='</tr>';
  thead.innerHTML=headHtml;
@@ -1838,11 +1839,11 @@ function renderCalendar(){
  else if(!prevSame)posClass='start';
  else if(!nextSame)posClass='end';
  const label=(posClass==='start'||posClass==='solo')? esc(info.clientName.split(' ')[0]): '';
- bodyHtml+=`<td style="${isToday?'outline:2px solid var(--accent2);outline-offset:-2px;':''}${isWeekend?'background:#FAF9F7;':''}"><div class="cal-tooltip"><div class="cal-cell booked ${posClass}" title="">${label}</div><div class="tooltip-box">${esc(info.clientName)}<br>${esc(info.debut)}→ ${esc(info.fin)}</div></div></td>`;
+ bodyHtml+=`<td style="${isToday?'outline:2px solid var(--accent2);outline-offset:-2px;':''}${isWeekend?'background:rgba(45,212,191,0.08);':''}"><div class="cal-tooltip"><div class="cal-cell booked ${posClass}" title="">${label}</div><div class="tooltip-box">${esc(info.clientName)}<br>${esc(info.debut)}→ ${esc(info.fin)}</div></div></td>`;
 }else if(v.statut==='maintenance'&&!info){
- bodyHtml+=`<td style="${isWeekend?'background:#FAF9F7;':''}"><div class="cal-cell maintenance" title="Maintenance">M</div></td>`;
+ bodyHtml+=`<td style="${isWeekend?'background:rgba(45,212,191,0.08);':''}"><div class="cal-cell maintenance" title="Maintenance">M</div></td>`;
 }else{
- bodyHtml+=`<td style="${isToday?'background:#EBF5FB;':''}${isWeekend?'background:#FAF9F7;':''}"><div class="cal-cell free"></div></td>`;
+ bodyHtml+=`<td style="${isToday?'background:rgba(45,212,191,0.14);':''}${isWeekend?'background:rgba(45,212,191,0.08);':''}"><div class="cal-cell free"></div></td>`;
 }
 }
  bodyHtml+='</tr>';
@@ -1955,7 +1956,7 @@ function exportExcel(){
  maintRows.push([v?v.marque+' '+v.modele:'',v?v.immat:'',m.type,fmt(m.date),m.km||'',m.kmSeuil||'',m.cout||0,m.statut,m.notes||'']);
 });
  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(maintRows),'Maintenance');
- XLSX.writeFile(wb,`AutoLocPro_${today()}.xlsx`);
+ XLSX.writeFile(wb,`INVOORENT_${today()}.xlsx`);
  addLog('Export Excel complet généré');
 }
 const PHOTO_TABS={
@@ -1968,6 +1969,10 @@ const PHOTO_TABS={
 };
 let photosCtx={type: null,id: null};
 function openPhotosModalFromBtn(btn){
+  if(!PHOTOS_ENABLED){
+   alAlert('La fonctionnalité Photos est temporairement désactivée.');
+   return;
+  }
   if(!btn)return;
   const type=btn.getAttribute('data-type')||'';
   const id=btn.getAttribute('data-id')||'';
@@ -1975,14 +1980,18 @@ function openPhotosModalFromBtn(btn){
   return openPhotosModal(type,id,title);
 }
 function openPhotosModal(type,id,title){
+ if(!PHOTOS_ENABLED){
+  alAlert('La fonctionnalité Photos est temporairement désactivée.');
+  return;
+ }
  photosCtx={type,id};
  document.getElementById('photos-modal-title').textContent=`Photos — ${title}`;
  const warnEl=document.getElementById('photos-storage-warn');
  if(warnEl){
  if(OPFS._ready){
- warnEl.style.background='#ECFDF5';
- warnEl.style.borderColor='#A7F3D0';
- warnEl.style.color='#065F46';
+ warnEl.style.background='rgba(45,212,191,0.14)';
+ warnEl.style.borderColor='rgba(45,212,191,0.35)';
+ warnEl.style.color='#ccfbf1';
  warnEl.innerHTML=`✓ Photos stockées dans OPFS — espace illimité`;
  warnEl.style.display='block';
 }else{
@@ -2262,11 +2271,11 @@ function renderSearchResults(q){
  return;
 }
  const groups=[
-{key:'veh',title:'Véhicules',color:'#EBF5FB',iconColor:'#2E86C1',badgeCls:'badge-info',
+{key:'veh',title:'Véhicules',color:'rgba(59,130,246,0.16)',iconColor:'#93c5fd',badgeCls:'badge-info',
  icon:'<path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>'},
-{key:'cl',title:'Clients',color:'#D5F5E3',iconColor:'#1E8449',badgeCls:'badge-success',
+{key:'cl',title:'Clients',color:'rgba(45,212,191,0.15)',iconColor:'#99f6e4',badgeCls:'badge-success',
  icon:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
-{key:'res',title:'Réservations',color:'#FEF9E7',iconColor:'#D68910',badgeCls:'badge-warning',
+{key:'res',title:'Réservations',color:'rgba(251,191,36,0.12)',iconColor:'#f59e0b',badgeCls:'badge-warning',
  icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
 ];
  let html='';
@@ -2292,7 +2301,7 @@ function goToVeh(id){
  const vehs=load(KEYS.veh);
  const idx=vehs.findIndex(v=>v.id===id);
  if(idx>=0&&rows[idx]){
- rows[idx].style.background='#FEF9E7';
+ rows[idx].style.background='rgba(251,191,36,0.16)';
  rows[idx].scrollIntoView({behavior:'smooth',block:'center'});
  setTimeout(()=>rows[idx].style.background='',2000);
 }
@@ -2307,7 +2316,7 @@ function goToClient(id){
  const cls=load(KEYS.cl);
  const idx=cls.findIndex(c=>c.id===id);
  if(idx>=0&&rows[idx]){
- rows[idx].style.background='#FEF9E7';
+ rows[idx].style.background='rgba(251,191,36,0.16)';
  rows[idx].scrollIntoView({behavior:'smooth',block:'center'});
  setTimeout(()=>rows[idx].style.background='',2000);
 }
@@ -2391,7 +2400,7 @@ function genererRapport(){
  ${vehStats.length ? `
 <div class="rapport-section"><h4>Rentabilité véhicules</h4>
  ${vehStats.map((x,i)=>`
-<div class="rapport-top-veh"><div class="rapport-rank" style="background:${i===0?'#FEF9E7':i===1?'#F0EEE9':'#EBF5FB'};color:${i===0?'#854F0B':i===1?'#5A5A5A':'#185FA5'}">${i+1}</div><div style="min-width:140px;font-size:0.82rem"><strong>${esc(x.v?.marque)}${esc(x.v?.modele)}</strong><br><span style="color:var(--text3);font-size:0.7rem">${esc(x.v?.immat)}· ${x.nb}loc.</span></div><div class="rapport-bar-wrap"><div class="rapport-bar-track"><div class="rapport-bar-fill" style="width:${Math.round(x.ca/maxCaVeh*100)}%;background:${i===0?'#C9A84C':'#2E86C1'}"></div></div></div><strong style="font-size:0.85rem;white-space:nowrap">${fmt(x.ca)}MAD</strong></div>`).join('')}
+<div class="rapport-top-veh"><div class="rapport-rank" style="background:${i===0?'rgba(251,191,36,0.16)':i===1?'rgba(45,212,191,0.15)':'rgba(59,130,246,0.16)'};color:${i===0?'#fde68a':i===1?'#99f6e4':'#93c5fd'}">${i+1}</div><div style="min-width:140px;font-size:0.82rem"><strong>${esc(x.v?.marque)}${esc(x.v?.modele)}</strong><br><span style="color:var(--text3);font-size:0.7rem">${esc(x.v?.immat)}· ${x.nb}loc.</span></div><div class="rapport-bar-wrap"><div class="rapport-bar-track"><div class="rapport-bar-fill" style="width:${Math.round(x.ca/maxCaVeh*100)}%;background:${i===0?'#f59e0b':'#2dd4bf'}"></div></div></div><strong style="font-size:0.85rem;white-space:nowrap">${fmt(x.ca)}MAD</strong></div>`).join('')}
 </div>` : ''}
  ${clientStats.length ? `
 <div class="rapport-section"><h4>Top clients</h4>
@@ -2430,7 +2439,7 @@ function renderCharts(){
  datasets:[{
  label: 'CA(MAD)',
  data: caByMonth,
- backgroundColor: '#2E86C1',
+ backgroundColor: '#2dd4bf',
  borderRadius: 5,
  borderSkipped: false,
 }]
@@ -2472,9 +2481,9 @@ function renderCharts(){
  datasets:[{
  label: 'Taux occupation %',
  data: occByMonth,
- borderColor: '#1E8449',
- backgroundColor: 'rgba(30,132,73,0.08)',
- pointBackgroundColor: '#1E8449',
+ borderColor: '#5eead4',
+ backgroundColor: 'rgba(45,212,191,0.16)',
+ pointBackgroundColor: '#5eead4',
  pointRadius: 4,
  tension: 0.3,
  fill: true,
@@ -2507,7 +2516,7 @@ function renderCharts(){
  datasets:[{
  label: 'CA(MAD)',
  data: vehCA.map(v=>v.ca),
- backgroundColor: vehCA.map((_,i)=>i===0 ? '#C9A84C' : '#2E86C1'),
+ backgroundColor: vehCA.map((_,i)=>i===0 ? '#f59e0b' : '#2dd4bf'),
  borderRadius: 5,
  borderSkipped: false,
 }]
@@ -2539,7 +2548,7 @@ function renderStorageGauge(){
  if(!wrap)return;
  if(OPFS._ready){
  wrap.innerHTML=`
-<div style="display:flex;align-items:center;gap:14px;background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:10px;padding:16px 18px"><div style="width:36px;height:36px;border-radius:10px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="2" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><p style="font-size:0.88rem;font-weight:700;color:#065F46;margin-bottom:2px">Stockage illimité actif</p><p style="font-size:0.78rem;color:#047857">OPFS — Origin Private File System. Vos données et photos n'ont aucune limite d'espace.</p></div></div>`;
+<div style="display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(45,212,191,0.14) 0%,rgba(20,31,43,0.96) 55%,rgba(94,234,212,0.1) 100%);border:1.5px solid rgba(45,212,191,0.35);border-radius:10px;padding:16px 18px"><div style="width:36px;height:36px;border-radius:10px;background:rgba(45,212,191,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg fill="none" viewBox="0 0 24 24" stroke="#5eead4" stroke-width="2" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><p style="font-size:0.88rem;font-weight:700;color:#ccfbf1;margin-bottom:2px">Stockage illimité actif</p><p style="font-size:0.78rem;color:#99f6e4">OPFS — Origin Private File System. Vos données et photos n'ont aucune limite d'espace.</p></div></div>`;
  return;
 }
  let total=0;
@@ -2568,10 +2577,10 @@ function renderStorageGauge(){
  return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><span style="font-size:0.78rem;color:var(--text2);width:110px;flex-shrink:0">${k}</span><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${p}%;background:${color};border-radius:3px;transition:width 0.4s"></div></div><span style="font-size:0.73rem;color:var(--text3);width:60px;text-align:right;flex-shrink:0">${fmtKb(v)}</span></div>`;
 }).join('');
  wrap.innerHTML=`
-<div style="background:#FEF9C3;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8rem;color:#92400E">
+<div style="background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.36);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8rem;color:#fde68a">
  ⚠ OPFS non disponible — utilisez<strong>Chrome</strong>ou<strong>Edge</strong>pour un stockage illimité.
 </div><div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:0.82rem;font-weight:600;color:var(--text)">${totalKb}KB utilisés sur ~5 120 KB</span><span style="font-size:0.78rem;font-weight:700;color:${color}">${pct}%</span></div><div style="height:8px;background:var(--surface3);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.6s var(--ease-out)"></div></div>
- ${pct>80 ? `<p style="font-size:0.75rem;color:#DC2626;margin-top:6px">⚠️ Stockage presque plein — passez à Chrome ou Edge pour activer OPFS</p>` : ''}
+ ${pct>80 ? `<p style="font-size:0.75rem;color:#fca5a5;margin-top:6px">⚠️ Stockage presque plein — passez à Chrome ou Edge pour activer OPFS</p>` : ''}
 </div>
  ${rows.length ? `<div style="border-top:1px solid var(--border);padding-top:8px">${rows}</div>` : ''}`;
 }
@@ -2659,7 +2668,7 @@ function guideHTML(){
 </div><hr class="guide-divider">`;
  const parts=[];
  /* ── 1. TABLEAU DE BORD ─────────────────────────────── */
- parts.push(sec('g-dashboard','#EBF5FB','#2E86C1',
+ parts.push(sec('g-dashboard','rgba(59,130,246,0.16)','#93c5fd',
  '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
  1,'Tableau de bord','Vue d\'ensemble de votre agence en temps réel',
  cards(
@@ -2671,7 +2680,7 @@ function guideHTML(){
  tip('info','🔄','Le tableau de bord se met à jour <strong>automatiquement</strong> chaque fois que vous revenez dessus ou effectuez une action.')
  ));
  /* ── 2. VÉHICULES ───────────────────────────────────── */
- parts.push(sec('g-vehicules','#EBF5FB','#2E86C1',
+ parts.push(sec('g-vehicules','rgba(59,130,246,0.16)','#93c5fd',
  '<path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
  2,'Véhicules','Gestion complète de votre flotte automobile',
  cards(
@@ -2689,7 +2698,7 @@ function guideHTML(){
  tip('info','📥','<strong>Import en masse :</strong> vous pouvez importer plusieurs véhicules à la fois via un fichier CSV (voir section Import).')
  ));
  /* ── 3. CLIENTS ─────────────────────────────────────── */
- parts.push(sec('g-clients','#D5F5E3','#1E8449',
+ parts.push(sec('g-clients','rgba(45,212,191,0.15)','#99f6e4',
  '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
  3,'Clients','Gestion du portefeuille clients de votre agence',
  cards(
@@ -2706,7 +2715,7 @@ function guideHTML(){
  tip('info','📥','<strong>Import en masse :</strong> importez votre liste de clients existants via un fichier CSV (voir section Import).')
  ));
  /* ── 4. RÉSERVATIONS ────────────────────────────────── */
- parts.push(sec('g-reservations','#FEF9E7','#D68910',
+ parts.push(sec('g-reservations','rgba(251,191,36,0.12)','#f59e0b',
  '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
  4,'Réservations','Créer et gérer les locations de vos véhicules',
  cards(
@@ -2717,7 +2726,7 @@ function guideHTML(){
  steps(
  ['1','Créer une réservation','Cliquez sur "+ Nouvelle réservation". Sélectionnez client, véhicule et dates. Le total est calculé automatiquement.'],
  ['2','Gérer les paiements','Bouton "Paiements" sur la carte. Ajoutez des versements (avance, solde), choisissez le mode et la date.'],
- ['3','Imprimer le contrat','Bouton "Contrat" → aperçu complet avec coordonnées agence, client, véhicule et conditions. Impression directe.'],
+['3','Télécharger le contrat PDF','Bouton "Contrat" → "Imprimer / Sauvegarder PDF" pour télécharger le fichier, puis l\'imprimer si besoin.'],
  ['4','Clôturer la location','Bouton "Clôturer" quand le véhicule est rendu. Le statut passe à Terminée, le véhicule redevient Disponible.']
  )+
  tip('info','💡','<strong>Modification sécurisée :</strong> changer les dates ou le véhicule conserve les paiements déjà enregistrés et la caution.')+
@@ -2765,21 +2774,21 @@ function guideHTML(){
  tip('info','📱','Sur mobile, le calendrier s\'adapte automatiquement à la taille de l\'écran pour rester lisible.')
  ));
  /* ── 8. CONTRAT PDF ─────────────────────────────────── */
- parts.push(sec('g-contrat','#EBF5FB','#2874A6',
+ parts.push(sec('g-contrat','rgba(59,130,246,0.16)','#93c5fd',
  '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
- 8,'Contrat de location','Génération et impression du contrat officiel',
+8,'Contrat de location','Génération et téléchargement du contrat officiel',
  cards(
  ['Contenu du contrat généré',['En-tête agence : nom, slogan, ville, téléphone, email, site, RC/Patente','Numéro de contrat unique (CTR-XXXXXX)','Bloc locataire : CIN, permis, téléphone, adresse, nationalité','Bloc véhicule : immatriculation, marque, modèle, année, kilométrage','Détails location : dates, durée, lieu de prise en charge','Récapitulatif paiements : versements, caution, reste dû','Conditions générales personnalisables','Zone signatures : locataire et agence']],
  ['Personnalisation dans Paramètres',['Nom et slogan de votre agence','Coordonnées : téléphone, email, site web','Ville et adresse','RC / Numéro de patente','Conditions générales : texte libre multi-lignes']]
  )+
  steps(
  ['1','Générer le contrat','Depuis une réservation, cliquez sur "Contrat". Un aperçu s\'affiche immédiatement.'],
- ['2','Imprimer ou sauvegarder en PDF','Bouton "Imprimer / PDF". Le navigateur ouvre sa fenêtre d\'impression. Choisissez "Enregistrer en PDF".'],
+['2','Télécharger le PDF','Bouton "Imprimer / Sauvegarder PDF" pour télécharger le contrat, puis l\'imprimer ensuite si nécessaire.'],
  ['3','Personnaliser vos informations','Allez dans Paramètres → section "Informations agence". Renseignez nom, coordonnées, conditions. Enregistrez.'],
  ['4','Mettre à jour les conditions','Section "Conditions générales" dans Paramètres. Chaque ligne devient une clause numérotée dans le contrat.']
  )+
  tip('info','💡','Le contrat utilise toujours les <strong>informations les plus récentes</strong> de vos paramètres agence.')+
- tip('warn','⚠️','Sur <strong>mobile</strong>, l\'impression dépend du navigateur. Chrome et Edge donnent les meilleurs résultats. Safari peut varier.')
+tip('warn','⚠️','Le PDF est d\'abord téléchargé. L\'impression se fait ensuite depuis votre lecteur PDF (mobile ou PC).')
  ));
  /* ── 9. RAPPORTS ────────────────────────────────────── */
  parts.push(sec('g-rapports','#F4ECF7','#7D3C98',
@@ -2810,32 +2819,32 @@ function guideHTML(){
  tip('info','⚡','La recherche est optimisée avec un <strong>délai intelligent</strong> : elle attend que vous ayez fini de taper avant de filtrer.')
  ));
  /* ── 11. PHOTOS VÉHICULES ───────────────────────────── */
- parts.push(sec('g-photos','#FEF9E7','#D4A017',
+ parts.push(sec('g-photos','rgba(251,191,36,0.12)','#f59e0b',
  '<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
- 11,'Photos véhicules','Documenter l\'état de votre flotte avec des photos',
+11,'Photos véhicules','Fonction temporairement désactivée',
  cards(
- ['Organisation des photos',['6 onglets : Avant, Arrière, Côté gauche, Côté droit, Intérieur, Documents','Plusieurs photos par onglet possibles','Stockage local permanent (OPFS) — pas de cloud nécessaire','Les photos survivent aux redémarrages et rechargements']],
- ['Gestion des fichiers',['Formats acceptés : JPG, PNG, WEBP, HEIC','Cliquez sur une photo pour l\'agrandir (aperçu plein écran)','Bouton de suppression photo par photo','Taille recommandée : moins de 5 Mo par photo pour de meilleures performances']]
+['État actuel',['Module photo désactivé pour garantir la stabilité globale de l\'application','Le bouton Photos est masqué dans les listes Véhicules et Clients','Les données principales (véhicules, clients, réservations, maintenance) restent 100% fonctionnelles']],
+['Réactivation future',['La fonctionnalité pourra être réactivée ultérieurement','Le code est conservé en mode désactivé, sans impact sur les autres modules','Aucune action requise de votre côté pour continuer à travailler']]
  )+
  steps(
- ['1','Accéder aux photos','Depuis la liste véhicules, cliquez sur "Photos" sur la fiche du véhicule.'],
- ['2','Ajouter une photo','Sélectionnez l\'onglet souhaité (Avant, Arrière…), puis cliquez sur la zone "+" ou glissez-déposez l\'image.'],
- ['3','Documenter avant/après','Bonne pratique : photographier le véhicule avant chaque départ et à chaque retour.'],
- ['4','Supprimer une photo','Survolez la photo et cliquez sur l\'icône poubelle rouge qui apparaît.']
+['1','Statut actuel','La fonctionnalité est en pause et n\'est pas affichée dans l\'interface.'],
+['2','Pourquoi','Objectif : éviter les problèmes de stockage/compteur et privilégier la stabilité opérationnelle.'],
+['3','Impact','Aucun impact sur les réservations, contrats, maintenance, sauvegardes et synchronisation.'],
+['4','Suite','Le module peut être réactivé dès que vous le souhaitez.']
  )+
- tip('info','💾','Les photos sont stockées sur votre appareil via <strong>OPFS</strong> (Origin Private File System) — espace illimité sur Chrome et Edge.')+
- tip('warn','⚠️','Sur <strong>iPhone/Safari</strong>, le stockage OPFS est limité. Les photos restent accessibles mais l\'espace est plus réduit. Préférez Chrome sur mobile.')
+tip('info','🧩','Module conservé mais désactivé : réactivation possible sans refonte complète.')+
+tip('warn','⚠️','Cette section est informative tant que la fonctionnalité reste désactivée.')
  ));
  /* ── 12. IMPORT CSV ─────────────────────────────────── */
  parts.push(sec('g-import','#E8F8F5','#1A9974',
  '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
  12,'Import en masse (CSV)','Importer des données depuis Excel ou un fichier CSV',
  cards(
- ['Données importables',['🚗 <strong>Véhicules</strong> — colonnes : immat*, marque*, modele*, annee, categorie, tarif, couleur, carburant, km, statut, notes','👤 <strong>Clients</strong> — colonnes : prenom*, nom*, tel*, email, cin, permis, ville, nationalite, adresse','📋 <strong>Réservations</strong> — colonnes : client_cin ou client_tel*, veh_immat*, debut*, fin*, total, lieu, statut, notes','* = colonne obligatoire']],
+['Données importables',['🚗 <strong>Véhicules</strong> — colonnes : immat*, marque*, modele*, annee, categorie, tarif, couleur, carburant, km, statut, notes','👤 <strong>Clients</strong> — colonnes : prenom*, nom*, tel*, email, cin, permis, ville, nat, adresse','* = colonne obligatoire']],
  ['Format accepté',['Fichier .csv avec séparateur virgule (,) ou point-virgule (;) — détection automatique','Première ligne = en-têtes de colonnes (noms en minuscules)','Encodage UTF-8 recommandé pour les accents','Export depuis Excel : "Enregistrer sous" → CSV UTF-8']]
  )+
  steps(
- ['1','Ouvrir l\'import','Paramètres → section "Import de données" → choisissez le type (Véhicules, Clients ou Réservations).'],
+['1','Ouvrir l\'import','Paramètres → section "Import de données" → choisissez le type (Véhicules ou Clients).'],
  ['2','Préparer votre fichier','Dans Excel : une ligne par enregistrement, première ligne = noms de colonnes en minuscules. Enregistrez en CSV.'],
  ['3','Choisir le fichier','Cliquez sur "Choisir un fichier CSV" et sélectionnez votre fichier. Un aperçu des 8 premières lignes s\'affiche.'],
  ['4','Vérifier et confirmer','Si des erreurs apparaissent (champs manquants), corrigez le CSV et rechargez. Cliquez "Importer" pour valider.']
@@ -2863,11 +2872,11 @@ function guideHTML(){
  tip('info','🔒','La sauvegarde JSON contient <strong>toutes vos données</strong> : véhicules, clients, réservations, paiements, maintenance. Conservez-la dans un endroit sûr.')
  ));
  /* ── 14. SAUVEGARDE & RESTAURATION ─────────────────── */
- parts.push(sec('g-export','#EBF5FB','#2E86C1',
+ parts.push(sec('g-export','rgba(59,130,246,0.16)','#93c5fd',
  '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
  14,'Sauvegarde & Restauration','Protéger et récupérer toutes vos données',
  cards(
- ['Sauvegarde manuelle',['Paramètres → bouton "Exporter la sauvegarde"','Télécharge un fichier JSON horodaté sur votre ordinateur','Contient 100% de vos données : véhicules, clients, réservations, paiements, maintenance, paramètres agence','Fichier nommé : AutoLocPro_backup_AAAA-MM-JJ.json']],
+['Sauvegarde manuelle',['Paramètres → bouton "Exporter la sauvegarde"','Télécharge un fichier JSON horodaté sur votre ordinateur','Contient 100% de vos données : véhicules, clients, réservations, paiements, maintenance, paramètres agence','Fichier nommé : INVOORENT_backup_AAAA-MM-JJ.json']],
  ['Rappel automatique',['Un bandeau orange apparaît si aucune sauvegarde depuis 7 jours','Bouton "Sauvegarder maintenant" dans le bandeau','Bouton "Plus tard" reporte l\'alerte de 24 heures','Le rappel disparaît automatiquement après une sauvegarde réussie']],
  ['Restauration',['Paramètres → bouton "Restaurer une sauvegarde"','Sélectionnez votre fichier JSON de sauvegarde','Une confirmation est demandée : les données actuelles seront remplacées','L\'application recharge automatiquement après restauration']]
  )+
@@ -2899,7 +2908,7 @@ function guideHTML(){
  tip('info','🔒','Le mot de passe est stocké sous forme de <strong>hash SHA-256</strong> sur votre appareil. Personne ne peut le lire, même avec un accès au fichier.')
  ));
  /* ── 16. INSTALLER L'APP (PWA) ──────────────────────── */
- parts.push(sec('g-pwa','#EBF5FB','#1A5276',
+ parts.push(sec('g-pwa','rgba(59,130,246,0.16)','#93c5fd',
  '<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>',
  16,'Installer INVOORENT','Utiliser l\'app comme une application native',
  cards(
@@ -2936,8 +2945,8 @@ function guideHTML(){
  /* ── CONTACT / SUPPORT ──────────────────────────────── */
  parts.push(`<div class="guide-section" id="g-support">
  <div class="guide-section-header">
- <div class="guide-section-icon" style="background:#D5F5E3">
- <svg fill="none" viewBox="0 0 24 24" stroke="#1E8449" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+ <div class="guide-section-icon" style="background:rgba(45,212,191,0.15)">
+ <svg fill="none" viewBox="0 0 24 24" stroke="#99f6e4" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
  </div>
  <div class="guide-section-title"><h3>Support & Assistance</h3><p>Besoin d'aide ? Nous sommes là.</p></div>
  </div>
@@ -3410,7 +3419,7 @@ async function exportBackup(){
  const blob=new Blob([JSON.stringify(backup,null,2)],{type: 'application/json'});
  const a=document.createElement('a');
  a.href=URL.createObjectURL(blob);
- a.download=`AutoLocPro_backup_${today()}.json`;
+ a.download=`INVOORENT_backup_${today()}.json`;
  a.click();
  addLog('Sauvegarde exportée');
  showBackupStatus('✓ Sauvegarde exportée','#059669');
@@ -3506,7 +3515,7 @@ document.getElementById('top-date').textContent=new Date().toLocaleDateString('f
  'opfs-unsupported-banner',
  '⚠️ Stockage limité',
  'Votre navigateur ne supporte pas OPFS. Vos données sont limitées à 5 MB et peuvent être perdues si vous videz le cache. Utilisez<strong>Chrome</strong>ou<strong>Edge</strong>pour un stockage illimité.',
- '#92400E','#FEF9C3','#FDE68A'
+ '#fde68a','rgba(251,191,36,0.12)','rgba(251,191,36,0.36)'
 );
 }
  const machineWarnKey='autoloc_machine_warned';
