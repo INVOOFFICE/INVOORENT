@@ -1,0 +1,59 @@
+{
+  "name": "INVOORENT — Gérez, louez, développez",
+  "short_name": "INVOORENT",
+  "description": "Gérez, louez, développez",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1923",
+  "theme_color": "#0f1923",
+  "lang": "fr",
+  "scope": "/",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/autoloc-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/autoloc-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='38' fill='%230f1923'/><rect x='16' y='16' width='160' height='160' rx='28' fill='%232dd4bf' opacity='0.12'/><path d='M56 130 L56 80 Q56 68 68 68 L124 68 Q136 68 136 80 L136 130' fill='none' stroke='%232dd4bf' stroke-width='8' stroke-linecap='round'/><circle cx='72' cy='134' r='10' fill='%232dd4bf'/><circle cx='120' cy='134' r='10' fill='%232dd4bf'/><path d='M56 92 L136 92' stroke='%235eead4' stroke-width='5' stroke-linecap='round'/><path d='M72 76 L88 62 L104 76' fill='none' stroke='%235eead4' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230f1923'/><rect x='40' y='40' width='432' height='432' rx='72' fill='%232dd4bf' opacity='0.12'/><path d='M148 346 L148 210 Q148 178 180 178 L332 178 Q364 178 364 210 L364 346' fill='none' stroke='%232dd4bf' stroke-width='20' stroke-linecap='round'/><circle cx='192' cy='356' r='26' fill='%232dd4bf'/><circle cx='320' cy='356' r='26' fill='%232dd4bf'/><path d='M148 242 L364 242' stroke='%235eead4' stroke-width='14' stroke-linecap='round'/><path d='M192 198 L236 158 L280 198' fill='none' stroke='%235eead4' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "label": "Tableau de bord INVOORENT",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle réservation",
+      "short_name": "Réservation",
+      "url": "/#reservations",
+      "description": "Créer une nouvelle réservation"
+    },
+    {
+      "name": "Véhicules",
+      "short_name": "Véhicules",
+      "url": "/#vehicules",
+      "description": "Gérer la flotte"
+    }
+  ]
+}
