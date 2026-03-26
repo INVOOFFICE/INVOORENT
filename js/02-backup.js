@@ -102,7 +102,7 @@
   refreshing=true;
   window.location.reload();
  });
- navigator.serviceWorker.register('/sw.js')
+ navigator.serviceWorker.register('sw.js')
  .then(reg=>{
   console.info('AutoLoc SW enregistré:',reg.scope);
   requestSkipWaiting(reg);

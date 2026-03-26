@@ -1596,10 +1596,10 @@ function printContratDirect(){
  _generatePDF();
 }else{
  const script=document.createElement('script');
- script.src='/assets/vendor/jspdf.umd.min.js';
+ script.src=new URL('assets/vendor/jspdf.umd.min.js',document.baseURI).toString();
  script.onload=_generatePDF;
  script.onerror=()=>{
-  alAlert('Impossible de générer le PDF pour le moment.\nVérifiez la connexion internet puis réessayez.');
+  alAlert('Impossible de charger le module PDF local.\nRechargez la page (Ctrl+F5) puis réessayez.');
  };
  document.head.appendChild(script);
 }
