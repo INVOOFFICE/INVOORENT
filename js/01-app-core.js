@@ -362,7 +362,7 @@ function alAlert(msg){
  overlay.style.display='flex';
  document.getElementById('al-alert-ok').onclick=()=>{overlay.style.display='none';};
 }
-const _bf={login:{fails:0,lockedUntil:0},master:{fails:0,lockedUntil:0}};
+const _bf={login:{fails:0,lockedUntil:0},master:{fails:0,lockedUntil:0},emailLic:{fails:0,lockedUntil:0}};
 const BF_MAX=5,BF_LOCKOUT_MS=30000;
 function bfCheck(s){
  if(Date.now()<_bf[s].lockedUntil)return `⏳ Trop de tentatives — réessayez dans ${Math.ceil((_bf[s].lockedUntil-Date.now())/1000)}s`;
@@ -3090,6 +3090,78 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  return Math.max(0,DEMO_DURATION-Math.floor((Date.now()-startTs)/ 1000));
 }
  function getStoredHash(){return localStorage.getItem(LOGIN_PWD_KEY)||null;}
+ const PENDING_EMAIL_LIC_KEY='invoo_pending_license_key';
+ function resetResetPanel1Ui(){
+ const lf=document.getElementById('reset-license-flow');
+ const vf=document.getElementById('reset-verify-flow');
+ if(lf)lf.style.display='';
+ if(vf)vf.style.display='none';
+ const ok=document.getElementById('license-request-success');
+ const er=document.getElementById('license-request-error');
+ if(ok)ok.style.display='none';
+ if(er){er.style.display='none';er.textContent='';}
+ const b=document.getElementById('btn-get-license-key');
+ if(b){b.disabled=false;b.classList.remove('is-loading');}
+ var pending=null;
+ try{pending=sessionStorage.getItem(PENDING_EMAIL_LIC_KEY);}catch(e){}
+ var enter=document.getElementById('license-enter-wrap');
+ var ek=document.getElementById('reset-email-license-key');
+ var lee=document.getElementById('license-enter-error');
+ if(lee)lee.classList.remove('show');
+ if(ek)ek.value='';
+ if(enter){
+ if(pending){
+ enter.style.display='block';
+ if(ok)ok.style.display='block';
+ }else{
+ enter.style.display='none';
+ }
+ }
+ }
+ function normalizeEmailLicenseInput(s){
+ if(!s)return '';
+ var t=s.trim().toUpperCase().replace(/\s+/g,'');
+ if(/^INVOO-[A-Z0-9]{6}$/.test(t))return t;
+ if(/^INVOO[A-Z0-9]{6}$/.test(t))return'INVOO-'+t.slice(4);
+ return t;
+ }
+ async function verifyPendingEmailLicense(){
+ var inp=document.getElementById('reset-email-license-key');
+ var errEl=document.getElementById('license-enter-error');
+ var errMsg=document.getElementById('license-enter-error-msg');
+ var val=normalizeEmailLicenseInput(inp?inp.value:'');
+ if(!val){
+ if(errMsg)errMsg.textContent='Saisissez la clé reçue par e-mail.';
+ if(errEl)errEl.classList.add('show');
+ return;
+ }
+ var pending=null;
+ try{pending=sessionStorage.getItem(PENDING_EMAIL_LIC_KEY);}catch(e){}
+ if(!pending){
+ if(errMsg)errMsg.textContent='Aucune clé en attente dans cet onglet. Demandez une nouvelle clé.';
+ if(errEl)errEl.classList.add('show');
+ return;
+ }
+ var locked=bfCheck('emailLic');
+ if(locked){
+ if(errMsg)errMsg.textContent=locked;
+ if(errEl)errEl.classList.add('show');
+ return;
+ }
+ if(normalizeEmailLicenseInput(pending)!==val){
+ bfFail('emailLic');
+ var locked2=bfCheck('emailLic');
+ if(errMsg)errMsg.textContent=locked2||'Clé incorrecte.';
+ if(errEl)errEl.classList.add('show');
+ if(inp){inp.value='';inp.focus();}
+ return;
+ }
+ bfReset('emailLic');
+ if(errEl)errEl.classList.remove('show');
+ try{sessionStorage.removeItem(PENDING_EMAIL_LIC_KEY);}catch(e){}
+ showPanel('reset-2');
+ document.getElementById('reset-new-pwd').focus();
+ }
  function showPanel(name){
 ['admin-panel','reset-panel-1','reset-panel-2'].forEach(id=>{
  const el=document.getElementById(id);
@@ -3111,6 +3183,7 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  const el=document.getElementById(id);
  if(el)el.classList.remove('show');
 });
+ if(name==='reset-1')resetResetPanel1Ui();
 }
  function showLogin(){
  if(checkSession()&&getStoredHash()){
@@ -3124,11 +3197,9 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  showPanel('reset-1');
  const t=document.querySelector('#reset-panel-1 .reset-step-title');
  if(t)t.textContent='🚀 Bienvenue — Créez votre mot de passe';
- const s=document.querySelector('#reset-panel-1 .reset-step-sub');
-  // On génère/stocker la clé maître pour permettre la création du mot de passe,
-  // mais on NE l'affiche pas dans l'UI (évite toute fuite dans l'espace de connexion).
+ const s=document.getElementById('reset-step-sub');
   getSetupMasterKey();
-  if(s)s.textContent='Aucun mot de passe défini. Clé maître générée et stockée dans ce navigateur.';
+  if(s){s.textContent='Aucun mot de passe défini. Demandez une clé ou saisissez la clé maître si vous la possédez déjà.';s.setAttribute('data-first-setup','1');}
  const back=document.getElementById('btn-cancel-reset-1');
  if(back)back.style.display='none';
 }else{
@@ -3328,6 +3399,7 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
 }
  const hash=await hashPassword(pwd1);
  localStorage.setItem(LOGIN_PWD_KEY,hash);
+ try{sessionStorage.removeItem(PENDING_EMAIL_LIC_KEY);}catch(e){}
  errEl.classList.remove('show');
  showPanel('admin');
  document.getElementById('btn-login-submit').style.display='';
@@ -3376,10 +3448,35 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  : '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 });
  document.getElementById('btn-open-reset').addEventListener('click',function(){
+ const t=document.querySelector('#reset-panel-1 .reset-step-title');
+ if(t)t.textContent='🔑 Réinitialiser le mot de passe';
+ const s=document.getElementById('reset-step-sub');
+ if(s){s.textContent='Demandez une clé par e-mail, ou ouvrez la saisie si vous avez déjà la clé.';s.removeAttribute('data-first-setup');}
  showPanel('reset-1');
- document.getElementById('reset-master-key').value='';
- setTimeout(()=>document.getElementById('reset-master-key').focus(),80);
+ setTimeout(function(){
+ const mk=document.getElementById('reset-master-key');
+ if(mk)mk.value='';
+ document.getElementById('btn-get-license-key')?.focus();
+},80);
 });
+ document.getElementById('btn-show-verify-key')?.addEventListener('click',function(){
+ document.getElementById('reset-license-flow').style.display='none';
+ document.getElementById('reset-verify-flow').style.display='';
+ var lew=document.getElementById('license-enter-wrap');
+ if(lew)lew.style.display='none';
+ document.getElementById('reset-master-key')?.focus();
+});
+ document.getElementById('btn-back-license-flow')?.addEventListener('click',function(){
+ document.getElementById('reset-verify-flow').style.display='none';
+ document.getElementById('reset-license-flow').style.display='';
+ document.getElementById('reset-error-1')?.classList.remove('show');
+ var pending=null;
+ try{pending=sessionStorage.getItem(PENDING_EMAIL_LIC_KEY);}catch(e){}
+ var lew=document.getElementById('license-enter-wrap');
+ if(pending&&lew)lew.style.display='block';
+ });
+ document.getElementById('btn-verify-email-license')?.addEventListener('click',verifyPendingEmailLicense);
+ document.getElementById('reset-email-license-key')?.addEventListener('keydown',function(e){if(e.key==='Enter')verifyPendingEmailLicense();});
  document.getElementById('btn-verify-master').addEventListener('click',verifyMasterKey);
  document.getElementById('reset-master-key').addEventListener('keydown',function(e){if(e.key==='Enter')verifyMasterKey();});
  document.getElementById('btn-save-new-pwd').addEventListener('click',saveNewPassword);

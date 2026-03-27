@@ -1,4 +1,4 @@
-const CACHE_NAME='INVOORENT-v23';
+const CACHE_NAME='INVOORENT-v25';
 const ASSETS=[
  'index.html',
  'manifest.json',
@@ -13,6 +13,7 @@ const ASSETS=[
  'js/01-app-core.js',
  'js/06-core-utils.js',
  'js/07-master-key-utils.js',
+ 'js/08-emailjs-license.js',
  'js/02-backup.js',
  'js/03-supabase-sync.js',
  'js/04-import.js',
