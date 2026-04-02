@@ -1,0 +1,8 @@
+{
+  "name": "invoo-offline",
+  "private": true,
+  "description": "INVOORENT app statique — tests optionnels",
+  "scripts": {
+    "test": "node scripts/verify-backup-schema.mjs"
+  }
+}

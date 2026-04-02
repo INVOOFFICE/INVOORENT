@@ -1,0 +1,89 @@
+<!-- page-dashboard -->
+<div class="page active" id="page-dashboard">
+<div class="dash-hero" style="background:#0C0E14;border-radius:16px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden;border:none;">
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 10% 50%,rgba(45,212,191,0.18) 0%,transparent 60%),radial-gradient(ellipse 40% 60% at 85% 20%,rgba(165,147,255,0.08) 0%,transparent 55%);pointer-events:none;">
+</div>
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;">
+</div>
+<div class="dash-hero-left" style="position:relative;z-index:1;">
+<div class="dash-hero-eyebrow" id="dash-greeting" style="color:rgba(255,255,255,0.4);font-size:0.78rem;">Bonjour Y'<</div>
+<h1 class="dash-hero-title" id="dash-agency-name" style="color:#fff;font-size:1.6rem;margin:4px 0 6px;">Tableau de bord</h1>
+<p class="dash-hero-sub" id="dash-hero-date" style="color:rgba(255,255,255,0.35);font-size:0.82rem;">
+</p>
+</div>
+<div class="dash-hero-actions" style="position:relative;z-index:1;">
+<button class="btn btn-sm" onclick="openRapportModal()" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);border:0.5px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+</svg>
+ Rapport
+ </button>
+<button class="btn btn-sm" onclick="navigate(document.querySelector('[data-page=reservations]'))" style="background:#2dd4bf;color:#fff;border:none;box-shadow:0 4px 14px rgba(45,212,191,0.4);">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+<path d="M12 5v14M5 12h14"/>
+</svg>
+ Nouvelle réservation
+ </button>
+</div>
+</div>
+<div class="stats-grid" id="stats-grid">
+</div>
+<div id="alerts-card-wrap">
+</div>
+<div id="docs-alerts-wrap">
+</div>
+<div id="impayes-wrap">
+</div>
+<div class="dash-section-label">Analyse & Performance</div>
+<div class="dashboard-grid" style="margin-bottom:16px">
+<div class="card">
+<div class="card-header">
+<h4>Chiffre d'affaires mensuel</h4>
+<span class="card-badge">12 mois</span>
+</div>
+<div style="position:relative;height:200px;margin-top:12px">
+<canvas id="chart-ca">
+</canvas>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<h4>Taux d'occupation</h4>
+<span class="card-badge">flotte</span>
+</div>
+<div style="position:relative;height:200px;margin-top:12px">
+<canvas id="chart-occupation">
+</canvas>
+</div>
+</div>
+</div>
+<div class="card" style="margin-bottom:16px">
+<div class="card-header">
+<h4>Rentabilité par véhicule</h4>
+<span class="card-badge">comparatif</span>
+</div>
+<div id="chart-veh-wrap" style="position:relative;margin-top:12px">
+<canvas id="chart-veh">
+</canvas>
+</div>
+</div>
+<div class="dash-section-label">Activité & Flotte</div>
+<div class="dashboard-grid">
+<div class="card">
+<div class="card-header">
+<h4>Activité récente</h4>
+<button class="card-link" onclick="navigate(document.querySelector('[data-page=reservations]'))">Voir tout '</button>
+</div>
+<div id="activity-list" style="margin-top:4px">
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<h4>tat de la flotte</h4>
+<button class="card-link" onclick="navigate(document.querySelector('[data-page=vehicules]'))">Gérer '</button>
+</div>
+<div id="fleet-status" style="margin-top:4px">
+</div>
+</div>
+</div>
+</div>

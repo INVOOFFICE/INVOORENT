@@ -1,0 +1,237 @@
+<!-- INVOORENT — connexion, reset, démo (injecté par partials-loader.js) -->
+<div id="login-screen">
+<div class="login-right login-right--invo">
+<div class="login-invo-header">
+<img class="login-invo-logo" src="assets/autoloc-icon-512.png" alt="INVOORENT" width="72" height="72" decoding="async" />
+<h1 class="login-invo-title">INVOORENT</h1>
+<p class="login-invo-tagline">Gérez, louez, développez</p>
+</div>
+<div class="login-invo-body">
+<p class="login-invo-intro">Choisissez comment accéder à l'application.</p>
+<div class="login-invo-options">
+<button type="button" class="login-option login-option--trial access-btn" id="tab-demo">
+<svg class="login-option-ic" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<polyline points="12 6 12 12 16 14"/>
+</svg>
+<span class="login-option-text">
+<strong>Essai gratuit 1 heure</strong>
+<small>Toutes les fonctionnalités · Session unique</small>
+</span>
+</button>
+<button type="button" class="login-option login-option--admin access-btn active" id="tab-admin">
+<svg class="login-option-ic" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+</svg>
+<span class="login-option-text">
+<strong>Administrateur</strong>
+<small>Mot de passe · Accès complet</small>
+</span>
+</button>
+</div>
+<div class="login-invo-detail">
+<div id="admin-panel">
+<div class="login-form">
+<div class="lf-group">
+<label>Mot de passe</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="11" width="18" height="11" rx="2"/>
+<path d="M7 11V7a5 5 0 0110 0v4"/>
+</svg>
+<input type="password" id="login-password" placeholder="Entrez le mot de passe" autocomplete="current-password" />
+<button class="lf-eye" id="toggle-pass" type="button">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+<circle cx="12" cy="12" r="3"/>
+</svg>
+</button>
+</div>
+</div>
+<div class="login-error" id="login-error">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+ Mot de passe incorrect. Veuillez réessayer.
+ </div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+<label id="remember-label" style="display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;">
+<span style="position:relative;width:18px;height:18px;flex-shrink:0;">
+<input type="checkbox" id="remember-me" style="position:absolute;opacity:0;width:18px;height:18px;margin:0;cursor:pointer;z-index:1;" />
+<span id="remember-box" style="display:block;width:18px;height:18px;border:1.5px solid #2a3f52;border-radius:5px;background:#1a2736;transition:all 0.15s;pointer-events:none;">
+</span>
+<svg id="remember-check" fill="none" viewBox="0 0 12 12" stroke="#fff" stroke-width="2.2" style="position:absolute;top:3px;left:3px;width:12px;height:12px;display:none;pointer-events:none;">
+<polyline points="1.5 6 4.5 9 10.5 3"/>
+</svg>
+</span>
+<span style="font-size:0.78rem;color:#6B7280;font-weight:400;">Se souvenir de moi</span>
+</label>
+<button type="button" id="btn-open-reset" style="background:none;border:none;font-family:var(--font-body);font-size:0.78rem;color:#2dd4bf;cursor:pointer;padding:0;transition:color 0.15s;letter-spacing:-0.01em;font-weight:500;">
+ Mot de passe oublié ?
+ </button>
+</div>
+</div>
+</div>
+<div id="reset-panel-1" style="display:none;">
+<div class="reset-step-box reset-step-box--compact">
+<div id="reset-license-flow" class="login-form login-form--license" style="margin-top:0;">
+<div id="license-enter-wrap" class="license-enter-wrap license-enter-wrap--offline">
+<div class="lf-group lf-group--license">
+<label class="lf-label-caps" for="reset-license-email">E-mail</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+<polyline points="22,6 12,13 2,6"/>
+</svg>
+<input type="email" id="reset-license-email" placeholder="vous@exemple.ma" autocomplete="email" autocapitalize="off" spellcheck="false" />
+</div>
+<p class="lf-field-hint">Utilisez l’e-mail lié à votre licence.</p>
+</div>
+<div class="lf-group lf-group--license">
+<label class="lf-label-caps" for="reset-license-wa">WhatsApp</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+</svg>
+<input type="tel" id="reset-license-wa" placeholder="06…, 07… ou +212 6…" autocomplete="tel" inputmode="tel" autocapitalize="off" spellcheck="false" />
+</div>
+<p class="lf-field-hint">Même numéro que pour WhatsApp — utilisé dans le message de demande de clé.</p>
+</div>
+</div>
+<div class="login-error login-error--compact" id="license-wa-error" style="display:none;margin-bottom:10px;" role="alert">
+<span id="license-wa-error-msg">Vérifiez le numéro.</span>
+</div>
+<button type="button" class="btn-license-wa" id="btn-send-license-whatsapp">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+Envoyer vers WhatsApp
+</button>
+<p class="lf-field-hint" id="license-key-gate-hint" style="margin-top:10px;margin-bottom:0;">Après envoi du message WhatsApp, le champ <strong>Clé de licence</strong> apparaît ci-dessous.</p>
+<div id="license-key-step" class="license-key-step license-key-step--locked" style="display:none;margin-top:14px;" aria-hidden="true">
+<div class="lf-group lf-group--license">
+<label class="lf-label-caps" for="reset-email-license-key">Clé de licence</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+</svg>
+<input type="text" id="reset-email-license-key" placeholder="64 caractères hex" title="Clé fournie par le support" autocomplete="off" autocapitalize="off" spellcheck="false" />
+</div>
+<p class="lf-field-hint" id="license-key-hint">Après paiement, vous recevrez la clé par WhatsApp — collez-la ici puis validez.</p>
+</div>
+<div class="login-error" id="license-enter-error">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+<span id="license-enter-error-msg">Clé incorrecte pour cet e-mail et cet appareil.</span>
+</div>
+<button class="btn-login" id="btn-verify-email-license" type="button">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+</svg>Valider</button>
+</div>
+</div>
+</div>
+<button type="button" class="reset-back-link" id="btn-cancel-reset-1"> Retour à la connexion</button>
+</div>
+<div id="reset-panel-2" style="display:none;">
+<div class="reset-step-box reset-step-box--ok">
+<div class="reset-step-title">Nouveau mot de passe</div>
+<div class="reset-step-sub">Choisissez un nouveau mot de passe pour accéder à INVOORENT.</div>
+<div class="login-form" style="margin-top:14px;">
+<div class="lf-group">
+<label>Nouveau mot de passe</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="11" width="18" height="11" rx="2"/>
+<path d="M7 11V7a5 5 0 0110 0v4"/>
+</svg>
+<input type="password" id="reset-new-pwd" placeholder="Min. 8 caractères" />
+</div>
+</div>
+<div class="lf-group">
+<label>Confirmer le mot de passe</label>
+<div class="lf-input-wrap">
+<svg class="lf-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="11" width="18" height="11" rx="2"/>
+<path d="M7 11V7a5 5 0 0110 0v4"/>
+</svg>
+<input type="password" id="reset-confirm-pwd" placeholder="Répétez le mot de passe" />
+</div>
+</div>
+<div class="login-error" id="reset-error-2">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+<span id="reset-error-2-msg">Erreur</span>
+</div>
+<button class="btn-login" id="btn-save-new-pwd" type="button" style="background:linear-gradient(135deg,#059669,#0DB882);">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M5 13l4 4L19 7"/>
+</svg>
+ Enregistrer le nouveau mot de passe
+ </button>
+</div>
+</div>
+<button type="button" class="reset-back-link" id="btn-cancel-reset-2"> Retour à la connexion</button>
+</div>
+<div id="demo-panel">
+<div class="demo-info-box">
+<p>
+<strong>Accès démo — 1 h</strong>
+<br>
+ Essayez INVOORENT pendant 1 heure.</p>
+<div class="demo-timer-row">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<polyline points="12 6 12 12 16 14"/>
+</svg>
+ 1 h — sans mot de passe
+ </div>
+</div>
+</div>
+<br>
+<button class="btn-login" id="btn-login-submit" type="button">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+<polyline points="10 17 15 12 10 7"/>
+<line x1="15" y1="12" x2="3" y2="12"/>
+</svg>
+ Accéder à l'interface
+</button>
+</div>
+<p class="login-invo-footer">INVOORENT · Système de gestion locative intelligent · Données 100% locales · Gérez, louez, développez · © <span id="login-footer-year">
+</span> INVOOFFICE — invooffice.com</p>
+<a class="login-invo-wa" href="paiement.html" target="_blank" rel="noopener">Paiement de la licence via <strong>WhatsApp</strong> — choisissez votre moyen (virement, Cash Plus, mobile…) sur la page suivante <strong>→</strong>
+</a>
+</div>
+</div>
+</div>
+<div id="demo-countdown-bar">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0;color:#FCD34D">
+<circle cx="12" cy="12" r="10"/>
+<polyline points="12 6 12 12 16 14"/>
+</svg>
+<span style="color:rgba(254,243,199,0.65);font-weight:500;">Démo</span>
+<span id="demo-time-left">60:00</span>
+<button id="demo-end-btn">o.</button>
+<div id="demo-progress" style="width:100%;">
+</div>
+</div>
+<div id="demo-expired-overlay">
+<div class="demo-expired-modal">
+<div class="demo-expired-icon">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<polyline points="12 6 12 12 16 14"/>
+</svg>
+</div>
+<h3>Démo terminée</h3>
+<p>Votre session de démonstration de 1 heure s'est terminée. Connectez-vous avec le mot de passe administrateur pour un accès complet.</p>
+<button class="btn-back-login" id="btn-back-login">Retour à la connexion</button>
+</div>
+</div>

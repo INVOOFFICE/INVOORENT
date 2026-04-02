@@ -1,0 +1,52 @@
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Logs
+*.log
+
+# Build/cache/deps
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.next/
+.nuxt/
+.output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local backups / exports
+INVOORENT_backup_*.json
+
+# Audits & suivis locaux (*.txt) — ex. AUDIT-STATUT.txt, rapports d’audit
+/AUDIT*.txt
+AUDIT*.txt
+
+# Procédures / notes internes à la racine (optionnel : retirer la ligne si vous versionnez)
+/TECHNIQUE.txt
+
+# Brouillons et suffixes locaux
+*.local.txt
+notes/
+_private/
+
+# IDE / éditeurs
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers temporaires OS / brouillons
+*.tmp
+*.temp
+Desktop.ini

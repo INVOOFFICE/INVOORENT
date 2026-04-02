@@ -1,0 +1,50 @@
+<!-- page-clients -->
+<div class="page" id="page-clients">
+<div class="page-section-header">
+<div>
+<h2>Clients</h2>
+<p>Base de données des locataires</p>
+</div>
+<div class="page-section-header-right">
+<div class="search-box">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="11" cy="11" r="8"/>
+<path d="M21 21l-4.35-4.35"/>
+</svg>
+<input type="text" id="client-search" placeholder="Rechercher" oninput="renderClients()">
+</div>
+<button class="btn btn-outline btn-sm" onclick="exportCSV('cl')">Export</button>
+<button class="btn btn-outline btn-sm" onclick="openImportModal('cl')" style="border-color:var(--accent2);color:var(--accent2);">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="17 8 12 3 7 8"/>
+<line x1="12" y1="3" x2="12" y2="15"/>
+</svg>
+ Import
+ </button>
+<button class="btn btn-primary btn-sm" onclick="openModal('client-modal')">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+<path d="M12 5v14M5 12h14"/>
+</svg>
+ Ajouter
+ </button>
+</div>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Nom complet</th>
+<th>Téléphone</th>
+<th>CIN / Passeport</th>
+<th>Email</th>
+<th>Permis</th>
+<th>Locations</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="client-tbody">
+</tbody>
+</table>
+</div>
+</div>

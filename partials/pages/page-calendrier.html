@@ -1,0 +1,44 @@
+<!-- page-calendrier -->
+<div class="page" id="page-calendrier">
+<div class="page-section-header">
+<div>
+<h2>Calendrier</h2>
+<p>Vue mensuelle de la disponibilité</p>
+</div>
+<div class="page-section-header-right">
+<div class="cal-nav">
+<button class="btn btn-outline btn-sm" onclick="calPrev()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px">
+<path d="M15 18l-6-6 6-6"/>
+</svg>
+</button>
+<h3 id="cal-month-label" style="font-size:0.84rem;font-weight:600;min-width:140px;text-align:center;letter-spacing:-0.02em;">"</h3>
+<button class="btn btn-outline btn-sm" onclick="calNext()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px">
+<path d="M9 18l6-6-6-6"/>
+</svg>
+</button>
+<button class="btn btn-outline btn-sm" onclick="calToday()">Aujourd'hui</button>
+</div>
+<div class="cal-legend">
+<div class="cal-legend-item">
+<div class="cal-dot" style="background:#2dd4bf">
+</div> Loué</div>
+<div class="cal-legend-item">
+<div class="cal-dot" style="background:#FFFBEB;border:1px solid #F59E0B">
+</div> Maintenance</div>
+<div class="cal-legend-item">
+<div class="cal-dot" style="background:#F4F4F5;border:1px solid #D1D1D6">
+</div> Disponible</div>
+</div>
+</div>
+</div>
+<div class="cal-table-wrap">
+<table class="cal-table">
+<thead id="cal-thead">
+</thead>
+<tbody id="cal-tbody">
+</tbody>
+</table>
+</div>
+</div>

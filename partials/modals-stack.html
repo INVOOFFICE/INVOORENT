@@ -1,0 +1,467 @@
+<!-- INVOORENT — fragment chargé par js/partials-loader.js (ids inchangés pour le JS métier) -->
+<div class="modal-overlay" id="pay-modal">
+<div class="modal pay-modal">
+<div class="modal-header">
+<h3 id="pay-modal-title">Paiements & Caution</h3>
+<button class="close-btn" onclick="closeModal('pay-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body" id="pay-modal-body">
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('pay-modal')">Fermer</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="hist-modal">
+<div class="modal hist-modal">
+<div class="modal-header">
+<h3 id="hist-modal-title">Historique</h3>
+<button class="close-btn" onclick="closeModal('hist-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body" id="hist-modal-body">
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('hist-modal')">Fermer</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="contrat-modal">
+<div class="modal modal-lg">
+<div class="modal-header">
+<h3>Contrat de location</h3>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="btn btn-primary btn-sm" onclick="printContratDirect()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M6 9V2h12v7"/>
+<path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+<rect x="6" y="14" width="12" height="8" rx="1"/>
+</svg>
+ Imprimer / PDF
+ </button>
+<button class="close-btn" onclick="closeModal('contrat-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+</div>
+<div class="modal-body">
+<div class="contrat-wrap" id="contrat-body">
+</div>
+</div>
+<div class="modal-footer" id="contrat-footer">
+<button class="btn btn-outline" onclick="closeModal('contrat-modal')">Fermer</button>
+<button class="btn btn-primary" onclick="printContratDirect()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">
+<path d="M6 9V2h12v7"/>
+<path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+<rect x="6" y="14" width="12" height="8" rx="1"/>
+</svg>
+ Imprimer / Sauvegarder PDF
+ </button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="veh-modal">
+<div class="modal">
+<div class="modal-header">
+<h3 id="veh-modal-title">Ajouter un véhicule</h3>
+<button class="close-btn" onclick="closeModal('veh-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group form-full">
+<label>Ys~ Immatriculation</label>
+<input id="veh-immat" placeholder="ex: 12345-A-6" style="font-size:1rem;padding:10px 14px;font-weight:600;letter-spacing:0.04em;" />
+</div>
+<div class="form-group">
+<label>Marque</label>
+<input id="veh-marque" placeholder="Renault" />
+</div>
+<div class="form-group">
+<label>Modèle</label>
+<input id="veh-modele" placeholder="Clio" />
+</div>
+<div class="form-group">
+<label>Année</label>
+<input id="veh-annee" type="number" placeholder="2022" />
+</div>
+<div class="form-group">
+<label>Catégorie</label>
+<select id="veh-cat">
+<option>Citadine</option>
+<option>Berline</option>
+<option>SUV</option>
+<option>4x4</option>
+<option>Utilitaire</option>
+<option>Luxe</option>
+</select>
+</div>
+<div class="form-group">
+<label>Carburant</label>
+<select id="veh-carburant">
+<option>Essence</option>
+<option>Diesel</option>
+<option>Hybride</option>
+<option>lectrique</option>
+</select>
+</div>
+<div class="form-group">
+<label>Couleur</label>
+<input id="veh-couleur" placeholder="Blanc" />
+</div>
+<div class="form-group">
+<label>Kilométrage</label>
+<input id="veh-km" type="number" placeholder="45000" />
+</div>
+<div class="form-group">
+<label>Tarif / Jour (MAD)</label>
+<input id="veh-tarif" type="number" placeholder="300" />
+</div>
+<div class="form-group form-full">
+<label>Statut</label>
+<select id="veh-statut">
+<option>disponible</option>
+<option>loué</option>
+<option>maintenance</option>
+</select>
+</div>
+<div class="form-full" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">📋 Documents &amp; échéances</div>
+<div class="form-group">
+<label>Assurance expire le</label>
+<input type="date" id="veh-assurance">
+</div>
+<div class="form-group">
+<label>Vignette expire le</label>
+<input type="date" id="veh-vignette">
+</div>
+<div class="form-group">
+<label>Visite technique le</label>
+<input type="date" id="veh-visite">
+</div>
+<div class="form-group">
+<label>Assistance (échéance le)</label>
+<input type="date" id="veh-assistance">
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('veh-modal')">Annuler</button>
+<button class="btn btn-primary" onclick="saveVehicule()">Enregistrer</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="client-modal">
+<div class="modal">
+<div class="modal-header">
+<h3 id="client-modal-title">Ajouter un client</h3>
+<button class="close-btn" onclick="closeModal('client-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group">
+<label>&#x1F464; Prénom</label>
+<input id="cl-prenom" placeholder="Mohamed" />
+</div>
+<div class="form-group">
+<label>&#x1F464; Nom</label>
+<input id="cl-nom" placeholder="Benali" />
+</div>
+<div class="form-group">
+<label>&#x1F4DE; Téléphone</label>
+<input id="cl-tel" placeholder="+212 6XX XX XX XX" />
+</div>
+<div class="form-group">
+<label>&#x2709;&#xFE0F; Email</label>
+<input id="cl-email" type="email" placeholder="email@exemple.com" />
+</div>
+<div class="form-full" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">&#x1F4C4; Documents</div>
+<div class="form-group">
+<label>&#x1FAA6; CIN / Passeport</label>
+<input id="cl-cin" placeholder="AB123456" />
+</div>
+<div class="form-group">
+<label>&#x1F697; N° Permis</label>
+<input id="cl-permis" placeholder="12345678" />
+</div>
+<div class="form-full" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">&#x1F4CD; Localisation</div>
+<div class="form-group">
+<label>Ville</label>
+<input id="cl-ville" placeholder="Tanger" />
+</div>
+<div class="form-group">
+<label>Nationalité</label>
+<input id="cl-nat" placeholder="Marocaine" />
+</div>
+<div class="form-group form-full">
+<label>Adresse complète</label>
+<input id="cl-adresse" placeholder="Rue, quartier" />
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('client-modal')">Annuler</button>
+<button class="btn btn-primary" onclick="saveClient()">Enregistrer</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="res-modal">
+<div class="modal">
+<div class="modal-header">
+<h3 id="res-modal-title">Nouvelle réservation</h3>
+<button class="close-btn" onclick="closeModal('res-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group form-full">
+<label>Ys- Véhicule</label>
+<select id="res-veh" style="font-size:1rem;padding:10px 14px;font-weight:600;">
+<option value="">-- Sélectionner un véhicule --</option>
+</select>
+</div>
+<div class="form-group form-full">
+<label>Y' Client</label>
+<select id="res-client">
+<option value="">-- Sélectionner un client --</option>
+</select>
+</div>
+<div class="form-group">
+<label>Y". Date de départ</label>
+<input id="res-debut" type="date" />
+</div>
+<div class="form-group">
+<label>Y". Date de retour</label>
+<input id="res-fin" type="date" />
+</div>
+<div class="form-group">
+<label>Y" Lieu de prise en charge</label>
+<input id="res-lieu" placeholder="Agence / Aéroport" />
+</div>
+<div class="form-group">
+<label>Y"< Statut</label>
+<select id="res-statut">
+<option>en cours</option>
+<option>terminée</option>
+<option>annulée</option>
+</select>
+</div>
+<div class="form-group form-full">
+<label>Y' Remarques</label>
+<textarea id="res-notes" placeholder="Notes éventuelles">
+</textarea>
+</div>
+</div>
+<div id="res-total-preview" style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;font-size:0.88rem;color:var(--text2);display:none;">
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('res-modal')">Annuler</button>
+<button class="btn btn-primary" onclick="saveReservation()">Confirmer</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="rapport-modal">
+<div class="modal rapport-modal">
+<div class="modal-header">
+<h3>Rapport mensuel</h3>
+<button class="close-btn" onclick="closeModal('rapport-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body rapport-print-wrap">
+<div class="rapport-picker">
+<label>Mois</label>
+<select id="rapport-mois">
+</select>
+<label>Année</label>
+<select id="rapport-annee">
+</select>
+<button class="btn btn-primary btn-sm" onclick="genererRapport()">Générer</button>
+</div>
+<div id="rapport-body">
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('rapport-modal')">Fermer</button>
+<button class="btn btn-primary" onclick="window.print()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M6 9V2h12v7"/>
+<path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+<rect x="6" y="14" width="12" height="8" rx="1"/>
+</svg>
+ Imprimer / PDF
+ </button>
+</div>
+</div>
+</div>
+<div class="photo-lightbox" id="photo-lightbox" onclick="closeLightbox()">
+<button class="photo-lightbox-close" onclick="closeLightbox()">-</button>
+<img id="lightbox-img" src="" alt="">
+</div>
+<div class="modal-overlay" id="photos-modal">
+<div class="modal photos-modal">
+<div class="modal-header">
+<h3 id="photos-modal-title">Photos & Documents</h3>
+<button class="close-btn" onclick="closeModal('photos-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body">
+<div id="photos-storage-warn" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:0.78rem;color:#991B1B;margin-bottom:10px">
+</div>
+<div class="photos-tabs" id="photos-tabs">
+</div>
+<div id="photos-panels">
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('photos-modal')">Fermer</button>
+</div>
+</div>
+</div>
+<div class="param-save-toast" id="save-toast">o" Paramètres enregistrés</div>
+<div class="modal-overlay" id="import-modal">
+<div class="modal modal-lg" style="max-width:680px;">
+<div class="modal-header">
+<h3 id="import-modal-title">Import en masse</h3>
+<button class="close-btn" onclick="closeModal('import-modal')">
+<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+</div>
+<div class="modal-body" style="display:flex;flex-direction:column;gap:18px;">
+<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+<p style="font-size:0.83rem;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:7px;">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--accent2)">
+<circle cx="12" cy="12" r="10"/>
+<path d="M12 8v4M12 16h.01"/>
+</svg>
+ Instructions
+ </p>
+<p id="import-instructions" style="font-size:0.80rem;color:var(--text2);line-height:1.6;">
+</p>
+</div>
+<div>
+<p style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Colonnes attendues</p>
+<div id="import-columns" style="display:flex;flex-wrap:wrap;gap:6px;">
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;">
+<button class="btn btn-outline btn-sm" onclick="downloadImportTemplate()" style="font-size:0.78rem;">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+ Télécharger le modèle CSV
+ </button>
+<span style="font-size:0.76rem;color:var(--text3);">Remplissez le modèle puis importez-le</span>
+</div>
+<div id="import-dropzone"
+ style="border:2px dashed var(--border2);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .18s;background:var(--surface);"
+ onclick="document.getElementById('import-file-input').click()"
+ ondragover="importDragOver(event)"
+ ondragleave="importDragLeave(event)"
+ ondrop="importDrop(event)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:36px;height:36px;color:var(--text4);margin:0 auto 10px;display:block">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="17 8 12 3 7 8"/>
+<line x1="12" y1="3" x2="12" y2="15"/>
+</svg>
+<p style="font-size:0.88rem;font-weight:600;color:var(--text2);margin-bottom:4px;">Glissez votre fichier CSV ici</p>
+<p style="font-size:0.76rem;color:var(--text3);">ou cliquez pour sélectionner (.csv, .txt)</p>
+<input type="file" id="import-file-input" accept=".csv,.txt" style="display:none" onchange="importFileSelected(event)">
+</div>
+<div id="import-preview" style="display:none;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+<p style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Aperçu (<span id="import-preview-count">0</span> lignes détectées)</p>
+<button onclick="clearImportFile()" style="background:none;border:none;cursor:pointer;font-size:0.76rem;color:var(--danger);font-family:inherit;">o. Effacer</button>
+</div>
+<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;max-height:200px;overflow-y:auto;">
+<table id="import-preview-table" style="font-size:0.76rem;min-width:100%;">
+</table>
+</div>
+</div>
+<div id="import-errors" style="display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:9px;padding:12px 14px;">
+<p style="font-size:0.80rem;font-weight:700;color:#B91C1C;margin-bottom:6px;">Erreurs détectées :</p>
+<ul id="import-errors-list" style="font-size:0.77rem;color:#991B1B;padding-left:16px;line-height:1.8;">
+</ul>
+</div>
+<div id="import-success-msg" style="display:none;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:9px;padding:12px 14px;">
+<p id="import-success-text" style="font-size:0.82rem;font-weight:600;color:#15803D;">
+</p>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline" onclick="closeModal('import-modal')">Annuler</button>
+<button class="btn btn-primary" id="import-confirm-btn" onclick="confirmImport()" disabled
+ style="opacity:0.4;cursor:not-allowed;">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="17 8 12 3 7 8"/>
+<line x1="12" y1="3" x2="12" y2="15"/>
+</svg>
+ Importer
+</button>
+</div>
+</div>
+</div>
+<div id="al-confirm-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(12,14,20,0.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;">
+<div id="al-confirm-box" style="background:#18192B;border:1px solid rgba(45,212,191,0.28);border-radius:16px;padding:28px 28px 22px;max-width:400px;width:92%;box-shadow:0 24px 64px rgba(12,14,20,0.55),0 0 0 1px rgba(45,212,191,0.1);animation:scaleIn 0.22s cubic-bezier(0.34,1.56,0.64,1);">
+<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;">
+<div id="al-confirm-icon-wrap" style="width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.35rem;">
+</div>
+<div style="flex:1;min-width:0;">
+<div id="al-confirm-title" style="font-family:'Syne',sans-serif;font-size:1.02rem;font-weight:700;color:#FFFFFF;letter-spacing:-0.03em;margin-bottom:6px;">
+</div>
+<div id="al-confirm-msg" style="font-size:0.82rem;color:rgba(255,255,255,0.48);line-height:1.6;">
+</div>
+</div>
+</div>
+<div style="display:flex;gap:8px;justify-content:flex-end;">
+<button id="al-confirm-cancel" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;cursor:pointer;transition:background 0.14s;">Annuler</button>
+<button id="al-confirm-ok" style="padding:8px 18px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:opacity 0.14s;">
+</button>
+</div>
+</div>
+</div>
+<div id="al-alert-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(12,14,20,0.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;">
+<div style="background:#18192B;border:1px solid rgba(240,68,68,0.25);border-radius:16px;padding:28px 28px 22px;max-width:380px;width:92%;box-shadow:0 24px 64px rgba(12,14,20,0.55);animation:scaleIn 0.22s cubic-bezier(0.34,1.56,0.64,1);">
+<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;">
+<div style="width:44px;height:44px;border-radius:11px;background:rgba(240,68,68,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.3rem;">s️</div>
+<div style="flex:1;">
+<div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#FFFFFF;letter-spacing:-0.03em;margin-bottom:5px;">Attention</div>
+<div id="al-alert-msg" style="font-size:0.82rem;color:rgba(255,255,255,0.5);line-height:1.6;">
+</div>
+</div>
+</div>
+<div style="display:flex;justify-content:flex-end;">
+<button id="al-alert-ok" style="padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#2dd4bf,#5B42D4);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:opacity 0.14s;">Compris</button>
+</div>
+</div>
+</div>

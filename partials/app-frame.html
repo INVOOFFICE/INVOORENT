@@ -1,0 +1,205 @@
+<!-- Sidebar, overlay, #main, topbar, bannières — pages injectées après (partials-loader) -->
+<!-- INVOORENT — sidebar + main (pages métier) -->
+<aside id="sidebar">
+<div class="sidebar-brand">
+<div class="sidebar-brand-inner">
+<div class="sidebar-logo-icon">
+<img src="assets/autoloc-icon-512.png" alt="" width="40" height="40" decoding="async" />
+</div>
+<div>
+<h1>INVOORENT</h1>
+<p>Gérez, louez, développez</p>
+</div>
+</div>
+</div>
+<nav>
+<span class="nav-label">Principal</span>
+<a class="active" data-page="dashboard" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="3" width="7" height="7" rx="1"/>
+<rect x="14" y="3" width="7" height="7" rx="1"/>
+<rect x="3" y="14" width="7" height="7" rx="1"/>
+<rect x="14" y="14" width="7" height="7" rx="1"/>
+</svg>
+ Tableau de bord
+ <span id="notif-dot">
+</span>
+</a>
+<span class="nav-label">Gestion</span>
+<a data-page="vehicules" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/>
+<circle cx="7" cy="17" r="2"/>
+<path d="M9 17h6"/>
+<circle cx="17" cy="17" r="2"/>
+<path d="M3 9h14M5 12h2"/>
+</svg>
+ Véhicules
+ </a>
+<a data-page="clients" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+<circle cx="9" cy="7" r="4"/>
+<path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+</svg>
+ Clients
+ </a>
+<a data-page="reservations" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="4" width="18" height="18" rx="2"/>
+<path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+</svg>
+ Réservations
+ </a>
+<a data-page="calendrier" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="3" y="4" width="18" height="18" rx="2"/>
+<path d="M16 2v4M8 2v4M3 10h18"/>
+<path d="M7 15h.01M12 15h.01M17 15h.01M7 19h.01M12 19h.01" stroke-linecap="round" stroke-width="2.5"/>
+</svg>
+ Calendrier
+ </a>
+<a data-page="maintenance" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+</svg>
+ Maintenance
+ <span id="maint-notif-dot" style="width:7px;height:7px;border-radius:50%;background:#F59E0B;margin-left:auto;display:none;animation:pulse-dot 1.5s ease-in-out infinite;">
+</span>
+</a>
+<span class="nav-label">Système</span>
+<a data-page="parametres" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="3"/>
+<path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+</svg>
+ Paramètres
+ </a>
+<a data-page="guide" onclick="navigate(this)">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="12" cy="12" r="10"/>
+<path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/>
+<line x1="12" y1="17" x2="12.01" y2="17"/>
+</svg>
+ Guide
+ </a>
+<a href="https://wa.me/212630230803?text=Bonjour%2C%20j%27ai%20besoin%20d%27aide%20avec%20AutoLoc%20Pro." target="_blank" rel="noopener" style="color:#25D366 !important;">
+<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;opacity:1">
+<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+</svg>
+ Support
+ <span style="font-size:0.6rem;background:rgba(37,211,102,0.15);color:#25D366;border:1px solid rgba(37,211,102,0.3);border-radius:20px;padding:1px 6px;margin-left:auto;">WA</span>
+</a>
+</nav>
+<div style="flex:1;">
+</div>
+<div class="sidebar-user">
+<div class="sidebar-user-avatar">A</div>
+<div class="sidebar-user-info">
+<p>Administrateur</p>
+<span>INVOORENT v1.5</span>
+</div>
+</div>
+<div class="sidebar-footer">
+<button type="button" class="sidebar-logout-btn" id="btn-sidebar-logout" onclick="doLogout()" style="
+ width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+ background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.18);
+ color:rgba(239,68,68,0.75); border-radius:9px; padding:9px 14px;
+ font-family:var(--font-body); font-size:0.8rem; font-weight:600;
+ cursor:pointer; transition:all 0.15s; margin-bottom:10px;
+ letter-spacing:-0.01em;"
+ onmouseover="this.style.background='rgba(239,68,68,0.16)';this.style.color='rgba(239,68,68,1)'"
+ onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.color='rgba(239,68,68,0.75)'">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0">
+<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+<polyline points="16 17 21 12 16 7"/>
+<line x1="21" y1="12" x2="9" y2="12"/>
+</svg>
+ Déconnexion
+ </button>
+<p>© 2025 INVOORENT</p>
+</div>
+</aside>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()">
+</div>
+<main id="main">
+<div class="topbar">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<line x1="3" y1="6" x2="21" y2="6"/>
+<line x1="3" y1="12" x2="21" y2="12"/>
+<line x1="3" y1="18" x2="21" y2="18"/>
+</svg>
+</button>
+<h2 id="page-title">Tableau de bord</h2>
+<div class="topbar-search" id="search-wrap">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<circle cx="11" cy="11" r="8"/>
+<path d="M21 21l-4.35-4.35"/>
+</svg>
+<input type="text" id="global-search" placeholder="Rechercher véhicule, client, réservation" oninput="onGlobalSearch(event)" onkeydown="onSearchKey(event)" autocomplete="off">
+<button id="search-clear" onclick="clearSearch()" style="display:none">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M18 6L6 18M6 6l12 12"/>
+</svg>
+</button>
+<div id="search-dropdown" class="search-dropdown">
+</div>
+</div>
+<div id="storage-topbar-warn" style="display:none;font-size:0.71rem;font-weight:600;color:#DC2626;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:3px 8px;white-space:nowrap" title="Espace de stockage presque plein — allez dans Paramètres">s️ Stockage plein</div>
+<div class="topbar-actions">
+<span class="topbar-date" id="top-date">
+</span>
+<button class="btn btn-outline btn-sm" onclick="exportExcel()" title="Exporter Excel">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+<span class="btn-label">Export</span>
+</button>
+</div>
+</div>
+<div id="alert-banner">
+<div class="alert-banner-inner">
+<div class="alert-banner-icon">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+<line x1="12" y1="9" x2="12" y2="13"/>
+<line x1="12" y1="17" x2="12.01" y2="17"/>
+</svg>
+</div>
+<div class="alert-banner-text">
+<strong id="alert-banner-title">Alertes actives</strong>
+<div class="alert-chips" id="alert-chips">
+</div>
+</div>
+<button class="alert-dismiss" onclick="document.getElementById('alert-banner').classList.remove('visible')" title="Masquer">o.</button>
+</div>
+</div>
+<div id="backup-reminder-banner">
+<div class="backup-reminder-inner">
+<div class="backup-reminder-icon" aria-hidden="true">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+<line x1="12" y1="9" x2="12" y2="13"/>
+<line x1="12" y1="17" x2="12.01" y2="17"/>
+</svg>
+</div>
+<div class="backup-reminder-text">
+<strong>⚠️ Sauvegarde recommandée</strong>
+<span id="backup-reminder-days-text">Vous n'avez pas sauvegardé vos données depuis plus de 7 jours — exportez maintenant pour éviter toute perte.</span>
+</div>
+<div class="backup-reminder-actions">
+<button class="backup-reminder-btn" onclick="backupReminderDoExport()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;display:inline;margin-right:5px;vertical-align:middle">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+ Sauvegarder maintenant
+ </button>
+<button class="backup-reminder-dismiss" onclick="backupReminderSnooze()">Plus tard</button>
+</div>
+</div>
+</div>

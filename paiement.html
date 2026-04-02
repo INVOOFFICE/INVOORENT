@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paiement licence · INVOORENT</title>
+<link rel="stylesheet" href="css/paiement-licence.css">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/autoloc-icon-192.png">
+</head>
+<body>
+
+<p class="pay-top"><a href="index.html">← Retour à INVOORENT</a></p>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Paiement licence INVOORENT
+    </div>
+    <div class="hero-avatar">IN</div>
+    <div class="hero-name">Youssef Onouari</div>
+    <div class="hero-sub">
+      Réglez votre licence <strong style="color:rgba(255,255,255,.85)">INVOORENT</strong> par le moyen de votre choix ci-dessous (virement, Cash Plus, dépôt mobile). La finalisation se fait ensuite via <strong style="color:rgba(255,255,255,.85)">WhatsApp</strong> pour recevoir votre clé d’activation.
+    </div>
+    <div class="hero-arc">
+      <svg viewBox="0 0 500 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,0 Q250,30 500,0 L500,30 L0,30 Z" fill="#080e14"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button type="button" class="tab t-bank active" onclick="switchTab('bank',this)">
+        <div class="tab-icon">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/>
+          </svg>
+        </div>
+        Virement<br>bancaire
+      </button>
+      <button type="button" class="tab t-cash" onclick="switchTab('cash',this)">
+        <div class="tab-icon">🏪</div>
+        Cash Plus<br>agence
+      </button>
+      <button type="button" class="tab t-mobile" onclick="switchTab('mobile',this)">
+        <div class="tab-icon">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>
+          </svg>
+        </div>
+        Dépôt<br>mobile
+      </button>
+    </div>
+  </div>
+
+  <div class="panel active" id="panel-bank">
+    <div class="slabel">Détails du compte</div>
+    <div class="fcard">
+      <div class="fitem">
+        <div class="ficon fi-t">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div class="fmeta">
+          <div class="flbl">Titulaire du compte</div>
+          <div class="fval">MONSIEUR YOUSSEF ONOUARI</div>
+        </div>
+        <button type="button" class="cbtn" onclick="copyField('MONSIEUR YOUSSEF ONOUARI',this)" title="Copier" aria-label="Copier">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="fitem">
+        <div class="ficon fi-g">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+        </div>
+        <div class="fmeta">
+          <div class="flbl">Numéro de compte</div>
+          <div class="fval">4366667211021400</div>
+        </div>
+        <button type="button" class="cbtn" onclick="copyField('4366667211021400',this)" title="Copier" aria-label="Copier">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="fitem">
+        <div class="ficon fi-b">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        </div>
+        <div class="fmeta">
+          <div class="flbl">RIB</div>
+          <div class="fval sm">230 010 4366667211021400 89</div>
+        </div>
+        <button type="button" class="cbtn" onclick="copyField('230010436666721102140089',this)" title="Copier" aria-label="Copier">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="fitem">
+        <div class="ficon fi-s">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M3 7l9-4 9 4"/></svg>
+        </div>
+        <div class="fmeta">
+          <div class="flbl">IBAN</div>
+          <div class="fval sm">MA64 2300 1043 6666 7211 0214 0089</div>
+        </div>
+        <button type="button" class="cbtn" onclick="copyField('MA64230010436666721102140089',this)" title="Copier" aria-label="Copier">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="slabel">Code SWIFT / BIC</div>
+    <div class="fcard">
+      <div class="swift-row">
+        <div class="ficon fi-t" style="flex-shrink:0">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        </div>
+        <div class="swift-chip"><span class="swift-dot"></span>CIHMMAMC</div>
+        <button type="button" class="cbtn" style="margin-left:auto" onclick="copyField('CIHMMAMC',this)" title="Copier" aria-label="Copier">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="infobox">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span>CIH Bank · Maroc. Utilisez les boutons pour copier chaque champ. Après paiement, contactez-nous sur WhatsApp pour activer votre licence INVOORENT.</span>
+    </div>
+    <div class="bsp"></div>
+  </div>
+
+  <div class="panel" id="panel-cash">
+    <div class="slabel">Dépôt en agence</div>
+    <div class="cp-card">
+      <div class="cp-brand">
+        <div class="cp-logo">C+</div>
+        <div>
+          <div class="cp-brand-name">Cash <span>Plus</span></div>
+          <div class="cp-brand-sub">Réseau de paiement au Maroc</div>
+        </div>
+      </div>
+      <div class="cp-fields">
+        <div class="cp-field">
+          <div class="cp-field-inner">
+            <div class="cf-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+            <div class="cf-meta">
+              <div class="cf-lbl">Nom du bénéficiaire</div>
+              <div class="cf-val">YOUSSEF ONOUARI</div>
+            </div>
+            <button type="button" class="cf-copy" onclick="copyField('YOUSSEF ONOUARI',this)" title="Copier" aria-label="Copier">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="cp-field">
+          <div class="cp-field-inner">
+            <div class="cf-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div>
+            <div class="cf-meta">
+              <div class="cf-lbl">Numéro de téléphone</div>
+              <div class="cf-val">0630 230 803</div>
+            </div>
+            <button type="button" class="cf-copy" onclick="copyField('0630230803',this)" title="Copier" aria-label="Copier">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="cp-note">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>Rendez-vous dans une agence <strong style="color:#fb923c">Cash Plus</strong> au Maroc, effectuez le dépôt, puis envoyez la preuve sur <strong style="color:#fb923c">WhatsApp</strong> pour finaliser votre licence INVOORENT.</span>
+      </div>
+    </div>
+    <div class="slabel">Procédure</div>
+    <div class="steps-box">
+      <div class="steps-header">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>
+        Dépôt Cash Plus
+      </div>
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">Rendez-vous dans une <strong>agence Cash Plus</strong>.</div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">Indiquez un <strong>dépôt d’argent</strong> au guichet.</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Donnez le <strong>nom : YOUSSEF ONOUARI</strong> et le <strong>numéro : 0630 230 803</strong>.</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Conservez le <strong>reçu</strong> et transmettez-le via WhatsApp pour votre clé INVOORENT.</div></div>
+    </div>
+    <div class="bsp"></div>
+  </div>
+
+  <div class="panel" id="panel-mobile">
+    <div class="slabel">Transfert mobile</div>
+    <div class="mb-card">
+      <div class="mb-brand">
+        <div class="mb-logo">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <div>
+          <div class="mb-brand-name">Dépôt <span>mobile</span></div>
+          <div class="mb-brand-sub">Cash Plus · Wafacash · Moneytrans…</div>
+        </div>
+      </div>
+      <div class="mb-fields">
+        <div class="mb-field">
+          <div class="mb-field-inner">
+            <div class="mf-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+            <div class="mf-meta">
+              <div class="mf-lbl">Nom complet</div>
+              <div class="mf-val">YOUSSEF ONOUARI</div>
+            </div>
+            <button type="button" class="mf-copy" onclick="copyField('YOUSSEF ONOUARI',this)" title="Copier" aria-label="Copier">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mb-field">
+          <div class="mb-field-inner">
+            <div class="mf-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div>
+            <div class="mf-meta">
+              <div class="mf-lbl">Numéro de téléphone</div>
+              <div class="mf-val">0630 230 803</div>
+            </div>
+            <button type="button" class="mf-copy" onclick="copyField('0630230803',this)" title="Copier" aria-label="Copier">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="mb-note">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>Envoyez depuis l’app de votre opérateur, puis une capture d’écran sur WhatsApp pour valider le paiement et recevoir votre clé INVOORENT.</span>
+      </div>
+    </div>
+    <div class="slabel">Services compatibles</div>
+    <div class="methods-grid">
+      <div class="method-chip"><span class="mc-dot" style="background:#f97316"></span>Cash Plus App</div>
+      <div class="method-chip"><span class="mc-dot" style="background:#10b981"></span>Wafacash</div>
+      <div class="method-chip"><span class="mc-dot" style="background:#3b82f6"></span>Moneytrans</div>
+      <div class="method-chip"><span class="mc-dot" style="background:#8b5cf6"></span>Autres agences</div>
+    </div>
+    <div class="infobox" style="border-left-color:var(--blue)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <span>Choisissez la méthode qui vous convient ; le suivi et l’envoi de la clé se font via WhatsApp.</span>
+    </div>
+    <div class="bsp"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  Copié dans le presse-papiers
+</div>
+
+<script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+function copyField(text, btn) {
+  var prev = btn.innerHTML;
+  var checkSVG = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  function doSuccess() {
+    btn.classList.add('ok');
+    btn.innerHTML = checkSVG;
+    showToast();
+    setTimeout(function () {
+      btn.classList.remove('ok');
+      btn.innerHTML = prev;
+    }, 1800);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(doSuccess).catch(function () { fallbackCopy(); });
+  } else {
+    fallbackCopy();
+  }
+  function fallbackCopy() {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;top:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {}
+    document.body.removeChild(ta);
+    if (ok) doSuccess();
+  }
+}
+var toastTimer;
+function showToast() {
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+}
+</script>
+</body>
+</html>

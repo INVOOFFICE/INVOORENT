@@ -1,0 +1,26 @@
+<!-- page-reservations -->
+<div class="page" id="page-reservations">
+<div class="page-section-header">
+<div>
+<h2>Réservations</h2>
+<p>Locations actives et historique</p>
+</div>
+<div class="page-section-header-right">
+<div class="filters" id="res-filters">
+<button class="filter-btn active" onclick="filterRes(this,'all')">Toutes</button>
+<button class="filter-btn" onclick="filterRes(this,'en cours')">En cours</button>
+<button class="filter-btn" onclick="filterRes(this,'terminée')">Terminées</button>
+<button class="filter-btn" onclick="filterRes(this,'annulée')">Annulées</button>
+</div>
+<button class="btn btn-outline btn-sm" onclick="exportCSV('res')">Export</button>
+<button class="btn btn-primary btn-sm" onclick="openModal('res-modal')">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+<path d="M12 5v14M5 12h14"/>
+</svg>
+ Nouvelle
+ </button>
+</div>
+</div>
+<div id="res-grid">
+</div>
+</div>

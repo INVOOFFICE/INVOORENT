@@ -1,0 +1,446 @@
+================================================================================
+  APP-GUIDE — Architecture et systèmes de CETTE application (INVOOFFICE / DEPL)
+================================================================================
+  Document tiré du code du dépôt (pas un guide générique PWA).
+  Pour une IA ou un dev : lire ce fichier avant de cloner l’architecture.
+  Dernière rédaction : 2026-04-01
+================================================================================
+
+
+1. VUE D’ENSEMBLE DE CETTE APPLICATION
+----------------------------------------
+
+  Type
+    • Application web **statique** : pas de serveur applicatif requis pour
+      l’usage normal (facturation, stock, clients, etc.).
+    • **PWA** : installable, **service worker** avec **précache** large pour
+      fonctionner **hors ligne** après le premier chargement réussi.
+    • **Local-first** : données métier stockées dans le navigateur (**OPFS**
+      avec repli **localStorage**), pas de synchro cloud imposée par l’app.
+
+  Logique produit (telle qu’implémentée)
+    • Facturation et documents (factures, devis, BL, avoirs) orientés contexte
+      **Maroc / DGI** (champs ICE, TVA, conformité affichée dans l’UI).
+    • **Autonomie** : pas de compte serveur ; activation **100 % locale**
+      (voir §5). Essai **1 h** possible sans clé (démo).
+    • Sauvegardes : export/import **JSON** (backup) côté paramètres ;
+      l’utilisateur est responsable des copies (messages dans l’UI).
+
+
+2. ARCHITECTURE RÉELLE DU PROJET
+---------------------------------
+
+2.1 Structure des dossiers (racine dépôt)
+    admin-license-tool/   (outil séparé — hors runtime de l’app principale)
+    assets/fonts/           polices servies localement (ex. Plus Jakarta)
+    css/                    feuilles de style (tokens, composants, pages)
+    docs/                   documentation (ce fichier, design-system, audit…)
+    icons/                  icônes PWA (192/512, maskable)
+    js/                     tout le JavaScript applicatif + vendor/
+    screenshots/            captures pour le manifest PWA
+    scripts/                vendor-copy.mjs, build-page-templates.mjs, etc.
+    tests/                  Jest + scripts Node
+    index.html              coquille + modales globales + ordre des <script>
+    manifest.json           métadonnées PWA
+    sw.js                   service worker
+    sw-register.js          enregistrement SW + UX mise à jour (chargé depuis HTML)
+    privacy.html            page statique liée depuis l’app
+    package.json            deps npm, postinstall → copie vendors
+
+2.2 Rôle précis des fichiers clés
+
+    index.html
+      • « Shell » : sidebar, topbar, zone **#content**, modales (article,
+        client, PDF, confirmation, etc.), onboarding, toasts.
+      • **Content-Security-Policy** meta (ressources self + patterns internes).
+      • Liste **ordonnée** des **<script defer>** : l’ordre est contractuel
+        (dépendances entre modules).
+
+    js/page-templates.js
+      • Définit des fonctions **templatePage\*** qui retournent des chaînes HTML.
+      • **injectAppPageTemplates()** : fait **el.innerHTML = …** sur **#content**
+        au chargement du script (les pages ont des ids `page-overview`,
+        `page-generate`, etc.).
+      • Peut être régénéré par **scripts/build-page-templates.mjs** ; le dépôt
+        maintient aussi des retouches a11y / manuelles (voir commentaire en tête du fichier).
+
+    js/storage.js
+      • **Premier maillon logique des données** : OPFS (`navigator.storage.
+        getDirectory()`), cache mémoire `_opfsMemCache`, chaîne **\_opfsWriteChain**
+        pour sérialiser les écritures.
+      • Objet global **`DB`** en mémoire : `settings`, `clients`, `stock`,
+        `docs`, `fournisseurs`, `bonsCommande`, `stockMoves`.
+      • Clés de persistence : voir **KEYS** (`invoo_settings`, `invoo_clients`, …).
+      • **preloadOPFS()** : init OPFS, lecture des `.json`, **migrations DB**,
+        **migrateStorageFormatIfNeeded**, puis **\_initDBFromCache()**.
+      • **`window.APP.opfs`** : façade (dir, ready, memCache) pour éviter les globaux bruts.
+
+    js/license-activation.js
+      • **Device ID** stable : grain SHA-256(localStorage seed + empreinte UA/écran…).
+      • **Clé attendue** : SHA-256( email_normalisé | deviceId | SECRET )
+        avec SECRET concaténé en dur dans ce fichier (même logique que l’outil
+        de génération de clés hors ligne).
+      • Expose **`globalThis.invooComputeExpectedLicenseHex`**, **`invooLicenseKeysMatch`**, etc.
+      • Définit aussi **`INVOO_OPFS_ACTIVATION_KEY`** / **`INVOO_SESSION_LOCK_KEY`**
+        utilisés par **auth.js**.
+
+    js/auth-templates.js
+      • HTML des écrans **activation** et **verrouillage** (chaînes insérées via
+        **setStaticHtml** depuis **auth.js**).
+
+    js/auth.js
+      • **checkAuth()** : point d’entrée après **preloadOPFS()** (voir app.js).
+      • Gère **activation**, **démo 1 h**, **écran de verrouillage**, persistance
+        dans OPFS/LS via **\_saveKey** / **\_loadKey** (fichiers logiques `key.json`).
+      • **\_launchApp()** : retire l’overlay auth, affiche **#app**, appelle **init()** (ui.js).
+
+    js/ui.js
+      • **init()** : après licence/démo OK — themed selects, date doc, overview
+        (idle), onboarding, notifications, rappel backup.
+      • **nav(id, el)** : bascule `.page.active` (`#page-{id}`), sync sidebar /
+        tabbar mobile, met à jour titre topbar (**pageMap**), déclenche
+        **renderHistory**, **renderStock**, **loadSettings**, etc. selon la page.
+      • Toasts, modales PDF, graphiques (Chart.js), recherche globale, thème.
+
+    js/docs.js, js/clients.js, js/products.js, js/fournisseurs.js,
+    js/bons-commande.js, js/imports.js, js/backup.js, js/invoices.js, js/pdf.js
+      • Logique métier par domaine ; lisent/écrivent **DB** et appellent
+        **save** / **saveAll** (storage.js).
+
+    js/app.js
+      • **preloadOPFS().then(() => checkAuth())** (avec catch → checkAuth).
+      • Gestes tactile sidebar mobile.
+
+    js/events.js
+      • **DOMContentLoaded** : **tous** les **addEventListener** (navigation
+        **nav**, formulaires, historique, etc.). Chargé **en dernier** après app.js.
+
+    sw.js
+      • **install** : ouvre **CACHE_NAME**, remplit le cache avec **PRECACHE_ASSETS**,
+        **skipWaiting** si précachage critique OK.
+      • **activate** : supprime les caches dont le nom ≠ **CACHE_NAME**, **clients.claim()**.
+      • **fetch** : requêtes GET same-origin — **cacheFirst** si **isAppShellRequest**,
+        sinon **networkFirstNoCache** ; fallback offline vers **index.html** pour HTML.
+
+    sw-register.js
+      • Enregistre **sw.js** depuis une base URL calculée (compat sous-dossiers /
+        GitHub Pages). **update** au focus / visibilité / intervalle ; toast
+        si nouvelle version (voir **showUpdateToast** dans ce fichier).
+
+    manifest.json
+      • **start_url** `./index.html`, **scope** `./`, **display** standalone,
+        **display_override** window-controls-overlay + standalone + minimal-ui.
+      • **short_name** / **name** : INVOOFFICE (tels qu’en dépôt au moment du guide).
+
+2.3 Comment tout est connecté (flux de démarrage)
+
+    1) Le navigateur parse **index.html** ; les scripts **defer** s’exécutent dans l’ordre.
+    2) **page-templates.js** injecte le HTML des pages dans **#content**.
+    3) **storage.js** définit OPFS, DB, preloadOPFS, save, migrations…
+    4) **license-activation.js** puis **auth.js** préparent checkAuth.
+    5) **ui.js** expose **init**, **nav**, rendus…
+    6) **app.js** lance **preloadOPFS** puis **checkAuth**.
+       • Si accès refusé / pas activé : overlay **auth** recouvre tout (**#app**
+         sans classe `app-visible`).
+       • Si OK : **\_launchApp** → **init()** dans ui.js.
+    7) **events.js** attache les clics (nav, etc.).
+    8) **sw-register.js** enregistre le SW (si **isSecureContext**).
+
+    La variable **DB** est l’état métier partagé ; les modules ne passent pas
+    par une API HTTP pour les données locales.
+
+
+3. PWA (IMPLÉMENTATION ACTUELLE)
+---------------------------------
+
+3.1 manifest.json (résumé fidèle au fichier)
+    • **id** `./index.html`
+    • **name** / **short_name** : branding INVOOFFICE + sous-titre facturation DGI
+    • **start_url** `./index.html`, **scope** `./`
+    • **display** `standalone`, **display_override** : window-controls-overlay,
+      standalone, minimal-ui
+    • **theme_color** / **background_color** : couleurs marque (teal / fond sombre)
+    • **icons** : 192/512 **any** + **maskable**
+    • **screenshots** : desktop + mobile (optionnel pour stores ; listées aussi
+      dans precache avec gestion « optionnel » côté SW pour les échecs réseau)
+
+3.2 sw.js — fonctionnement
+    • **CACHE_NAME** : chaîne unique (ex. `invo-v5` au moment de la rédaction).
+      Toute évolution majeure du precache → **incrémenter** ce nom.
+    • **PRECACHE_ASSETS** : liste exhaustive des URL relatives à mettre en cache
+      à l’**install** : `./`, index.html, privacy.html, manifest, sw.js, chaque
+      fichier CSS référencé (y compris ceux importés par style.css), polices woff2,
+      **tous** les scripts **js/** applicatifs listés explicitement, **page-templates.js**,
+      **sw-register.js**, vendors, icônes, etc.
+    • **install** :
+      - URLs **critiques** : si une échoue → **installation annulée**, cache
+        supprimé, message **SW_PRECACHE_CRITICAL_FAILED** aux clients.
+      - URLs **optionnelles** (ex. screenshots) : échec = warning seulement.
+      - Succès → **skipWaiting()** pour activer vite la nouvelle version.
+    • **activate** : purge tous les caches dont le nom ≠ CACHE_NAME actuel.
+    • **fetch** (GET, même origine) :
+      - Si **isAppShellRequest** (HTML nav, .js, .css, images, fonts, chemins
+        /js/, /css/, /icons/, /assets/, …) → **cacheFirst** (lit le cache puis
+        réseau, met à jour le cache si OK).
+      - Sinon → **networkFirstNoCache** (réseau ; pas de stratégie cache pour
+        ces requêtes dans le dépôt actuel).
+    • **offlineFallback** : navigation HTML → tente de servir index depuis le
+      cache ; JS/CSS manquants → réponses placeholders 503 ou commentaires vides.
+
+3.3 Stratégie CACHE_NAME
+    • Un seul cache « courant » porte le nom **CACHE_NAME**.
+    • L’**activate** du nouveau SW **supprime** les anciens noms : les utilisateurs
+      repartent sur le nouveau cache après reload effectif du SW contrôleur.
+
+3.4 Mise à jour sans « casser » l’app
+    • Déployer les fichiers **puis** incrémenter **CACHE_NAME** si la liste
+      **PRECACHE_ASSETS** ou les assets critiques changent.
+    • **sw-register.js** appelle **registration.update()** au retour visible /
+      focus ; si un nouveau SW s’installe, l’UI peut proposer un rechargement
+      (**showUpdateToast**).
+    • Ne pas retirer un fichier du disque s’il est encore dans **PRECACHE_ASSETS**
+      sans corriger la liste (sinon échec precache critique à l’install du SW).
+    • Les **données utilisateur** ne sont pas dans le Cache API : elles sont dans
+      **OPFS / localStorage** ; changer CACHE_NAME ne les efface pas.
+
+
+4. STOCKAGE LOCAL (IMPLÉMENTATION ACTUELLE)
+--------------------------------------------
+
+4.1 Couche OPFS (storage.js)
+    • **initOPFS** : récupère le répertoire racine stockage ; si OPFS indispo,
+      **\_opfsReady = false**, repli transparent sur **localStorage**.
+    • Migration initiale : pour chaque clé connue, si le fichier `clé.json` n’existe
+      pas en OPFS mais que **localStorage** a une valeur → **opfsWrite** puis
+      suppression LS si succès.
+    • **opfsRead** / **opfsWrite** : lectures/écritures fichier `key.json`.
+      Échec OPFS → repli **localStorage.setItem(key, …)** (sans suffixe .json
+      dans la clé LS).
+    • **\_opfsMemCache** : copie mémoire des chaînes JSON brutes pour **ls**/**lss**
+      synchrones côté app après preload.
+
+4.2 Objet DB et clés KEYS
+    • **KEYS** mappe : settings, clients, stock, docs, fournisseurs,
+      bonsCommande, stockMoves → noms logiques `invoo_*` (fichiers `invoo_*.json`).
+    • **DB** est peuplé par **\_initDBFromCache** après **ls(KEY)** pour chaque entité.
+    • **DB_DEFAULTS** : structure par défaut de **settings** et tableaux vides.
+
+4.3 Enveloppe JSON « format versionné » (données métier KEYS uniquement)
+    • **STORAGE_FORMAT_MARKER** : `invoo_storage_v2`
+    • **STORAGE_FORMAT_VERSION** : nombre entier (2 en dépôt)
+    • **\_encodeStoredPayload** : pour chaque valeur dans **Object.values(KEYS)**,
+      persiste `{ __fmt, version, data }`.
+    • **\_decodeStoredPayload** : extrait **data** ; si version future > connue,
+      renvoie data quand même (tolérance lecture).
+    • **migrateStorageFormatIfNeeded** : si un fichier en cache est encore
+      « brut » (sans enveloppe), le re-emballage et réécriture.
+
+4.4 DB_VERSION (schéma logique applicatif)
+    • Constante **DB_VERSION** (nombre entier, ex. **1**).
+    • Fichier / clé **`invoo_db_version`** : JSON `{ "v": number }`, **hors**
+      enveloppe STORAGE_FORMAT (traité à part).
+    • **getStoredDbVersion** / **persistDbVersion** : lecture/écriture de ce compteur.
+    • **DB_MIGRATIONS** : objet dont les clés sont les **numéros de version cible**
+      (1, 2, …). Chaque valeur est une **async function** exécutée pour passer
+      de (n-1) à n. Boucle dans **runDbMigrationsIfNeeded** jusqu’à égaler **DB_VERSION**.
+    • Si migration manquante pour une cible : **console.error** et arrêt de la chaîne.
+
+4.5 Autres clés lues au preload (hors KEYS « métier »)
+    • Exemples dans **preloadOPFS** : `invoo_notif_read`, `invoo_onboarding_done`,
+      `invoo_activation_v3`, `invoo_demo_session`, **DB_VERSION_KEY**.
+    • Ces clés suivent le même schéma fichiers OPFS `nom.json` quand OPFS actif.
+
+4.6 Sauvegarde métier
+    • **save(key)** → **lss(KEYS[key], DB[key])** avec chaînage **\_opfsWriteChain**.
+    • **saveAll** / **saveAllAsync** pour flush.
+
+
+5. SYSTÈME DE LICENCE (IMPLÉMENTATION ACTUELLE)
+-----------------------------------------------
+
+5.1 Fichiers
+    • **js/license-activation.js** : calcul device ID, hash **SHA-256** attendu pour
+      la clé (email + deviceId + secret local).
+    • **js/auth.js** : flux UI, validation, persistance **invoo_activation_v3**,
+      démo, verrouillage session.
+
+5.2 Stockage de l’activation
+    • Clé OPFS/LS : **`invoo_activation_v3`** (constante **OPFS_ACTIVATION_KEY**,
+      peut être surchargée via **globalThis.INVOO_OPFS_ACTIVATION_KEY**).
+    • Contenu typique après succès : **isActivated**, **email**, **deviceId**,
+      **licenseKey** (hex normalisé), **activatedAt** ; éventuellement
+      **sessionPassHash** / **sessionPassSalt** (mot de passe de session post-
+      activation), **sessionLockedAt** (verrou persistant).
+    • Ancienne clé **invoo_licence** : si présente avec **activated**, migration
+      vers **invoo_activation_v3** (**legacyMigratedFromV2**).
+
+5.3 Vérification de la clé (offline)
+    • À la soumission **submit-activation** (auth.js) : après étape WhatsApp
+      obligatoire (UX), **invooComputeExpectedLicenseHex(email, deviceId)** est
+      comparé à la saisie via **invooLicenseKeysMatch**.
+    • Exige **crypto.subtle** (HTTPS ou localhost) pour SHA-256.
+    • Si mismatch : message d’erreur champs + « Clé incorrecte pour cet e-mail
+      et cet appareil » — **aucune** activation enregistrée.
+
+5.4 Comportement si invalide / non activé
+    • Pas **isActivated** et pas démo valide → écran **activation** (auth-templates).
+    • Démo expirée → même écran avec **demoExpired** (option démo masquée / message adapté).
+    • Démo active : **invoo_demo_session** avec **startedAt**, durée **DEMO_DURATION_MS**
+      (60 * 60 * 1000). Timer UI ; à expiration → retour activation.
+
+5.5 Session / verrouillage (lien licence)
+    • **authLogout** : **sessionStorage** `invoo_app_session_lock` = '1' +
+      **sessionLockedAt** sur l’enregistrement activation ; affiche **lock screen**.
+    • Déverrouillage : vérif mot de passe (PBKDF2) si défini, ou simple unlock
+      si pas de hash — puis **checkAuth** à nouveau.
+
+
+6. PAGE DE CONNEXION / ACCÈS (IMPLÉMENTATION ACTUELLE)
+------------------------------------------------------
+
+6.1 Orchestration
+    • **app.js** : **preloadOPFS()** doit finir **avant** **checkAuth()** pour que
+      **DB** et **APP.opfs** soient prêts.
+    • **checkAuth()** (auth.js) :
+      1) Si état activation **isActivated** → soit **lock screen** si session
+         verrouillée, soit **\_launchApp**.
+      2) Sinon si démo valide → **\_launchApp** + timer démo.
+      3) Sinon → **\_showActivationScreen**.
+
+6.2 Écrans
+    • **\_showActivationScreen** : crée **#auth-screen** fixed full viewport,
+      injecte HTML **buildActivationHTML** (auth-templates.js), branche événements
+      (démo, WhatsApp, submit clé).
+    • **\_showSetPasswordScreen** : après clé valide — définition mot de passe
+      session (détails dans auth.js).
+    • **\_showLockScreen** : après logout — saisie mot de passe ou unlock.
+
+6.3 « Redirection » dans l’app
+    • Pas de routeur URL : **\_launchApp** ajoute **app-visible** sur **#app**,
+      réaffiche barre mobile, appelle **init()**.
+    • La navigation se fait ensuite par **nav(pageId)** (ui.js) sur **#page-\***.
+
+
+7. INTERFACE ET TEMPLATES
+--------------------------
+
+7.1 page-templates.js
+    • Exporte des fonctions qui retournent des **template literals** HTML.
+    • **buildAppPagesHtml()** concatène **templatePageOverview**, **Generate**,
+      **History**, **Reports**, **Stock**, **Clients**, **Fournisseurs**,
+      **BonsCommande**, **Settings**.
+    • Fin de fichier : **injectAppPageTemplates()** sur **#content**.
+
+7.2 Lien avec index.html
+    • Le shell (sidebar, topbar, modales) vit dans **index.html**.
+    • Le contenu paginé vit dans **#content** après injection.
+
+7.3 Lien avec ui.js
+    • **nav** manipule les éléments **.page** injectés (ex. **#page-overview**).
+    • **init** initialise l’état visible au premier lancement (charts overview,
+      selects, onboarding…).
+    • **events.js** lie les **.sb-item[data-page]**, **.mob-tab[data-page]**, etc.,
+      à **nav(dataset.page, element)**.
+
+7.4 Script order réel (extrait index.html — à respecter si vous recréez)
+    vendors lourds → purify, papaparse, csv-parse, sanitize, html-safe
+    → **page-templates.js**
+    → **storage.js**
+    → **license-activation.js**
+    → **auth-templates.js** → **auth.js**
+    → **ui.js** → **pdf.js** → backup → products → imports → clients → invoices
+    → **docs.js** → fournisseurs → bons-commande
+    → **app.js** → **events.js** → **sw-register.js**
+
+
+8. RÈGLES CRITIQUES DU PROJET
+------------------------------
+
+8.1 Quand modifier CACHE_NAME (sw.js)
+    • Ajout / suppression / renommage de fichier **pré-caché** listé dans
+      **PRECACHE_ASSETS**.
+    • Changement important du **shell** ou des JS/CSS que les utilisateurs
+      doivent recevoir **sans** mélanger ancien SW + nouveaux fichiers manquants.
+    • Ne pas oublier après bump : smoke test hors ligne + installation PWA.
+
+8.2 Quand modifier DB_VERSION (storage.js)
+    • Toute évolution de **forme ou sens** des données OPFS qui nécessite une
+      transformation au chargement (champ renommé, structure docs, etc.).
+    • Toujours ajouter une entrée **DB_MIGRATIONS\[nouvelleVersion]** avant ou
+      en même temps que l’incrément de **DB_VERSION**.
+    • Tester migration depuis une sauvegarde ancienne si possible.
+
+8.3 Erreurs à éviter
+    • **Ne pas** charger les scripts dans un ordre différent sans ajuster les
+      dépendances (auth avant ui, storage avant entités, events en dernier).
+    • **Ne pas** retirer un fichier du dépôt s’il est encore dans **PRECACHE_ASSETS**.
+    • **Ne pas** changer **DB_VERSION** sans fonction de migration → utilisateurs
+      bloqués avec erreur console « Migration manquante ».
+    • **Ne pas** supposer que le SW met à jour les données : CACHE API ≠ OPFS.
+    • Éditer **page-templates.js** puis oublier le bump **CACHE_NAME** : les PWA
+      peuvent garder l’**ancien** HTML injecté en cache.
+
+
+9. ÉTAPES POUR RECRÉER CETTE APP « À L’IDENTIQUE » (FIDÈLE AU DÉPÔT)
+-------------------------------------------------------------------
+
+  1) Repo statique : **index.html**, **manifest.json**, **sw.js**, **sw-register.js**,
+     **privacy.html**, dossiers **css/**, **js/**, **icons/**, **assets/fonts/**,
+     **screenshots/** (si référencés).
+  2) **package.json** + **scripts/vendor-copy.mjs** pour remplir **js/vendor/** depuis
+     node_modules (postinstall).
+  3) Reproduire la **liste PRECACHE_ASSETS** (ou équivalent exhaustif) alignée sur
+     les fichiers réellement servis (dont tous les CSS découplés de style.css).
+  4) Implémenter **storage.js** : KEYS, enveloppe v2, OPFS + chaîne d’écriture,
+     **DB**, **preloadOPFS**, **DB_VERSION**, **DB_MIGRATIONS**, **migrateStorageFormatIfNeeded**.
+  5) Implémenter **license-activation.js** (device ID + SECRET + fonctions globales).
+  6) Implémenter **auth-templates.js** + **auth.js** (checkAuth, démo, activation,
+     lock, \_saveKey/\_loadKey sur **APP.opfs.memCache** + **opfsWrite**).
+  7) Rédiger **page-templates.js** + injection **#content** ; shell dans **index.html**.
+  8) Implémenter **ui.js** (**init**, **nav**, rendus lourds) puis modules métier
+     dans l’ordre des scripts du HTML.
+  9) **app.js** : **preloadOPFS → checkAuth** uniquement.
+ 10) **events.js** : centraliser listeners après **init** possible via **\_launchApp**.
+ 11) **sw-register.js** : contexte sécurisé + enregistrement + update UX.
+ 12) CSP meta comme dans **index.html** si vous visez le même modèle sécurité.
+ 13) Tester : premier chargement online → install PWA → mode avion → navigation ;
+     activation + démo + lock ; backup export/import.
+
+
+10. CHECKLIST FINALE
+--------------------
+
+  [ ] **Offline** : SW actif, precache sans erreur critique, navigation hors ligne
+      sur les écrans principaux.
+  [ ] **Stockage** : OPFS ou repli LS ; **DB** rechargé après refresh ; sauvegarde
+      **save/saveAll** OK ; **invoo_db_version** cohérent.
+  [ ] **Licence** : clé refusée si incorrecte ; acceptée si SHA-256 match ; persistance
+      **invoo_activation_v3** ; migration legacy **invoo_licence** si besoin.
+  [ ] **Session** : logout → lock ; unlock → retour app ; démo 1 h expire vers activation.
+  [ ] **Navigation** : **nav** + **#page-\*** + sidebar/mobile tabs synchronisés.
+  [ ] **Mise à jour** : nouveau **CACHE_NAME** après changement **PRECACHE_ASSETS** /
+      page-templates significatif.
+
+
+11. PROMPT RÉUTILISABLE (pour une IA)
+--------------------------------------
+
+  Copier-coller la citation suivante dans une nouvelle conversation :
+
+  ---
+  Lis le fichier docs/APP-GUIDE.txt du dépôt INVOOFFICE (application PWA
+  offline, local-first, facturation). Ce document décrit l’architecture réelle
+  (index.html, storage.js, auth.js, license-activation.js, page-templates.js,
+  ui.js, events.js, sw.js, sw-register.js, manifest.json, ordre des scripts,
+  OPFS, DB_VERSION, CACHE_NAME, PRECACHE_ASSETS). Recrée ou modifie le code pour
+  respecter exactement cette architecture et ces systèmes, sans introduire de
+  framework SPA ni de backend obligatoire pour les données locales. À chaque
+  changement de fichiers pré-cachés ou de page-templates.js, prévois un bump de
+  CACHE_NAME dans sw.js. À chaque migration de schéma données, incrémente
+  DB_VERSION et ajoute DB_MIGRATIONS dans storage.js.
+  ---
+
+
+================================================================================
+  Fin APP-GUIDE.txt
+================================================================================

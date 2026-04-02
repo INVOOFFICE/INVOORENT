@@ -1,0 +1,45 @@
+{
+  "id": "./index.html",
+  "name": "INVOORENT — Gérez, louez, développez",
+  "short_name": "INVOORENT",
+  "description": "Gérez, louez, développez",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1923",
+  "theme_color": "#0f1923",
+  "lang": "fr",
+  "scope": "./",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "assets/autoloc-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/autoloc-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "Tableau de bord INVOORENT",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle réservation",
+      "short_name": "Réservation",
+      "url": "#reservations",
+      "description": "Créer une nouvelle réservation"
+    },
+    {
+      "name": "Véhicules",
+      "short_name": "Véhicules",
+      "url": "#vehicules",
+      "description": "Gérer la flotte"
+    }
+  ]
+}

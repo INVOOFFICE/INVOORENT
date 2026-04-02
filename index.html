@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; worker-src 'self' blob:">
+<link rel="stylesheet" href="css/styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1923">
+<meta name="description" content="INVOORENT — Gérez, louez, développez">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="INVOORENT">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/autoloc-icon-512.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/autoloc-icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/autoloc-icon-192.png">
+<title>INVOORENT — Gérez, louez, développez</title>
+</head>
+<body>
+<div id="invoo-boot-fallback" style="display:none;padding:32px 24px;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#0f1923;color:#e2e8f0;min-height:100vh;box-sizing:border-box;line-height:1.55;font-size:0.95rem;"></div>
+<script src="js/partials-loader.js"></script>
+<script defer src="js/00-passive-touch.js"></script>
+<script defer src="js/00-html-utils.js"></script>
+<script defer src="js/vendor-loader.js"></script>
+<script defer src="js/history-modals.js"></script>
+<script defer src="js/payment-modals.js"></script>
+<script defer src="js/contract-print.js"></script>
+<script defer src="js/rapport-modals.js"></script>
+<script defer src="js/reservations-render.js"></script>
+<script defer src="js/data-export.js"></script>
+<script defer src="js/backup-validate.js"></script>
+<script defer src="js/dashboard-charts.js"></script>
+<script defer src="js/calendar-view.js"></script>
+<script defer src="js/maintenance-ui.js"></script>
+<script defer src="js/photos-ui.js"></script>
+<script defer src="js/global-search.js"></script>
+<script defer src="js/guide-html.js"></script>
+<script defer src="js/parametres-ui.js"></script>
+<script defer src="js/reservations-modal.js"></script>
+<script defer src="js/06-core-utils.js"></script>
+<script defer src="js/07-master-key-utils.js"></script>
+<script defer src="js/license-activation.js"></script>
+<script defer src="js/01-app-core.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/auth.js"></script>
+<script defer src="js/app.js"></script>
+<script defer src="js/sw-register.js"></script>
+<div id="pwa-install-banner" class="pwa-install-banner" aria-live="polite">
+<div class="pwa-install-inner">
+<div class="pwa-install-icon-wrap">
+<img class="pwa-install-icon" src="assets/autoloc-icon-512.png" alt="" width="48" height="48" decoding="async" />
+</div>
+<div class="pwa-install-text">
+<p class="pwa-install-title">Installer INVOORENT</p>
+<p class="pwa-install-sub">Accès rapide depuis votre écran d’accueil — fonctionne hors ligne</p>
+</div>
+<div class="pwa-install-actions">
+<button type="button" id="pwa-install-btn" class="pwa-install-btn-primary" onclick="pwaTriggerInstall()">Installer</button>
+<button type="button" class="pwa-install-btn-secondary" onclick="pwaDismiss()">Plus tard</button>
+</div>
+</div>
+</div>
+<script defer src="js/02-backup.js"></script>
+<script defer src="js/03-supabase-sync.js"></script>
+<script defer src="js/04-import.js"></script>
+<script defer src="js/05-save-patch.js"></script>
+</body>
+</html>

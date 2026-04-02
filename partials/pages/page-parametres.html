@@ -1,0 +1,331 @@
+<!-- page-parametres -->
+<div class="page" id="page-parametres">
+<div class="page-section-header">
+<div>
+<h2>Paramètres</h2>
+<p>Configuration de l'agence</p>
+</div>
+</div>
+<div style="max-width:720px;margin:0 auto;">
+<div class="param-section">
+<div class="param-section-header">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+<polyline points="9 22 9 12 15 12 15 22"/>
+</svg>
+<h3>Informations de l'agence</h3>
+</div>
+<div class="form-grid">
+<div class="form-group">
+<label>Nom de l'agence</label>
+<input id="p-nom" placeholder="INVOORENT">
+</div>
+<div class="form-group">
+<label>Slogan / Sous-titre</label>
+<input id="p-slogan" placeholder="Gérez, louez, développez">
+</div>
+<div class="form-group">
+<label>Téléphone</label>
+<input id="p-tel" placeholder="+212 5XX XX XX XX">
+</div>
+<div class="form-group">
+<label>Email</label>
+<input id="p-email" type="email" placeholder="contact@agence.ma">
+</div>
+<div class="form-group">
+<label>Adresse</label>
+<input id="p-adresse" placeholder="Rue, quartier">
+</div>
+<div class="form-group">
+<label>Ville / Pays</label>
+<input id="p-ville" placeholder="Tanger, Maroc">
+</div>
+<div class="form-group">
+<label>Site web</label>
+<input id="p-site" placeholder="www.agence.ma">
+</div>
+<div class="form-group">
+<label>N° Patente / RC</label>
+<input id="p-patente" placeholder="N° registre commerce">
+</div>
+<div class="form-group form-full">
+<label>IBAN / RIB bancaire</label>
+<input id="p-iban" placeholder="Pour les virements clients">
+</div>
+</div>
+</div>
+<div class="param-section">
+<div class="param-section-header">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+<polyline points="14 2 14 8 20 8"/>
+<line x1="16" y1="13" x2="8" y2="13"/>
+<line x1="16" y1="17" x2="8" y2="17"/>
+</svg>
+<h3>Conditions générales du contrat</h3>
+</div>
+<p style="font-size:0.82rem;color:var(--text2);margin-bottom:12px">Ces conditions s'affichent automatiquement dans chaque contrat de location généré.</p>
+<div class="form-group form-grid one">
+<label>Conditions générales</label>
+<textarea id="p-conditions" style="min-height:220px;font-size:0.83rem;line-height:1.7">
+</textarea>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<button class="btn btn-outline btn-sm" onclick="resetConditions()">Remettre par défaut</button>
+<p style="font-size:0.75rem;color:var(--text3);align-self:center">Chaque ligne = une clause numérotée automatiquement</p>
+</div>
+</div>
+<div class="param-section">
+<div class="param-section-header">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+<h3>Sauvegarde & restauration</h3>
+</div>
+<div id="opfs-status-box" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+<div id="opfs-indicator" style="width:9px;height:9px;border-radius:50%;background:#D0D0D8;flex-shrink:0">
+</div>
+<div style="flex:1">
+<p id="opfs-status-text" style="font-size:0.84rem;font-weight:600;color:var(--text2)">Vérification du stockage</p>
+<p id="opfs-status-sub" style="font-size:0.75rem;color:var(--text3);margin-top:2px">Stockage automatique interne au navigateur — aucune configuration requise</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin:16px 0">
+<div style="flex:1;height:1px;background:var(--border)">
+</div>
+<span style="font-size:0.72rem;color:var(--text4);font-weight:500">SAUVEGARDE PORTABLE</span>
+<div style="flex:1;height:1px;background:var(--border)">
+</div>
+</div>
+<p style="font-size:0.82rem;color:var(--text2);margin-bottom:14px">Exportez vos données en fichier JSON pour les sauvegarder sur une clé USB, les transférer sur un autre appareil, ou les archiver.</p>
+<div style="display:flex;align-items:flex-start;gap:10px;background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+<svg fill="none" viewBox="0 0 24 24" stroke="#1D4ED8" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;margin-top:1px">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+<p style="font-size:0.79rem;color:#1e3a5f;line-height:1.55">
+<strong>Données liées à ce navigateur.</strong> Si vous changez d'ordinateur, de navigateur, ou réinstallez Chrome, vos données seront perdues. Exportez régulièrement une sauvegarde et gardez-la en lieu sûr.
+ </p>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button class="btn btn-outline" onclick="exportBackup()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="7 10 12 15 17 10"/>
+<line x1="12" y1="15" x2="12" y2="3"/>
+</svg>
+ Exporter sauvegarde (.json)
+ </button>
+<label class="btn btn-outline" style="cursor:pointer">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">
+<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+<polyline points="17 8 12 3 7 8"/>
+<line x1="12" y1="3" x2="12" y2="15"/>
+</svg>
+ Importer sauvegarde
+ <input type="file" accept=".json" onchange="importBackup(event)" style="display:none">
+</label>
+</div>
+<div id="backup-status" style="margin-top:10px;font-size:0.82rem;color:var(--success);display:none">
+</div>
+</div>
+<div class="param-section" id="storage-usage-section">
+<div class="param-section-header">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<rect x="2" y="2" width="20" height="8" rx="2"/>
+<rect x="2" y="14" width="20" height="8" rx="2"/>
+<line x1="6" y1="6" x2="6.01" y2="6"/>
+<line x1="6" y1="18" x2="6.01" y2="18"/>
+</svg>
+<h3>Stockage des données</h3>
+</div>
+<div id="storage-gauge-wrap">
+</div>
+</div>
+<div class="param-section" id="supa-section">
+<div class="param-section-header">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+</svg>
+<h3>Sync multi-appareils — Supabase</h3>
+<div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+<span id="supa-toggle-label" style="font-size:0.75rem;color:var(--text3)">Désactivé</span>
+<button id="supa-toggle-btn" onclick="AutoLocSync.toggleAuto()" style="position:relative;width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background 0.22s;background:var(--surface3);flex-shrink:0">
+<span id="supa-toggle-knob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 0.22s;transform:translateX(0);box-shadow:0 1px 4px rgba(0,0,0,0.18)">
+</span>
+</button>
+</div>
+</div>
+<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
+<svg fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;margin-top:1px">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+<div>
+<p style="font-size:0.8rem;font-weight:600;color:#065F46;margin-bottom:4px">Comment configurer ?</p>
+<p style="font-size:0.78rem;color:#047857;line-height:1.7">
+ 1. Créez un compte gratuit sur <a href="https://supabase.com" target="_blank" style="color:#059669;font-weight:600">supabase.com</a>
+<br>
+ 2. Créez un projet → <strong>SQL Editor</strong> → exécutez le script ci-dessous<br>
+ 3. Allez dans Settings → API<br>
+ 4. Copiez <strong>Project URL</strong> et <strong>anon public key</strong>
+<br>
+ 5. Collez-les ci-dessous et cliquez Connecter
+ </p>
+</div>
+</div>
+<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
+<svg fill="none" viewBox="0 0 24 24" stroke="#1D4ED8" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;margin-top:1px">
+<circle cx="12" cy="12" r="10"/>
+<line x1="12" y1="8" x2="12" y2="12"/>
+<line x1="12" y1="16" x2="12.01" y2="16"/>
+</svg>
+<div>
+<p style="font-size:0.8rem;font-weight:600;color:#1E3A5F;margin-bottom:4px">Confidentialité des données</p>
+<p style="font-size:0.78rem;color:#1E3A5F;line-height:1.7">La synchronisation Supabase envoie les données en clair dans la colonne <strong>data (jsonb)</strong>. Pour un usage personnel sur un projet privé, cela reste acceptable. Notez toutefois qu'un accès admin Supabase peut lire les données clients, réservations, véhicules et maintenances.</p>
+</div>
+</div>
+<div style="background:#0c141c;border-radius:10px;padding:14px 16px;margin-bottom:18px;position:relative">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+<span style="font-size:0.75rem;font-weight:600;color:#2dd4bf;letter-spacing:0.06em;text-transform:uppercase">Script SQL — à exécuter une seule fois dans Supabase → SQL Editor</span>
+<button onclick="
+ const t=document.getElementById('supa-sql-block').textContent;
+ navigator.clipboard.writeText(t).then(()=>{this.textContent='✓ Copié !';this.style.color='#10B981';setTimeout(()=>{this.textContent='Copier';this.style.color='#5eead4';},2000)});
+ " style="font-size:0.72rem;color:#5eead4;background:none;border:1px solid rgba(45,212,191,0.3);border-radius:5px;padding:3px 10px;cursor:pointer">Copier</button>
+</div>
+<details id="supa-sql-details" style="background:rgba(6,10,20,0.45);border:1px solid rgba(45,212,191,0.18);border-radius:8px;padding:8px 10px;">
+<summary class="supa-sql-summary">
+<span class="supa-sql-summary-main">
+<span>Lire le script SQL complet</span>
+<small>Cliquez pour afficher/masquer le script</small>
+</span>
+<span class="supa-sql-toggle" aria-hidden="true">-</span>
+</summary>
+<pre id="supa-sql-block" style="font-family:var(--font-mono);font-size:0.72rem;color:#A8B4C8;line-height:1.7;white-space:pre-wrap;margin:10px 0 0">-- ============================================================
+-- INVOORENT - Schema + RLS (usage perso / petite equipe)
+-- Executer ce script UNE SEULE FOIS dans Supabase SQL Editor
+-- ============================================================
+
+create table if not exists autoloc_vehicules (
+ id text primary key,
+ data jsonb,
+ deleted_at timestamptz,
+ updated_at timestamptz default now()
+);
+create table if not exists autoloc_clients (
+ id text primary key,
+ data jsonb,
+ deleted_at timestamptz,
+ updated_at timestamptz default now()
+);
+create table if not exists autoloc_reservations (
+ id text primary key,
+ data jsonb,
+ deleted_at timestamptz,
+ updated_at timestamptz default now()
+);
+create table if not exists autoloc_maintenances (
+ id text primary key,
+ data jsonb,
+ deleted_at timestamptz,
+ updated_at timestamptz default now()
+);
+
+-- Activer RLS sur toutes les tables
+alter table autoloc_vehicules enable row level security;
+alter table autoloc_clients enable row level security;
+alter table autoloc_reservations enable row level security;
+alter table autoloc_maintenances enable row level security;
+
+-- Supprimer d'anciennes policies trop larges si elles existent
+drop policy if exists "anon all" on autoloc_vehicules;
+drop policy if exists "anon all" on autoloc_clients;
+drop policy if exists "anon all" on autoloc_reservations;
+drop policy if exists "anon all" on autoloc_maintenances;
+
+-- Policies explicites pour role anon (app locale + cle anon)
+-- Vehicules
+create policy "veh_select_anon" on autoloc_vehicules for select to anon using (true);
+create policy "veh_insert_anon" on autoloc_vehicules for insert to anon with check (true);
+create policy "veh_update_anon" on autoloc_vehicules for update to anon using (true) with check (true);
+create policy "veh_delete_anon" on autoloc_vehicules for delete to anon using (true);
+
+-- Clients
+create policy "cl_select_anon" on autoloc_clients for select to anon using (true);
+create policy "cl_insert_anon" on autoloc_clients for insert to anon with check (true);
+create policy "cl_update_anon" on autoloc_clients for update to anon using (true) with check (true);
+create policy "cl_delete_anon" on autoloc_clients for delete to anon using (true);
+
+-- Reservations
+create policy "res_select_anon" on autoloc_reservations for select to anon using (true);
+create policy "res_insert_anon" on autoloc_reservations for insert to anon with check (true);
+create policy "res_update_anon" on autoloc_reservations for update to anon using (true) with check (true);
+create policy "res_delete_anon" on autoloc_reservations for delete to anon using (true);
+
+-- Maintenances
+create policy "maint_select_anon" on autoloc_maintenances for select to anon using (true);
+create policy "maint_insert_anon" on autoloc_maintenances for insert to anon with check (true);
+create policy "maint_update_anon" on autoloc_maintenances for update to anon using (true) with check (true);
+create policy "maint_delete_anon" on autoloc_maintenances for delete to anon using (true);
+
+-- Notes securite:
+-- 1) Utiliser uniquement la cle anon cote client.
+-- 2) Ne jamais exposer la cle service_role dans l'app.
+-- 3) Pour un usage multi-utilisateur, ajouter owner_id et remplacer
+--    (true) par auth.uid() = owner_id.</pre>
+</details>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="form-group">
+<label style="font-size:0.83rem">Project URL
+ <a href="https://supabase.com/dashboard" target="_blank" style="font-size:0.72rem;color:#059669;font-weight:500;text-decoration:none;background:#ECFDF5;border-radius:5px;padding:2px 7px;margin-left:6px">Ouvrir Supabase '</a>
+</label>
+<input id="supa-url-input" type="url" placeholder="https://xxxxxxxxxxxx.supabase.co"
+ style="font-family:var(--font-mono);font-size:0.83rem">
+</div>
+<div class="form-group">
+<label style="font-size:0.83rem">Clé API (anon public)</label>
+<input id="supa-key-input" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ style="font-family:var(--font-mono);font-size:0.83rem">
+<p style="font-size:0.72rem;color:var(--text3);margin-top:4px">Utilisez la clé <strong>anon public</strong> — jamais la clé service_role</p>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="AutoLocSync.saveConfig()" style="background:linear-gradient(135deg,#059669,#10B981);gap:7px">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+<polyline points="17 21 17 13 7 13 7 21"/>
+<polyline points="7 3 7 8 15 8"/>
+</svg>
+ Connecter &amp; synchroniser
+ </button>
+<button class="btn btn-outline" onclick="AutoLocSync.syncNow(false)" style="gap:7px">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<path d="M1 4v6h6M23 20v-6h-6"/>
+<path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/>
+</svg>
+ Synchroniser maintenant
+ </button>
+<button class="btn btn-outline btn-sm" onclick="AutoLocSync.disconnect()" style="color:#EF4444;border-color:#FECACA">
+ Déconnecter
+ </button>
+</div>
+<div id="supa-sync-status" style="font-size:0.8rem;min-height:20px;color:var(--text3);padding:2px 0">
+</div>
+</div>
+</div>
+<div style="display:flex;justify-content:flex-end;margin-top:8px;padding-bottom:32px">
+<button class="btn btn-primary" onclick="saveParametres()">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">
+<path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+<polyline points="17 21 17 13 7 13 7 21"/>
+<polyline points="7 3 7 8 15 8"/>
+</svg>
+ Enregistrer les paramètres
+ </button>
+</div>
+</div>
+</div>
