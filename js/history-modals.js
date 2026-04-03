@@ -7,6 +7,12 @@
 
   var ctx = null;
 
+  function idEq(a, b) {
+    return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+      ? global.AutoLocCoreUtils.idEq(a, b)
+      : String(a) === String(b);
+  }
+
   function esc(s) {
     if (global.AutoLocUtils && typeof global.AutoLocUtils.escapeHtml === 'function') {
       return global.AutoLocUtils.escapeHtml(s);
@@ -37,10 +43,10 @@
       sorted
         .map(function (r) {
           var v = vehs.find(function (x) {
-            return x.id === r.vehId;
+            return idEq(x.id, r.vehId);
           });
           var c = clients.find(function (x) {
-            return x.id === r.clientId;
+            return idEq(x.id, r.clientId);
           });
           var days =
             r.debut && r.fin
@@ -102,14 +108,20 @@
     if (!c) return;
     var load = c.load;
     var KEYS = c.KEYS;
+    var sid = String(id);
     var cl = load(KEYS.cl).find(function (x) {
-      return x.id === id;
+      return idEq(x.id, sid);
     });
     if (!cl) return;
     var reservations = load(KEYS.res).filter(function (r) {
-      return r.clientId === id;
+      return !r._deleted && idEq(r.clientId, sid);
     });
-    var vehs = load(KEYS.veh);
+    var vehs = load(KEYS.veh).filter(function (x) {
+      return !x._deleted;
+    });
+    var clientsActive = load(KEYS.cl).filter(function (x) {
+      return !x._deleted;
+    });
     var totalCA = reservations
       .filter(function (r) {
         return r.statut === 'terminée';
@@ -145,7 +157,7 @@
       '</strong><span>En cours</span></div><div class="hist-stat"><strong>' +
       totalCA.toLocaleString('fr-FR') +
       'MAD</strong><span>CA généré</span></div></div> ' +
-      buildHistTimeline(reservations, vehs, load(KEYS.cl));
+      buildHistTimeline(reservations, vehs, clientsActive);
     modalEl.classList.add('open');
   };
 
@@ -154,14 +166,17 @@
     if (!c) return;
     var load = c.load;
     var KEYS = c.KEYS;
+    var sid = String(id);
     var v = load(KEYS.veh).find(function (x) {
-      return x.id === id;
+      return idEq(x.id, sid);
     });
     if (!v) return;
     var reservations = load(KEYS.res).filter(function (r) {
-      return r.vehId === id;
+      return !r._deleted && idEq(r.vehId, sid);
     });
-    var clients = load(KEYS.cl);
+    var clients = load(KEYS.cl).filter(function (x) {
+      return !x._deleted;
+    });
     var totalCA = reservations
       .filter(function (r) {
         return r.statut === 'terminée';
@@ -206,7 +221,13 @@
       '</strong><span>Jours loués</span></div><div class="hist-stat"><strong>' +
       totalCA.toLocaleString('fr-FR') +
       'MAD</strong><span>CA généré</span></div></div> ' +
-      buildHistTimeline(reservations, load(KEYS.veh), clients);
+      buildHistTimeline(
+        reservations,
+        load(KEYS.veh).filter(function (x) {
+          return !x._deleted;
+        }),
+        clients
+      );
     modalEl.classList.add('open');
   };
 

@@ -52,9 +52,10 @@
       sel.appendChild(opt);
     });
     if (id) {
-      editingMaintId = id;
+      editingMaintId = String(id);
+      var mid = editingMaintId;
       var m = load(ctx.KEYS.maint).find(function (x) {
-        return x.id === id;
+        return String(x.id) === mid;
       });
       if (m) {
         sel.value = m.vehId;
@@ -106,7 +107,7 @@
       createdAt: (function () {
         if (!editingMaintId) return now;
         var prev = load(ctx.KEYS.maint).find(function (x) {
-          return x.id === editingMaintId;
+          return String(x.id) === String(editingMaintId);
         });
         return (prev && prev.createdAt) || now;
       })(),
@@ -122,13 +123,13 @@
     }
     var oldM = editingMaintId
       ? load(ctx.KEYS.maint).find(function (x) {
-          return x.id === editingMaintId;
+          return String(x.id) === String(editingMaintId);
         })
       : null;
     var data = load(ctx.KEYS.maint);
     if (editingMaintId) {
       data = data.map(function (x) {
-        return x.id === editingMaintId ? m : x;
+        return String(x.id) === String(editingMaintId) ? m : x;
       });
     } else {
       data.push(m);
@@ -137,7 +138,7 @@
     if (m.km > 0) {
       var vehs = load(ctx.KEYS.veh);
       vehs = vehs.map(function (v) {
-        return v.id === vehId
+        return String(v.id) === String(vehId)
           ? { ...v, km: Math.max(v.km || 0, m.km), updatedAt: new Date().toISOString() }
           : v;
       });
@@ -146,7 +147,7 @@
     if (m.statut === 'planifiée') {
       var vehsPlan = load(ctx.KEYS.veh);
       vehsPlan = vehsPlan.map(function (v) {
-        return v.id === vehId && v.statut === 'disponible'
+        return String(v.id) === String(vehId) && v.statut === 'disponible'
           ? { ...v, statut: 'maintenance', updatedAt: new Date().toISOString() }
           : v;
       });
@@ -155,13 +156,16 @@
     if (oldM && oldM.statut === 'planifiée' && m.statut === 'effectuée') {
       var autresPlanifiees = data.filter(function (x) {
         return (
-          !x._deleted && x.id !== m.id && x.vehId === m.vehId && x.statut === 'planifiée'
+          !x._deleted &&
+          String(x.id) !== String(m.id) &&
+          String(x.vehId) === String(m.vehId) &&
+          x.statut === 'planifiée'
         );
       });
       if (!autresPlanifiees.length) {
         var vehsBack = load(ctx.KEYS.veh);
         vehsBack = vehsBack.map(function (v) {
-          return v.id === m.vehId && v.statut === 'maintenance'
+          return String(v.id) === String(m.vehId) && v.statut === 'maintenance'
             ? { ...v, statut: 'disponible', updatedAt: new Date().toISOString() }
             : v;
         });
@@ -182,10 +186,11 @@
       msg: 'Cette action est irréversible.',
       okLabel: 'Supprimer',
       onOk: function () {
+        var sid = String(id);
         save(
           ctx.KEYS.maint,
           load(ctx.KEYS.maint).map(function (x) {
-            return x.id === id
+            return String(x.id) === sid
               ? { ...x, _deleted: true, updatedAt: new Date().toISOString() }
               : x;
           })
@@ -197,24 +202,27 @@
   };
 
   global.markMaintDone = function (id) {
+    var sid = String(id);
     var data = load(ctx.KEYS.maint);
     var m = data.find(function (x) {
-      return x.id === id;
+      return String(x.id) === sid;
     });
     data = data.map(function (x) {
-      return x.id === id
+      return String(x.id) === sid
         ? { ...x, statut: 'effectuée', updatedAt: new Date().toISOString() }
         : x;
     });
     save(ctx.KEYS.maint, data);
     if (m) {
       var autresMaint = data.filter(function (x) {
-        return !x._deleted && x.vehId === m.vehId && x.statut === 'planifiée';
+        return (
+          !x._deleted && String(x.vehId) === String(m.vehId) && x.statut === 'planifiée'
+        );
       });
       if (!autresMaint.length) {
         var vehs = load(ctx.KEYS.veh);
         vehs = vehs.map(function (v) {
-          return v.id === m.vehId && v.statut === 'maintenance'
+          return String(v.id) === String(m.vehId) && v.statut === 'maintenance'
             ? { ...v, statut: 'disponible', updatedAt: new Date().toISOString() }
             : v;
         });
@@ -251,7 +259,7 @@
     tbody.innerHTML = data
       .map(function (m) {
         var v = vehs.find(function (x) {
-          return x.id === m.vehId;
+          return String(x.id) === String(m.vehId);
         });
         var dateD = new Date(m.date);
         dateD.setHours(0, 0, 0, 0);
@@ -337,7 +345,7 @@
     var alerts = [];
     maints.forEach(function (m) {
       var v = vehs.find(function (x) {
-        return x.id === m.vehId;
+        return String(x.id) === String(m.vehId);
       });
       var dateD = new Date(m.date);
       dateD.setHours(0, 0, 0, 0);

@@ -14,6 +14,12 @@
 
  var ctx = null;
 
+ function idEq(a, b) {
+  return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+   ? global.AutoLocCoreUtils.idEq(a, b)
+   : String(a) === String(b);
+ }
+
  function csvEscape(v) {
   if (v === null || v === undefined) return '';
   var s = String(v).replace(/"/g, '""');
@@ -129,10 +135,10 @@
    ];
    res.forEach(function (r) {
     var c = cls.find(function (x) {
-     return x.id === r.clientId;
+     return idEq(x.id, r.clientId);
     });
     var v = vehs.find(function (x) {
-     return x.id === r.vehId;
+     return idEq(x.id, r.vehId);
     });
     var days =
      r.debut && r.fin
@@ -166,7 +172,7 @@
    var rowsM = [['Véhicule', 'Immat', 'Type', 'Date prévue', 'Km', 'Km seuil', 'Coût(MAD)', 'Statut', 'Notes']];
    maints.forEach(function (m) {
     var v = vehs.find(function (x) {
-     return x.id === m.vehId;
+     return idEq(x.id, m.vehId);
     });
     rowsM.push([
      v ? v.marque + ' ' + v.modele : '',
@@ -200,9 +206,15 @@
    alAlert('Chargement en cours,réessayez dans 2 secondes…');
    return;
   }
-  var vehs = load(KEYS.veh);
-  var cls = load(KEYS.cl);
-  var res = load(KEYS.res);
+  var vehs = load(KEYS.veh).filter(function (v) {
+   return !v._deleted;
+  });
+  var cls = load(KEYS.cl).filter(function (c) {
+   return !c._deleted;
+  });
+  var res = load(KEYS.res).filter(function (r) {
+   return !r._deleted;
+  });
   var maints = load(KEYS.maint);
   var fmt = function (d) {
    return d ? new Date(d).toLocaleDateString('fr-FR') : '';
@@ -248,7 +260,7 @@
   var clRows = [['Prénom', 'Nom', 'Téléphone', 'Email', 'CIN/Passeport', 'Permis', 'Ville', 'Nationalité', 'Nb locations']];
   cls.forEach(function (c) {
    var nb = res.filter(function (r) {
-    return r.clientId === c.id;
+    return idEq(r.clientId, c.id);
    }).length;
    clRows.push([c.prenom, c.nom, c.tel, c.email || '', c.cin || '', c.permis || '', c.ville || '', c.nat || '', nb]);
   });
@@ -274,10 +286,10 @@
   ];
   res.forEach(function (r) {
    var c = cls.find(function (x) {
-    return x.id === r.clientId;
+    return idEq(x.id, r.clientId);
    });
    var v = vehs.find(function (x) {
-    return x.id === r.vehId;
+    return idEq(x.id, r.vehId);
    });
    var days =
     r.debut && r.fin
@@ -309,7 +321,7 @@
   var maintRows = [['Véhicule', 'Immat', 'Type', 'Date prévue', 'Km', 'Km seuil', 'Coût(MAD)', 'Statut', 'Notes']];
   maints.forEach(function (m) {
    var v = vehs.find(function (x) {
-    return x.id === m.vehId;
+    return idEq(x.id, m.vehId);
    });
    maintRows.push([
     v ? v.marque + ' ' + v.modele : '',

@@ -689,7 +689,7 @@ function initNativeDatePickers(){
   sync();
  });
 }
-let editingId=null;
+let editingVehId=null,editingClientId=null,editingResId=null;
 const SEED_KEY='autoloc_seeded';
 function seedData(){
  if(localStorage.getItem(SEED_KEY))return;
@@ -767,26 +767,51 @@ function navigate(el){
  else if(pg==='guide')renderGuide();
  closeSidebarMobile();
 }
-function openModal(id){
- if(id==='res-modal'&&typeof populateResSelects==='function')populateResSelects();
- document.getElementById(id).classList.add('open');
-}
-function closeModal(id){
- document.getElementById(id).classList.remove('open');
- editingId=null;
- clearForms();
-}
-function clearForms(){
+function clearVehForm(){
+ const vm=document.getElementById('veh-modal');if(vm)delete vm.dataset.editingVehId;
 ['veh-immat','veh-marque','veh-modele','veh-annee','veh-tarif','veh-couleur','veh-km'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
 ['veh-cat','veh-carburant','veh-statut'].forEach(i=>{const el=document.getElementById(i);if(el)el.selectedIndex=0;});
-['cl-prenom','cl-nom','cl-tel','cl-email','cl-cin','cl-permis','cl-ville','cl-nat','cl-adresse'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
-['res-debut','res-fin','res-lieu','res-notes'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
 ['veh-assurance','veh-vignette','veh-visite','veh-assistance'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
-['res-debut','res-fin','veh-assurance','veh-vignette','veh-visite','veh-assistance'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
+['veh-assurance','veh-vignette','veh-visite','veh-assistance'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
+ const t=document.getElementById('veh-modal-title');if(t)t.textContent='Ajouter un véhicule';
+}
+function clearClientForm(){
+ const cm=document.getElementById('client-modal');if(cm)delete cm.dataset.editingClientId;
+['cl-prenom','cl-nom','cl-tel','cl-email','cl-cin','cl-permis','cl-ville','cl-nat','cl-adresse'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+ const t=document.getElementById('client-modal-title');if(t)t.textContent='Ajouter un client';
+}
+function clearResForm(){
+ const rm=document.getElementById('res-modal');if(rm)delete rm.dataset.editingResId;
+['res-debut','res-fin','res-lieu','res-notes'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+['res-debut','res-fin'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
  const t=document.getElementById('res-total-preview');if(t)t.style.display='none';
- document.getElementById('veh-modal-title').textContent='Ajouter un véhicule';
- document.getElementById('client-modal-title').textContent='Ajouter un client';
- document.getElementById('res-modal-title').textContent='Nouvelle réservation';
+ const h=document.getElementById('res-modal-title');if(h)h.textContent='Nouvelle réservation';
+}
+function clearForms(){clearVehForm();clearClientForm();clearResForm();}
+function openModal(id){
+ if(id==='res-modal'&&typeof populateResSelects==='function')populateResSelects();
+ const el=document.getElementById(id);if(el)el.classList.add('open');
+}
+function closeModal(id){
+ const el=document.getElementById(id);if(el)el.classList.remove('open');
+ if(id==='veh-modal'){editingVehId=null;clearVehForm();}
+ else if(id==='client-modal'){editingClientId=null;clearClientForm();}
+ else if(id==='res-modal'){editingResId=null;clearResForm();}
+}
+function openNewVehModal(){
+ editingVehId=null;
+ clearVehForm();
+ openModal('veh-modal');
+}
+function openNewClientModal(){
+ editingClientId=null;
+ clearClientForm();
+ openModal('client-modal');
+}
+function openNewResModal(){
+ editingResId=null;
+ clearResForm();
+ openModal('res-modal');
 }
 let vehFilter='all';
 function filterVeh(el,f){
@@ -814,9 +839,13 @@ function renderVehicules(){
 }).join('');
 }
 function saveVehicule(){
+ const vehModal=document.getElementById('veh-modal');
+ const fromDom=vehModal&&vehModal.dataset.editingVehId?String(vehModal.dataset.editingVehId):'';
+ const effectiveEditId=fromDom||editingVehId||null;
+ if(effectiveEditId)editingVehId=effectiveEditId;
  const now=new Date().toISOString();
  const v={
- id: editingId||uid(),
+ id: effectiveEditId||uid(),
  immat: document.getElementById('veh-immat').value.trim().toUpperCase(),
  marque: document.getElementById('veh-marque').value.trim(),
  modele: document.getElementById('veh-modele').value.trim(),
@@ -832,7 +861,7 @@ function saveVehicule(){
  visite: document.getElementById('veh-visite')?.value||'',
  assistance: document.getElementById('veh-assistance')?.value||'',
  updatedAt: now,
- createdAt: editingId ?(load(KEYS.veh).find(x=>x.id===editingId)?.createdAt||now): now,
+ createdAt: effectiveEditId ?(load(KEYS.veh).find(x=>String(x.id)===String(effectiveEditId))?.createdAt||now): now,
 };
  if(!v.immat||!v.marque||!v.modele){alAlert('Veuillez remplir les champs obligatoires.');return;}
  if(!Number.isFinite(v.annee)||v.annee<1950||v.annee>2100){alAlert('Année invalide (1950 - 2100).');return;}
@@ -848,18 +877,25 @@ function saveVehicule(){
  return;
 }
  let data=load(KEYS.veh);
- const doublon=data.find(x=>String(x.immat||'').replace(/\s/g,'').toUpperCase()===immatClean&&x.id!==v.id);
- if(doublon){alAlert('Immatriculation "'+v.immat+'" déjà utilisée par '+doublon.marque+' '+doublon.modele+'.');return;}
- if(editingId){data=data.map(x=>x.id===editingId ? v : x);addLog('Véhicule modifié — '+v.marque+' '+v.modele);}
+ const doublon=data.find(x=>!x._deleted&&String(x.immat||'').replace(/\s/g,'').toUpperCase()===immatClean&&String(x.id)!==String(v.id));
+ if(doublon){
+ const msg=effectiveEditId
+ ?'Immatriculation « '+v.immat+' » existe déjà sur une autre fiche ('+doublon.marque+' '+doublon.modele+'). Ouvrez la liste Véhicules : supprimez ou corrigez le doublon.'
+ :'Immatriculation « '+v.immat+' » déjà utilisée par '+doublon.marque+' '+doublon.modele+'.';
+ alAlert(msg);return;
+}
+ if(effectiveEditId){data=data.map(x=>String(x.id)===String(effectiveEditId)?v:x);addLog('Véhicule modifié — '+v.marque+' '+v.modele);}
  else{data.push(v);addLog('Véhicule ajouté — '+v.marque+' '+v.modele+' ('+v.immat+')');}
  save(KEYS.veh,data);
  closeModal('veh-modal');
  renderVehicules();
 }
 function editVeh(id){
- const v=load(KEYS.veh).find(x=>x.id===id);
+ const sid=String(id);
+ const v=load(KEYS.veh).find(x=>String(x.id)===sid);
  if(!v)return;
- editingId=id;
+ editingVehId=sid;
+ const vm=document.getElementById('veh-modal');if(vm)vm.dataset.editingVehId=sid;
  document.getElementById('veh-modal-title').textContent='Modifier le véhicule';
 ['immat','marque','modele','annee','tarif','couleur','km'].forEach(k=>document.getElementById('veh-'+k).value=v[k]||'');
 ['cat','carburant','statut'].forEach(k=>document.getElementById('veh-'+k).value=v[k]);
@@ -867,14 +903,15 @@ function editVeh(id){
  openModal('veh-modal');
 }
 function deleteVeh(id){
- const v=load(KEYS.veh).find(x=>x.id===id);
+ const sid=String(id);
+ const v=load(KEYS.veh).find(x=>String(x.id)===sid);
  if(!v)return;
- const actives=load(KEYS.res).filter(r=>r.vehId===id&&r.statut==='en cours');
+ const actives=load(KEYS.res).filter(r=>String(r.vehId)===sid&&r.statut==='en cours');
  if(actives.length){
  alAlert('Impossible de supprimer "'+v.marque+' '+v.modele+'" : '+actives.length+' location(s) en cours. Clôturez ou supprimez les réservations actives d\'abord.');
  return;
 }
- const historiques=load(KEYS.res).filter(r=>r.vehId===id);
+ const historiques=load(KEYS.res).filter(r=>String(r.vehId)===sid);
  const msg=historiques.length
  ? 'Ce véhicule a '+historiques.length+' réservation(s) dans l\'historique. Confirmer la suppression ?'
  : 'Supprimer ce véhicule ?';
@@ -882,7 +919,7 @@ function deleteVeh(id){
  icon: '🚗',danger: true,title: 'Supprimer ce véhicule ?',msg,
  okLabel: 'Supprimer',
  onOk:()=>{
- save(KEYS.veh,load(KEYS.veh).map(x=>x.id===id ?{...x,_deleted: true,updatedAt: new Date().toISOString()}: x));
+ save(KEYS.veh,load(KEYS.veh).map(x=>String(x.id)===sid ?{...x,_deleted: true,updatedAt: new Date().toISOString()}: x));
  addLog('Véhicule supprimé — '+v.marque+' '+v.modele);
  renderVehicules();
  renderDashboard();
@@ -898,7 +935,7 @@ function renderClients(){
  if(!tbody)return;
  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 48 48" fill="none"><circle cx="20" cy="18" r="8" fill="#F5F5F7" stroke="#D0D0D8" stroke-width="1.5"/><path d="M6 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#D0D0D8" stroke-width="1.5" stroke-linecap="round"/><circle cx="38" cy="12" r="8" fill="#0C0E14"/><path d="M35 12h6M38 9v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Aucun client</h4><p>Ajoutez votre premier client</p></div></td></tr>`;return;}
  tbody.innerHTML=data.map(c=>{
- const locs=resData.filter(r=>r.clientId===c.id).length;
+ const locs=resData.filter(r=>String(r.clientId)===String(c.id)).length;
  const photosBtn=PHOTOS_ENABLED ? `<button class="btn-icon" title="Photos" data-type="cl" data-id="${window.AutoLocUtils.escapeHtml(c.id)}" data-title="${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}" onclick="openPhotosModalFromBtn(this)" style="position:relative"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${countPhotos('cl',c.id)>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${countPhotos('cl',c.id)}</span>`:''}
 </button>` : '';
@@ -906,9 +943,13 @@ function renderClients(){
 }).join('');
 }
 function saveClient(){
+ const clModal=document.getElementById('client-modal');
+ const fromDom=clModal&&clModal.dataset.editingClientId?String(clModal.dataset.editingClientId):'';
+ const effectiveEditId=fromDom||editingClientId||null;
+ if(effectiveEditId)editingClientId=effectiveEditId;
  const now=new Date().toISOString();
  const c={
- id: editingId||uid(),
+ id: effectiveEditId||uid(),
  prenom: document.getElementById('cl-prenom').value.trim(),
  nom: document.getElementById('cl-nom').value.trim(),
  tel: document.getElementById('cl-tel').value.trim(),
@@ -919,7 +960,7 @@ function saveClient(){
  nat: document.getElementById('cl-nat').value.trim(),
  adresse: document.getElementById('cl-adresse').value.trim(),
  updatedAt: now,
- createdAt: editingId ?(load(KEYS.cl).find(x=>x.id===editingId)?.createdAt||now): now,
+ createdAt: effectiveEditId ?(load(KEYS.cl).find(x=>String(x.id)===String(effectiveEditId))?.createdAt||now): now,
 };
  if(!c.prenom||!c.nom||!c.tel){alAlert('Veuillez remplir les champs obligatoires (prénom, nom, téléphone).');return;}
  const telClean=c.tel.replace(/[\s\-().+]/g,'');
@@ -927,29 +968,32 @@ function saveClient(){
  if(c.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)){alAlert('Adresse email invalide.');return;}
  if(c.cin&&c.cin.length<4){alAlert('CIN / Passeport trop court.');return;}
  let data=load(KEYS.cl);
- if(editingId){data=data.map(x=>x.id===editingId ? c : x);addLog(`Client modifié — ${c.prenom} ${c.nom}`);}
+ if(effectiveEditId){data=data.map(x=>String(x.id)===String(effectiveEditId)?c:x);addLog(`Client modifié — ${c.prenom} ${c.nom}`);}
  else{data.push(c);addLog(`Client ajouté — ${c.prenom} ${c.nom}`);}
  save(KEYS.cl,data);
  closeModal('client-modal');
  renderClients();
 }
 function editClient(id){
- const c=load(KEYS.cl).find(x=>x.id===id);
+ const sid=String(id);
+ const c=load(KEYS.cl).find(x=>String(x.id)===sid);
  if(!c)return;
- editingId=id;
+ editingClientId=sid;
+ const cm=document.getElementById('client-modal');if(cm)cm.dataset.editingClientId=sid;
  document.getElementById('client-modal-title').textContent='Modifier le client';
 ['prenom','nom','tel','email','cin','permis','ville','nat','adresse'].forEach(k=>document.getElementById('cl-'+k).value=c[k]||'');
  openModal('client-modal');
 }
 function deleteClient(id){
- const c=load(KEYS.cl).find(x=>x.id===id);
+ const sid=String(id);
+ const c=load(KEYS.cl).find(x=>String(x.id)===sid);
  if(!c)return;
- const actives=load(KEYS.res).filter(r=>r.clientId===id&&r.statut==='en cours');
+ const actives=load(KEYS.res).filter(r=>String(r.clientId)===sid&&r.statut==='en cours');
  if(actives.length){
  alAlert('Impossible de supprimer '+c.prenom+' '+c.nom+' : '+actives.length+' location(s) en cours. Clôturez ou supprimez les réservations actives d\'abord.');
  return;
 }
- const historiques=load(KEYS.res).filter(r=>r.clientId===id);
+ const historiques=load(KEYS.res).filter(r=>String(r.clientId)===sid);
  const msg=historiques.length
  ? c.prenom+' '+c.nom+' a '+historiques.length+' réservation(s) dans l\'historique. Confirmer la suppression ?'
  : 'Supprimer ce client ?';
@@ -957,16 +1001,17 @@ function deleteClient(id){
  icon: '👤',danger: true,title: 'Supprimer ce client ?',msg,
  okLabel: 'Supprimer',
  onOk:()=>{
- save(KEYS.cl,load(KEYS.cl).map(x=>x.id===id ?{...x,_deleted: true,updatedAt: new Date().toISOString()}: x));
+ save(KEYS.cl,load(KEYS.cl).map(x=>String(x.id)===sid ?{...x,_deleted: true,updatedAt: new Date().toISOString()}: x));
  addLog('Client supprimé — '+c.prenom+' '+c.nom);
  renderClients();
 }
 });
 }
 function computeAlerts(){
- const res=load(KEYS.res).filter(r=>r.statut==='en cours');
- const vehs=load(KEYS.veh);
- const clients=load(KEYS.cl);
+ const idEq=(a,b)=>window.AutoLocCoreUtils&&typeof window.AutoLocCoreUtils.idEq==='function'?window.AutoLocCoreUtils.idEq(a,b):String(a)===String(b);
+ const res=load(KEYS.res).filter(r=>!r._deleted&&r.statut==='en cours');
+ const vehs=load(KEYS.veh).filter(v=>!v._deleted);
+ const clients=load(KEYS.cl).filter(c=>!c._deleted);
  const today=new Date();
  today.setHours(0,0,0,0);
  const tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);
@@ -977,8 +1022,8 @@ function computeAlerts(){
  res.forEach(r=>{
  if(!r.fin)return;
  const fin=new Date(r.fin);fin.setHours(0,0,0,0);
- const v=vehs.find(x=>x.id===r.vehId);
- const c=clients.find(x=>x.id===r.clientId);
+ const v=vehs.find(x=>idEq(x.id,r.vehId));
+ const c=clients.find(x=>idEq(x.id,r.clientId));
  const info={
  r,v,c,
  vName: v ? `${v.marque}${v.modele}(${v.immat})` : '—',
@@ -1047,7 +1092,7 @@ function scrollToDocsAlerts(){
 },100);
 }
 function computeDocsAlerts(){
- const vehs=load(KEYS.veh);
+ const vehs=load(KEYS.veh).filter(v=>!v._deleted);
  const today=new Date();today.setHours(0,0,0,0);
  const alerts=[];
  vehs.forEach(v=>{
@@ -1176,18 +1221,19 @@ function renderDashboard(){
  renderDocsAlerts();
  const impayesWrap=document.getElementById('impayes-wrap');
  if(impayesWrap){
- const enCoursList=load(KEYS.res).filter(r=>r.statut==='en cours');
+ const enCoursList=load(KEYS.res).filter(r=>!r._deleted&&r.statut==='en cours');
  const impayes=enCoursList.map(r=>{
  const paid2=(r.paiements||[]).reduce((s,p)=>s+p.montant,0);
  const reste2=Math.max(0,(r.total||0)-paid2);
  return{...r,paid2,reste2};
 }).filter(r=>r.reste2>0);
  if(!impayes.length){impayesWrap.innerHTML='';return;}
- const clsD=load(KEYS.cl),vehsD=load(KEYS.veh);
+ const clsD=load(KEYS.cl).filter(c=>!c._deleted),vehsD=load(KEYS.veh).filter(v=>!v._deleted);
+ const idEqI=(a,b)=>window.AutoLocCoreUtils&&typeof window.AutoLocCoreUtils.idEq==='function'?window.AutoLocCoreUtils.idEq(a,b):String(a)===String(b);
  impayesWrap.innerHTML=`
 <div class="impaye-alert"><div class="impaye-alert-header"><svg fill="none" viewBox="0 0 24 24" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><h4>${impayes.length}location${impayes.length>1?'s':''}avec solde impayé</h4></div>
  ${impayes.map(r=>{
- const c2=clsD.find(x=>x.id===r.clientId),v2=vehsD.find(x=>x.id===r.vehId);
+ const c2=clsD.find(x=>idEqI(x.id,r.clientId)),v2=vehsD.find(x=>idEqI(x.id,r.vehId));
  const pct=r.total>0?Math.round(r.paid2/r.total*100):0;
  return `<div class="impaye-row"><div class="impaye-row-left"><strong>${c2?window.AutoLocUtils.escapeHtml(c2.prenom)+' '+window.AutoLocUtils.escapeHtml(c2.nom):'—'}</strong><span>${v2?window.AutoLocUtils.escapeHtml(v2.marque)+' '+window.AutoLocUtils.escapeHtml(v2.modele):''}· ${pct}% payé</span></div><span class="impaye-amount">${r.reste2.toLocaleString('fr-FR')}MAD</span><button class="btn btn-sm btn-outline" onclick="openPayModal('${window.AutoLocUtils.escapeHtml(r.id)}')" style="margin-left:8px;font-size:0.72rem">Payer</button></div>`;
 }).join('')}
@@ -2104,8 +2150,8 @@ function showBackupStatus(msg,color){
  if(typeof invooReservationsModal==='object'&&typeof invooReservationsModal.attach==='function'){
   invooReservationsModal.attach({
    load,save,KEYS,uid,
-   getEditingId:()=>editingId,
-   setEditingId:(id)=>{editingId=id;},
+   getEditingId:()=>editingResId,
+   setEditingId:(id)=>{editingResId=id;},
    alAlert,alConfirm,addLog,
    closeModal,openModal,
    renderDashboard,renderAlerts,getSettings

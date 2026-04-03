@@ -16,6 +16,12 @@
 (function (global) {
  'use strict';
 
+ function idEq(a, b) {
+  return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+   ? global.AutoLocCoreUtils.idEq(a, b)
+   : String(a) === String(b);
+ }
+
  var ctx = null;
  /** Filtre actif des boutons #res-filters (état module, comme l’ancien resFilter global). */
  var resFilter = 'all';
@@ -42,8 +48,12 @@
     return r.statut === resFilter;
    });
   }
-  var clients = load(KEYS.cl);
-  var vehs = load(KEYS.veh);
+  var clients = load(KEYS.cl).filter(function (c) {
+   return !c._deleted;
+  });
+  var vehs = load(KEYS.veh).filter(function (v) {
+   return !v._deleted;
+  });
   var grid = document.getElementById('res-grid');
   if (!grid) return;
   if (!data.length) {
@@ -53,10 +63,10 @@
   grid.innerHTML = `<div class="grid-2">${data
    .map(function (r) {
     var c = clients.find(function (x) {
-     return x.id === r.clientId;
+     return idEq(x.id, r.clientId);
     });
     var v = vehs.find(function (x) {
-     return x.id === r.vehId;
+     return idEq(x.id, r.vehId);
     });
     var badgeCls =
      r.statut === 'en cours' ? 'badge-info' : r.statut === 'terminée' ? 'badge-success' : 'badge-danger';
@@ -72,7 +82,7 @@
       : paid >= total
        ? `<span class="pay-badge-full">Soldé ✓</span>`
        : `<span class="pay-badge-partial">${payPct}% payé</span>`;
-    return `<div class="rental-card"><div class="rental-card-header"><div><h4>${c ? window.AutoLocUtils.escapeHtml(c.prenom) + ' ' + window.AutoLocUtils.escapeHtml(c.nom) : 'Client inconnu'}</h4><div style="margin-top:4px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><span class="badge ${badgeCls}">${window.AutoLocUtils.escapeHtml(r.statut)}</span>
+    return `<div class="rental-card" data-res-id="${window.AutoLocUtils.escapeHtml(String(r.id))}"><div class="rental-card-header"><div><h4>${c ? window.AutoLocUtils.escapeHtml(c.prenom) + ' ' + window.AutoLocUtils.escapeHtml(c.nom) : 'Client inconnu'}</h4><div style="margin-top:4px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><span class="badge ${badgeCls}">${window.AutoLocUtils.escapeHtml(r.statut)}</span>
  ${payBadge}
  ${caution > 0 ? `<span style="background:rgba(45,212,191,0.14);color:#99f6e4;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;border:1px solid rgba(45,212,191,0.3);">Caution : ${caution} MAD</span>` : ''}
 </div></div><span class="total-badge">${total || '—'} MAD</span></div><div class="rental-info"><strong>Véhicule :</strong>${v ? window.AutoLocUtils.escapeHtml(v.marque) + ' ' + window.AutoLocUtils.escapeHtml(v.modele) + ' (' + window.AutoLocUtils.escapeHtml(v.immat) + ')' : '—'}<br><strong>Période :</strong>${window.AutoLocUtils.escapeHtml(r.debut)} → ${window.AutoLocUtils.escapeHtml(r.fin)}<br><strong>Lieu :</strong>${window.AutoLocUtils.escapeHtml(r.lieu || '—')}<br>

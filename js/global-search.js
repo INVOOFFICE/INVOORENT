@@ -7,6 +7,12 @@
 (function (global) {
   'use strict';
 
+  function idEq(a, b) {
+    return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+      ? global.AutoLocCoreUtils.idEq(a, b)
+      : String(a) === String(b);
+  }
+
   var ctx = null;
   var searchActiveIdx = -1;
   var _srchT = null;
@@ -82,9 +88,15 @@
 
   global.renderSearchResults = function (q) {
     var ql = q.toLowerCase();
-    var vehs = load(ctx.KEYS.veh);
-    var cls = load(ctx.KEYS.cl);
-    var res = load(ctx.KEYS.res);
+    var vehs = load(ctx.KEYS.veh).filter(function (v) {
+      return !v._deleted;
+    });
+    var cls = load(ctx.KEYS.cl).filter(function (c) {
+      return !c._deleted;
+    });
+    var res = load(ctx.KEYS.res).filter(function (r) {
+      return !r._deleted;
+    });
     var results = [];
     vehs
       .filter(function (v) {
@@ -121,10 +133,10 @@
     res
       .filter(function (r) {
         var v = vehs.find(function (x) {
-          return x.id === r.vehId;
+          return idEq(x.id, r.vehId);
         });
         var c = cls.find(function (x) {
-          return x.id === r.clientId;
+          return idEq(x.id, r.clientId);
         });
         return (
           '' +
@@ -140,10 +152,10 @@
       .slice(0, 4)
       .forEach(function (r) {
         var v = vehs.find(function (x) {
-          return x.id === r.vehId;
+          return idEq(x.id, r.vehId);
         });
         var c = cls.find(function (x) {
-          return x.id === r.clientId;
+          return idEq(x.id, r.clientId);
         });
         results.push({
           type: 'res',
@@ -234,9 +246,12 @@
       rows.forEach(function (r) {
         r.style.background = '';
       });
-      var vehs = load(ctx.KEYS.veh);
+      var vehs = load(ctx.KEYS.veh).filter(function (v) {
+        return !v._deleted;
+      });
+      var sid = String(id);
       var idx = vehs.findIndex(function (v) {
-        return v.id === id;
+        return idEq(v.id, sid);
       });
       if (idx >= 0 && rows[idx]) {
         rows[idx].style.background = 'rgba(251,191,36,0.16)';
@@ -256,9 +271,12 @@
       rows.forEach(function (r) {
         r.style.background = '';
       });
-      var cls = load(ctx.KEYS.cl);
+      var cls = load(ctx.KEYS.cl).filter(function (c) {
+        return !c._deleted;
+      });
+      var sid = String(id);
       var idx = cls.findIndex(function (c) {
-        return c.id === id;
+        return idEq(c.id, sid);
       });
       if (idx >= 0 && rows[idx]) {
         rows[idx].style.background = 'rgba(251,191,36,0.16)';
@@ -274,20 +292,36 @@
     var link = document.querySelector('nav a[data-page="reservations"]');
     if (link) ctx.navigate(link);
     setTimeout(function () {
-      var cards = document.querySelectorAll('#res-grid .rental-card');
-      cards.forEach(function (c) {
-        c.style.outline = '';
-      });
-      var res = load(ctx.KEYS.res);
-      var idx = res.findIndex(function (r) {
-        return r.id === id;
-      });
-      if (idx >= 0 && cards[idx]) {
-        cards[idx].style.outline = '2px solid var(--gold)';
-        cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var sid = String(id);
+      function clearOutlines() {
+        document.querySelectorAll('#res-grid .rental-card').forEach(function (c) {
+          c.style.outline = '';
+        });
+      }
+      function findAndHighlight() {
+        clearOutlines();
+        var target = null;
+        document.querySelectorAll('#res-grid .rental-card').forEach(function (card) {
+          var rid = card.getAttribute('data-res-id');
+          if (rid != null && idEq(rid, sid)) target = card;
+        });
+        if (target) {
+          target.style.outline = '2px solid var(--gold)';
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(function () {
+            target.style.outline = '';
+          }, 2500);
+          return true;
+        }
+        return false;
+      }
+      if (findAndHighlight()) return;
+      var allBtn = document.querySelector('#res-filters .filter-btn');
+      if (allBtn && typeof global.filterRes === 'function') {
+        global.filterRes(allBtn, 'all');
         setTimeout(function () {
-          cards[idx].style.outline = '';
-        }, 2500);
+          findAndHighlight();
+        }, 50);
       }
     }, 150);
   };

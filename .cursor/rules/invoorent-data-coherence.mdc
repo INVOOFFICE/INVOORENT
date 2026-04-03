@@ -1,0 +1,34 @@
+---
+description: Cohérence données INVOORENT (IDs, soft-delete, modales, événements)
+globs: js/**/*.js
+alwaysApply: false
+---
+
+# Données & modules INVOORENT
+
+## Identifiants
+
+- Toujours comparer les IDs de liaison (`clientId`, `vehId`, `vehId` réservation, etc.) avec **`AutoLocCoreUtils.idEq(a, b)`** (ou la même logique `String(a) === String(b)` avec garde `null`), jamais `===` seul entre clés venant du stockage ou d’imports JSON.
+- Les **éditions par modale** utilisent un ID dédié par entité (`editingVehId` / `editingClientId` / `editingResId`) et, quand c’est déjà en place, un attribut **`data-editing-*-id`** sur la modale pour survivre aux fermetures partielles.
+
+## Enregistrements supprimés logiquement
+
+- Pour tout affichage, stats, export « métier », recherche ou jointure liste ↔ fiche : **exclure** les entrées où **`_deleted === true`** (véhicules, clients, réservations).
+- Préférer le helper **`AutoLocCoreUtils.isActiveRecord(x)`** pour les nouveaux filtres (`x && !x._deleted`).
+
+## Persistance unique
+
+- Lire/écrire les collections via **`load` / `save`** exposés par `01-app-core.js` (et leurs `KEYS`), pas un second cache parallèle sauf sync externe documentée.
+- Après **`save`**, l’événement **`autoloc:saved`** est émis : les écrans concernés doivent se rafraîchir via `_dirty` / `render*` existants, pas dupliquer la logique de persistance.
+
+## Réservations ↔ véhicules
+
+- Le statut **loué / disponible** du véhicule doit rester aligné avec les réservations **en cours** (voir `releaseVehicleWhenNoActiveReservation` et la logique dans `reservations-modal.js`). Éviter de mettre à jour `KEYS.veh` dans un module sans tenir compte des réservations actives.
+
+## UI liste ciblée (ex. recherche)
+
+- Pour retrouver une ligne ou une carte après navigation, utiliser un attribut **`data-*-id`** stable sur l’élément DOM, pas l’index dans un tableau filtré.
+
+## Cache PWA
+
+- Après modification sensible de scripts référencés dans **`sw.js`**, incrémenter **`CACHE_NAME`** pour forcer la mise à jour client.

@@ -1,3 +1,11 @@
+/**
+ * Utilitaires partagés INVOORENT.
+ *
+ * Cohérence données (à respecter dans tout nouveau code JS) :
+ * - Jointures : idEq(a,b) pour clientId / vehId / id entre entités.
+ * - Listes « actives » : isActiveRecord(x) ou !x._deleted pour UI, stats, exports.
+ * - Persistance : load/save + KEYS (01-app-core) ; écouter autoloc:saved pour rafraîchir.
+ */
 (function(root){
  'use strict';
  function normalizeDateInputValue(raw){
@@ -18,10 +26,22 @@
   if(!isNaN(+dt))return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
   return '';
  }
- const api={normalizeDateInputValue};
+ /** Comparaison d’identifiants cohérente (nombre vs chaîne après import JSON, etc.). */
+ function idEq(a,b){
+  if(a==null&&b==null)return true;
+  if(a==null||b==null)return false;
+  return String(a)===String(b);
+ }
+ /** Fiche non supprimée logiquement (_deleted soft-delete). */
+ function isActiveRecord(x){
+  return x!=null&&!x._deleted;
+ }
+ const api={normalizeDateInputValue,idEq,isActiveRecord};
  if(root){
   root.AutoLocCoreUtils=root.AutoLocCoreUtils||{};
   root.AutoLocCoreUtils.normalizeDateInputValue=normalizeDateInputValue;
+  root.AutoLocCoreUtils.idEq=idEq;
+  root.AutoLocCoreUtils.isActiveRecord=isActiveRecord;
  }
  if(typeof module!=='undefined'&&module.exports){
   module.exports=api;

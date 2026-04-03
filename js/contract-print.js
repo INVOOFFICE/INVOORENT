@@ -7,20 +7,27 @@
 
  var ctx = null;
 
+ function idEq(a, b) {
+  return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+   ? global.AutoLocCoreUtils.idEq(a, b)
+   : String(a) === String(b);
+ }
+
  global.printContrat = function (id) {
   if (!ctx) return;
   global._printContratId = id;
   const load = ctx.load;
   const KEYS = ctx.KEYS;
+  const sid = String(id);
   const r = load(KEYS.res).find(function (x) {
-   return x.id === id;
+   return idEq(x.id, sid);
   });
   if (!r) return;
   const c = load(KEYS.cl).find(function (x) {
-   return x.id === r.clientId;
+   return idEq(x.id, r.clientId);
   });
   const v = load(KEYS.veh).find(function (x) {
-   return x.id === r.vehId;
+   return idEq(x.id, r.vehId);
   });
   const d1 = new Date(r.debut);
   const d2 = new Date(r.fin);
@@ -183,9 +190,10 @@
   if (!contratEl || !contratEl.innerHTML) return;
   function _generatePDF() {
    const { jsPDF } = global.jspdf;
-   const r = global._printContratId
+   const pid = global._printContratId != null ? String(global._printContratId) : '';
+   const r = pid
     ? ctx.load(ctx.KEYS.res).find(function (x) {
-       return x.id === global._printContratId;
+       return idEq(x.id, pid);
       })
     : null;
    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
@@ -199,12 +207,12 @@
    const vehId = res.vehId;
    const c = clientId
     ? ctx.load(ctx.KEYS.cl).find(function (x) {
-       return x.id === clientId;
+       return idEq(x.id, clientId);
       })
     : null;
    const v = vehId
     ? ctx.load(ctx.KEYS.veh).find(function (x) {
-       return x.id === vehId;
+       return idEq(x.id, vehId);
       })
     : null;
    const d1 = res.debut ? new Date(res.debut) : new Date();

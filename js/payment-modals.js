@@ -18,15 +18,16 @@
     if (!x) return;
     var load = x.load;
     var KEYS = x.KEYS;
+    var pid = payResId != null ? String(payResId) : '';
     var r = load(KEYS.res).find(function (it) {
-      return it.id === payResId;
+      return String(it.id) === pid;
     });
     if (!r) return;
     var cl = load(KEYS.cl).find(function (it) {
-      return it.id === r.clientId;
+      return String(it.id) === String(r.clientId);
     });
     var v = load(KEYS.veh).find(function (it) {
-      return it.id === r.vehId;
+      return String(it.id) === String(r.vehId);
     });
     var paiements = r.paiements || [];
     var caution = r.caution || 0;
@@ -202,7 +203,7 @@
   }
 
   global.openPayModal = function (resId) {
-    payResId = resId;
+    payResId = resId != null ? String(resId) : null;
     renderPayModal();
     document.getElementById('pay-modal').classList.add('open');
   };
@@ -221,8 +222,9 @@
     var note = document.getElementById('pay-note').value.trim();
     var date = document.getElementById('pay-date').value || new Date().toISOString().slice(0, 10);
     var data = x.load(x.KEYS.res);
+    var pid = payResId != null ? String(payResId) : '';
     data = data.map(function (r) {
-      if (r.id !== payResId) return r;
+      if (String(r.id) !== pid) return r;
       var paiements = (r.paiements || []).concat([{ montant: montant, mode: mode, type: type, note: note, date: date }]);
       return Object.assign({}, r, { paiements: paiements, updatedAt: new Date().toISOString() });
     });
@@ -247,8 +249,9 @@
       okLabel: 'Supprimer',
       onOk: function () {
         var data = x.load(x.KEYS.res);
+        var pid = payResId != null ? String(payResId) : '';
         data = data.map(function (r) {
-          if (r.id !== payResId) return r;
+          if (String(r.id) !== pid) return r;
           var paiements = (r.paiements || []).filter(function (_, i) {
             return i !== idx;
           });
@@ -270,8 +273,9 @@
     var unpaidBefore = getUnpaidActiveCount();
     var montant = parseFloat(document.getElementById('caution-input').value) || 0;
     var data = x.load(x.KEYS.res);
+    var pid = payResId != null ? String(payResId) : '';
     data = data.map(function (r) {
-      return r.id === payResId
+      return String(r.id) === pid
         ? Object.assign({}, r, { caution: montant, updatedAt: new Date().toISOString() })
         : r;
     });
@@ -289,12 +293,13 @@
     if (!x) return;
     var unpaidBefore = getUnpaidActiveCount();
     var data = x.load(x.KEYS.res);
+    var pid = payResId != null ? String(payResId) : '';
     var cur = data.find(function (r) {
-      return r.id === payResId;
+      return String(r.id) === pid;
     });
     var newStatut = cur && cur.cautionStatut === statut ? 'non' : statut;
     data = data.map(function (r) {
-      return r.id === payResId
+      return String(r.id) === pid
         ? Object.assign({}, r, { cautionStatut: newStatut, updatedAt: new Date().toISOString() })
         : r;
     });

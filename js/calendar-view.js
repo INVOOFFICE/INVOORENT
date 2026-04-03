@@ -9,6 +9,12 @@
 (function (global) {
   'use strict';
 
+  function idEq(a, b) {
+    return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+      ? global.AutoLocCoreUtils.idEq(a, b)
+      : String(a) === String(b);
+  }
+
   var ctx = null;
   var calYear = new Date().getFullYear();
   var calMonth = new Date().getMonth();
@@ -119,12 +125,12 @@
       var dayMap = {};
       reservations
         .filter(function (r) {
-          return r.vehId === v.id;
+          return idEq(r.vehId, v.id);
         })
         .forEach(function (r) {
           if (!r.debut || !r.fin) return;
           var client = clients.find(function (c) {
-            return c.id === r.clientId;
+            return idEq(c.id, r.clientId);
           });
           var clientName = client ? client.prenom + ' ' + client.nom : 'Client';
           var d1 = new Date(r.debut);

@@ -15,8 +15,20 @@
 
     var load = ctx.load;
     var KEYS = ctx.KEYS;
-    var res = load(KEYS.res);
-    var vehs = load(KEYS.veh);
+    var idEq =
+      global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+        ? function (a, b) {
+            return global.AutoLocCoreUtils.idEq(a, b);
+          }
+        : function (a, b) {
+            return String(a) === String(b);
+          };
+    var res = load(KEYS.res).filter(function (r) {
+      return !r._deleted;
+    });
+    var vehs = load(KEYS.veh).filter(function (v) {
+      return !v._deleted;
+    });
     var MOIS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
     var now = new Date();
     var caByMonth = Array(12).fill(0);
@@ -142,7 +154,7 @@
       .map(function (v) {
         var caV = res
           .filter(function (r) {
-            return r.vehId === v.id && r.statut === 'terminée';
+            return idEq(r.vehId, v.id) && r.statut === 'terminée';
           })
           .reduce(function (s, r) {
             return s + (r.total || 0);
