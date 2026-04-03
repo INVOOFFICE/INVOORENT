@@ -73,19 +73,21 @@
     var paid = (r.paiements || []).reduce(function (s, p) {
      return s + p.montant;
     }, 0);
-    var total = r.total || 0;
+    var totalNum = Number(r.total);
+    var total = Number.isFinite(totalNum) ? totalNum : 0;
+    var totalBadge = Number.isFinite(totalNum) ? totalNum.toLocaleString('fr-FR') : '—';
     var caution = r.caution || 0;
     var payPct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
     var payBadge =
      paid === 0
       ? `<span class="pay-badge-none">Non payé</span>`
-      : paid >= total
+      : total > 0 && paid >= total
        ? `<span class="pay-badge-full">Soldé ✓</span>`
        : `<span class="pay-badge-partial">${payPct}% payé</span>`;
     return `<div class="rental-card" data-res-id="${window.AutoLocUtils.escapeHtml(String(r.id))}"><div class="rental-card-header"><div><h4>${c ? window.AutoLocUtils.escapeHtml(c.prenom) + ' ' + window.AutoLocUtils.escapeHtml(c.nom) : 'Client inconnu'}</h4><div style="margin-top:4px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><span class="badge ${badgeCls}">${window.AutoLocUtils.escapeHtml(r.statut)}</span>
  ${payBadge}
  ${caution > 0 ? `<span style="background:rgba(45,212,191,0.14);color:#99f6e4;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;border:1px solid rgba(45,212,191,0.3);">Caution : ${caution} MAD</span>` : ''}
-</div></div><span class="total-badge">${total || '—'} MAD</span></div><div class="rental-info"><strong>Véhicule :</strong>${v ? window.AutoLocUtils.escapeHtml(v.marque) + ' ' + window.AutoLocUtils.escapeHtml(v.modele) + ' (' + window.AutoLocUtils.escapeHtml(v.immat) + ')' : '—'}<br><strong>Période :</strong>${window.AutoLocUtils.escapeHtml(r.debut)} → ${window.AutoLocUtils.escapeHtml(r.fin)}<br><strong>Lieu :</strong>${window.AutoLocUtils.escapeHtml(r.lieu || '—')}<br>
+</div></div><span class="total-badge">${window.AutoLocUtils.escapeHtml(totalBadge)} MAD</span></div><div class="rental-info"><strong>Véhicule :</strong> ${v ? window.AutoLocUtils.escapeHtml(v.marque) + ' ' + window.AutoLocUtils.escapeHtml(v.modele) + ' (' + window.AutoLocUtils.escapeHtml(v.immat) + ')' : '—'}<br><strong>Période :</strong> ${window.AutoLocUtils.escapeHtml(r.debut)} → ${window.AutoLocUtils.escapeHtml(r.fin)}<br><strong>Lieu :</strong> ${window.AutoLocUtils.escapeHtml(r.lieu || '—')}<br>
  ${r.notes ? `<strong>Notes :</strong>${window.AutoLocUtils.escapeHtml(r.notes)}` : ''}
 </div><div class="rental-actions">
  ${r.statut === 'en cours' ? `<button class="btn btn-sm btn-outline" onclick="closeRental('${window.AutoLocUtils.escapeHtml(r.id)}')">Clôturer</button>` : ''}

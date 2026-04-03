@@ -17,7 +17,9 @@
   var rm = document.getElementById('res-modal');
   var domId = rm && rm.dataset.editingResId ? String(rm.dataset.editingResId) : '';
   var editId = domId || (ctx.getEditingId() ? String(ctx.getEditingId()) : null);
-  var currentRes = editId ? load(KEYS.res).find(function (r) { return String(r.id) === editId; }) : null;
+  var currentRes = editId
+   ? load(KEYS.res).find(function (r) { return String(r.id) === editId && !r._deleted; })
+   : null;
   var currentVehId = currentRes ? currentRes.vehId : null;
 
   var clients = load(KEYS.cl).filter(function (c) { return !c._deleted; });
@@ -71,7 +73,7 @@
    return;
   }
   var vehs = ctx.load(ctx.KEYS.veh);
-  var v = vehs.find(function (x) { return String(x.id) === String(vId); });
+  var v = vehs.find(function (x) { return String(x.id) === String(vId) && !x._deleted; });
   var days = Math.max(1, Math.round((new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24)));
   var tarif = v && Number.isFinite(v.tarif) ? v.tarif : 0;
   var total = days * tarif;
@@ -86,6 +88,17 @@
    ' MAD</strong>/jour = <strong style="color:var(--success)">' +
    total.toLocaleString('fr-FR') +
    ' MAD</strong>';
+ }
+
+ /** Rafraîchit toutes les vues qui lisent réservations / véhicules / clients (même page active). */
+ function afterReservationDataChanged() {
+  if (!ctx) return;
+  global.renderReservations();
+  if (typeof global.renderVehicules === 'function') global.renderVehicules();
+  if (typeof global.renderCalendar === 'function') global.renderCalendar();
+  if (typeof global.renderClients === 'function') global.renderClients();
+  if (typeof ctx.renderDashboard === 'function') ctx.renderDashboard();
+  if (typeof ctx.renderAlerts === 'function') ctx.renderAlerts();
  }
 
  /** Remet le véhicule en « disponible » s'il est « loué » et qu'aucune réservation active (non supprimée) ne l'utilise. */
@@ -125,12 +138,15 @@
   if (editingId) ctx.setEditingId(editingId);
 
   var vId = document.getElementById('res-veh').value;
-  var v = load(KEYS.veh).find(function (x) { return String(x.id) === String(vId); });
+  var v = load(KEYS.veh).find(function (x) { return String(x.id) === String(vId) && !x._deleted; });
   var d1 = document.getElementById('res-debut').value;
   var d2 = document.getElementById('res-fin').value;
   var days = d1 && d2 ? Math.max(1, Math.round((new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24))) : 0;
-  var existing = editingId ? load(KEYS.res).find(function (x) { return String(x.id) === editingId; }) || {} : {};
-  var r = {
+  var existingRaw = editingId
+   ? load(KEYS.res).find(function (x) { return String(x.id) === editingId; })
+   : null;
+  var existing = existingRaw && !existingRaw._deleted ? existingRaw : {};
+  var r = Object.assign({}, existing, {
    id: editingId || uid(),
    clientId: document.getElementById('res-client').value,
    vehId: vId,
@@ -143,9 +159,10 @@
    createdAt: existing.createdAt || new Date().toISOString(),
    updatedAt: new Date().toISOString(),
    paiements: existing.paiements || [],
-   caution: existing.caution || 0,
+   caution: existing.caution != null ? existing.caution : 0,
    cautionStatut: existing.cautionStatut || 'non',
-  };
+  });
+  delete r._deleted;
   if (!r.clientId || !r.vehId || !r.debut || !r.fin) {
    ctx.alAlert('Veuillez remplir tous les champs obligatoires.');
    return;
@@ -180,6 +197,7 @@
   });
   if (conflit) {
    var c = load(KEYS.cl).find(function (x) {
+    if (x._deleted) return false;
     return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
      ? global.AutoLocCoreUtils.idEq(x.id, conflit.clientId)
      : String(x.id) === String(conflit.clientId);
@@ -206,7 +224,7 @@
     save(KEYS.veh, vehs);
    }
   } else {
-   var oldRes = load(KEYS.res).find(function (x) { return String(x.id) === editingId; });
+   var oldRes = load(KEYS.res).find(function (x) { return String(x.id) === editingId && !x._deleted; });
    var oldStatut = oldRes && oldRes.statut;
    var oldVehId = oldRes && oldRes.vehId;
    if (oldStatut === 'en cours' && oldVehId != null && String(oldVehId) !== String(r.vehId)) {
@@ -235,6 +253,7 @@
   } else {
    data.push(r);
    var cl = load(KEYS.cl).find(function (c) {
+    if (c._deleted) return false;
     return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
      ? global.AutoLocCoreUtils.idEq(c.id, r.clientId)
      : String(c.id) === String(r.clientId);
@@ -249,8 +268,7 @@
    releaseVehicleWhenNoActiveReservation(existing.vehId);
   }
   ctx.closeModal('res-modal');
-  global.renderReservations();
-  if (typeof global.renderVehicules === 'function') global.renderVehicules();
+  afterReservationDataChanged();
  }
 
  function editRes(id) {
@@ -258,7 +276,7 @@
   var load = ctx.load;
   var KEYS = ctx.KEYS;
   var sid = String(id);
-  var r = load(KEYS.res).find(function (x) { return String(x.id) === sid; });
+  var r = load(KEYS.res).find(function (x) { return String(x.id) === sid && !x._deleted; });
   if (!r) return;
   ctx.setEditingId(sid);
   var rm = document.getElementById('res-modal');
@@ -294,7 +312,8 @@
     var KEYS = ctx.KEYS;
     var sid = String(id);
     var data = load(KEYS.res);
-    var r = data.find(function (x) { return String(x.id) === sid; });
+    var r = data.find(function (x) { return String(x.id) === sid && !x._deleted; });
+    if (!r) return;
     data = data.map(function (x) {
      return String(x.id) === sid ? { ...x, statut: 'terminée', updatedAt: new Date().toISOString() } : x;
     });
@@ -303,9 +322,7 @@
      releaseVehicleWhenNoActiveReservation(r.vehId);
      ctx.addLog('Location clôturée');
     }
-    global.renderReservations();
-    ctx.renderAlerts();
-    if (typeof global.renderVehicules === 'function') global.renderVehicules();
+    afterReservationDataChanged();
    },
   });
  }
@@ -315,10 +332,10 @@
   var load = ctx.load;
   var KEYS = ctx.KEYS;
   var sid = String(id);
-  var res = load(KEYS.res).find(function (r) { return String(r.id) === sid; });
+  var res = load(KEYS.res).find(function (r) { return String(r.id) === sid && !r._deleted; });
   if (!res) return;
-  var cl = load(KEYS.cl).find(function (c) { return String(c.id) === String(res.clientId); });
-  var veh = load(KEYS.veh).find(function (v) { return String(v.id) === String(res.vehId); });
+  var cl = load(KEYS.cl).find(function (c) { return !c._deleted && String(c.id) === String(res.clientId); });
+  var veh = load(KEYS.veh).find(function (v) { return !v._deleted && String(v.id) === String(res.vehId); });
   var rawTel = cl && cl.tel ? cl.tel.replace(/[\s\-().]/g, '') : '';
   var tel = rawTel;
   if (tel.startsWith('00')) tel = '+' + tel.slice(2);
@@ -333,7 +350,7 @@
    }
   })();
   var prenom = cl ? cl.prenom : 'Client';
-  var vehStr = veh ? veh.marque + ' ' + veh.modele + '(' + veh.immat + ')' : '—';
+  var vehStr = veh ? veh.marque + ' ' + veh.modele + ' (' + veh.immat + ')' : '—';
   var debut = res.debut || '—';
   var fin = res.fin || '—';
   var lieu = res.lieu || 'notre agence';
@@ -379,7 +396,8 @@
     var save = ctx.save;
     var KEYS = ctx.KEYS;
     var sid = String(id);
-    var r = load(KEYS.res).find(function (x) { return String(x.id) === sid; });
+    var r = load(KEYS.res).find(function (x) { return String(x.id) === sid && !x._deleted; });
+    if (!r) return;
     save(
      KEYS.res,
      load(KEYS.res).map(function (x) {
@@ -390,9 +408,7 @@
      releaseVehicleWhenNoActiveReservation(r.vehId);
     }
     ctx.addLog('Réservation supprimée');
-    global.renderReservations();
-    ctx.renderDashboard();
-    if (typeof global.renderVehicules === 'function') global.renderVehicules();
+    afterReservationDataChanged();
    },
   });
  }

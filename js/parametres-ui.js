@@ -1,7 +1,7 @@
 /**
  * Page Paramètres : jauge stockage, formulaire, conditions par défaut (texte partagé avec contrat).
  * Expose window.INVOO_CONDITIONS_DEFAUT avant le core (contract-print).
- * Branchement : invooParametresUi.attach({ KEYS, getSettings, addLog, alConfirm })
+ * Branchement : invooParametresUi.attach({ KEYS, save, getSettings, addLog, alAlert, alConfirm, renderDashboard })
  */
 (function (global) {
  'use strict';
@@ -10,7 +10,7 @@
   "Le véhicule doit être restitué dans l'état dans lequel il a été remis au locataire.\n" +
   'Tout dommage causé au véhicule sera à la charge du locataire selon le contrat d\'assurance en vigueur.\n' +
   'Le carburant est à la charge du locataire — le véhicule doit être restitué avec le même niveau.\n' +
-  'En cas de panne ou d\'accident,le locataire doit en informer immédiatement l\'agence.\n' +
+  'En cas de panne ou d\'accident, le locataire doit en informer immédiatement l\'agence.\n' +
   'Le dépassement de la date de retour sans accord préalable entraîne une facturation supplémentaire.\n' +
   "L'utilisation du véhicule hors du territoire convenu est interdite sans autorisation écrite de l'agence.\n" +
   'La caution sera restituée intégralement après vérification du bon état du véhicule.';
@@ -97,7 +97,7 @@
   document.getElementById('p-tel').value = s.tel || '';
   document.getElementById('p-email').value = s.email || '';
   document.getElementById('p-adresse').value = s.adresse || '';
-  document.getElementById('p-ville').value = s.ville || 'Tanger,Maroc';
+  document.getElementById('p-ville').value = s.ville || 'Tanger, Maroc';
   document.getElementById('p-site').value = s.site || '';
   document.getElementById('p-patente').value = s.patente || '';
   document.getElementById('p-iban').value = s.iban || '';
@@ -118,9 +118,19 @@
    iban: document.getElementById('p-iban').value.trim(),
    conditions: document.getElementById('p-conditions').value,
   };
-  localStorage.setItem(KEYS.settings, JSON.stringify(s));
-  if (global.OPFS && global.OPFS.write) {
-   global.OPFS.write(KEYS.settings, s).catch(function () {});
+  if (s.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) {
+   if (typeof ctx.alAlert === 'function') {
+    ctx.alAlert('Adresse email invalide.');
+   }
+   return;
+  }
+  if (typeof ctx.save === 'function') {
+   ctx.save(KEYS.settings, s);
+  } else {
+   localStorage.setItem(KEYS.settings, JSON.stringify(s));
+   if (global.OPFS && global.OPFS.write) {
+    global.OPFS.write(KEYS.settings, s).catch(function () {});
+   }
   }
   var brandH1 = document.querySelector('.sidebar-brand h1');
   if (brandH1 && s.nom) {
@@ -145,6 +155,9 @@
    }, 2500);
   }
   ctx.addLog('Paramètres mis à jour');
+  if (typeof ctx.renderDashboard === 'function') {
+   ctx.renderDashboard();
+  }
  }
 
  function resetConditions() {

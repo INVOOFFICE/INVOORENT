@@ -797,6 +797,7 @@ function closeModal(id){
  if(id==='veh-modal'){editingVehId=null;clearVehForm();}
  else if(id==='client-modal'){editingClientId=null;clearClientForm();}
  else if(id==='res-modal'){editingResId=null;clearResForm();}
+ else if(id==='maint-modal'&&typeof window.resetMaintenanceEditState==='function'){window.resetMaintenanceEditState();}
 }
 function openNewVehModal(){
  editingVehId=null;
@@ -835,7 +836,11 @@ function renderVehicules(){
  const photosBtn=PHOTOS_ENABLED ? `<button class="btn-icon" title="Photos" data-type="veh" data-id="${window.AutoLocUtils.escapeHtml(v.id)}" data-title="${window.AutoLocUtils.escapeHtml(v.marque)} ${window.AutoLocUtils.escapeHtml(v.modele)} (${window.AutoLocUtils.escapeHtml(v.immat)})" onclick="openPhotosModalFromBtn(this)"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${countPhotos('veh',v.id)>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${countPhotos('veh',v.id)}</span>`:''}
 </button>` : '';
-  return `<tr><td><strong>${window.AutoLocUtils.escapeHtml(v.immat)}</strong></td><td>${window.AutoLocUtils.escapeHtml(v.marque)} ${window.AutoLocUtils.escapeHtml(v.modele)}</td><td>${window.AutoLocUtils.escapeHtml(v.cat)}</td><td>${window.AutoLocUtils.escapeHtml(String(v.annee))}</td><td><strong>${window.AutoLocUtils.escapeHtml(String(v.tarif))} MAD</strong></td><td><span class="badge ${v.statut==='disponible'?'badge-success':v.statut==='loué'?'badge-info':'badge-warning'}">${window.AutoLocUtils.escapeHtml(v.statut)}</span>${docBadge}</td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" title="Maintenance" onclick="openMaintModal();document.getElementById('maint-veh').value='${window.AutoLocUtils.escapeHtml(v.id)}'"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></button><button class="btn-icon" title="Modifier" onclick="editVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
+ const catDisp=window.AutoLocUtils.escapeHtml(String(v.cat||v.categorie||'—'));
+ const anneeDisp=v.annee!==undefined&&v.annee!==''&&!Number.isNaN(Number(v.annee))?String(v.annee):'—';
+ const tarifNum=Number(v.tarif);
+ const tarifDisp=Number.isFinite(tarifNum)?tarifNum.toLocaleString('fr-FR'):String(v.tarif||'—');
+  return `<tr><td><strong>${window.AutoLocUtils.escapeHtml(v.immat)}</strong></td><td>${window.AutoLocUtils.escapeHtml(v.marque)} ${window.AutoLocUtils.escapeHtml(v.modele)}</td><td>${catDisp}</td><td>${window.AutoLocUtils.escapeHtml(anneeDisp)}</td><td><strong>${window.AutoLocUtils.escapeHtml(tarifDisp)} MAD</strong></td><td><span class="badge ${v.statut==='disponible'?'badge-success':v.statut==='loué'?'badge-info':'badge-warning'}">${window.AutoLocUtils.escapeHtml(v.statut)}</span>${docBadge}</td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" title="Maintenance" onclick="openMaintModal();document.getElementById('maint-veh').value='${window.AutoLocUtils.escapeHtml(v.id)}'"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></button><button class="btn-icon" title="Modifier" onclick="editVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteVeh('${window.AutoLocUtils.escapeHtml(v.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
 }).join('');
 }
 function saveVehicule(){
@@ -844,13 +849,15 @@ function saveVehicule(){
  const effectiveEditId=fromDom||editingVehId||null;
  if(effectiveEditId)editingVehId=effectiveEditId;
  const now=new Date().toISOString();
+ const catVal=document.getElementById('veh-cat').value;
  const v={
  id: effectiveEditId||uid(),
  immat: document.getElementById('veh-immat').value.trim().toUpperCase(),
  marque: document.getElementById('veh-marque').value.trim(),
  modele: document.getElementById('veh-modele').value.trim(),
  annee:+document.getElementById('veh-annee').value,
- cat: document.getElementById('veh-cat').value,
+ cat: catVal,
+ categorie: catVal,
  tarif:+document.getElementById('veh-tarif').value,
  couleur: document.getElementById('veh-couleur').value.trim(),
  carburant: document.getElementById('veh-carburant').value,
@@ -877,6 +884,11 @@ function saveVehicule(){
  return;
 }
  let data=load(KEYS.veh);
+ if(effectiveEditId){
+ const prev=data.find(x=>String(x.id)===String(effectiveEditId));
+ if(prev&&Array.isArray(prev.photos)) v.photos=prev.photos;
+}
+ if(!Array.isArray(v.photos)) v.photos=[];
  const doublon=data.find(x=>!x._deleted&&String(x.immat||'').replace(/\s/g,'').toUpperCase()===immatClean&&String(x.id)!==String(v.id));
  if(doublon){
  const msg=effectiveEditId
@@ -889,6 +901,10 @@ function saveVehicule(){
  save(KEYS.veh,data);
  closeModal('veh-modal');
  renderVehicules();
+ renderDashboard();
+ if(typeof renderMaintAlerts==='function')renderMaintAlerts();
+ if(typeof renderCalendar==='function')renderCalendar();
+ if(typeof window.renderReservations==='function')window.renderReservations();
 }
 function editVeh(id){
  const sid=String(id);
@@ -898,7 +914,8 @@ function editVeh(id){
  const vm=document.getElementById('veh-modal');if(vm)vm.dataset.editingVehId=sid;
  document.getElementById('veh-modal-title').textContent='Modifier le véhicule';
 ['immat','marque','modele','annee','tarif','couleur','km'].forEach(k=>document.getElementById('veh-'+k).value=v[k]||'');
-['cat','carburant','statut'].forEach(k=>document.getElementById('veh-'+k).value=v[k]);
+ document.getElementById('veh-cat').value=v.cat||v.categorie||'';
+['carburant','statut'].forEach(k=>document.getElementById('veh-'+k).value=v[k]||'');
 ['assurance','vignette','visite','assistance'].forEach(k=>{const el=document.getElementById('veh-'+k);if(el){el.value=window.AutoLocCoreUtils.normalizeDateInputValue(v[k])||'';el.dispatchEvent(new Event('input'));}});
  openModal('veh-modal');
 }
@@ -906,12 +923,12 @@ function deleteVeh(id){
  const sid=String(id);
  const v=load(KEYS.veh).find(x=>String(x.id)===sid);
  if(!v)return;
- const actives=load(KEYS.res).filter(r=>String(r.vehId)===sid&&r.statut==='en cours');
+ const actives=load(KEYS.res).filter(r=>!r._deleted&&String(r.vehId)===sid&&r.statut==='en cours');
  if(actives.length){
  alAlert('Impossible de supprimer "'+v.marque+' '+v.modele+'" : '+actives.length+' location(s) en cours. Clôturez ou supprimez les réservations actives d\'abord.');
  return;
 }
- const historiques=load(KEYS.res).filter(r=>String(r.vehId)===sid);
+ const historiques=load(KEYS.res).filter(r=>!r._deleted&&String(r.vehId)===sid);
  const msg=historiques.length
  ? 'Ce véhicule a '+historiques.length+' réservation(s) dans l\'historique. Confirmer la suppression ?'
  : 'Supprimer ce véhicule ?';
@@ -923,14 +940,17 @@ function deleteVeh(id){
  addLog('Véhicule supprimé — '+v.marque+' '+v.modele);
  renderVehicules();
  renderDashboard();
+ if(typeof renderMaintAlerts==='function')renderMaintAlerts();
+ if(typeof renderCalendar==='function')renderCalendar();
+ if(typeof window.renderReservations==='function')window.renderReservations();
 }
 });
 }
 function renderClients(){
  const q=(document.getElementById('client-search')?.value||'').toLowerCase();
  let data=load(KEYS.cl).filter(c=>!c._deleted);
- if(q)data=data.filter(c=>`${c.prenom}${c.nom}${c.tel}${c.cin}`.toLowerCase().includes(q));
- const resData=load(KEYS.res);
+ if(q)data=data.filter(c=>`${c.prenom||''}${c.nom||''}${c.tel||''}${c.cin||''}${c.email||''}${c.permis||''}${c.ville||''}${c.nat||''}${c.adresse||''}`.toLowerCase().includes(q));
+ const resData=load(KEYS.res).filter(r=>!r._deleted);
  const tbody=document.getElementById('client-tbody');
  if(!tbody)return;
  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 48 48" fill="none"><circle cx="20" cy="18" r="8" fill="#F5F5F7" stroke="#D0D0D8" stroke-width="1.5"/><path d="M6 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#D0D0D8" stroke-width="1.5" stroke-linecap="round"/><circle cx="38" cy="12" r="8" fill="#0C0E14"/><path d="M35 12h6M38 9v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Aucun client</h4><p>Ajoutez votre premier client</p></div></td></tr>`;return;}
@@ -939,7 +959,7 @@ function renderClients(){
  const photosBtn=PHOTOS_ENABLED ? `<button class="btn-icon" title="Photos" data-type="cl" data-id="${window.AutoLocUtils.escapeHtml(c.id)}" data-title="${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}" onclick="openPhotosModalFromBtn(this)" style="position:relative"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${countPhotos('cl',c.id)>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${countPhotos('cl',c.id)}</span>`:''}
 </button>` : '';
-  return `<tr><td><strong>${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}</strong></td><td>${window.AutoLocUtils.escapeHtml(c.tel)}</td><td>${window.AutoLocUtils.escapeHtml(c.cin)}</td><td>${window.AutoLocUtils.escapeHtml(c.email||'—')}</td><td>${window.AutoLocUtils.escapeHtml(c.permis||'—')}</td><td><span class="badge badge-info">${locs} location${locs>1?'s':''}</span></td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" onclick="editClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" onclick="deleteClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
+  return `<tr><td><strong>${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}</strong></td><td>${window.AutoLocUtils.escapeHtml(c.tel||'—')}</td><td>${window.AutoLocUtils.escapeHtml(c.cin||'—')}</td><td>${window.AutoLocUtils.escapeHtml(c.email||'—')}</td><td>${window.AutoLocUtils.escapeHtml(c.permis||'—')}</td><td><span class="badge badge-info">${locs} location${locs>1?'s':''}</span></td><td style="display:flex;gap:6px;">${photosBtn}<button class="btn-icon" title="Historique" onclick="showHistClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button><button class="btn-icon" onclick="editClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" onclick="deleteClient('${window.AutoLocUtils.escapeHtml(c.id)}')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td></tr>`;
 }).join('');
 }
 function saveClient(){
@@ -968,11 +988,19 @@ function saveClient(){
  if(c.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)){alAlert('Adresse email invalide.');return;}
  if(c.cin&&c.cin.length<4){alAlert('CIN / Passeport trop court.');return;}
  let data=load(KEYS.cl);
+ if(effectiveEditId){
+ const prev=data.find(x=>String(x.id)===String(effectiveEditId));
+ if(prev&&Array.isArray(prev.photos)) c.photos=prev.photos;
+}
+ if(!Array.isArray(c.photos)) c.photos=[];
  if(effectiveEditId){data=data.map(x=>String(x.id)===String(effectiveEditId)?c:x);addLog(`Client modifié — ${c.prenom} ${c.nom}`);}
  else{data.push(c);addLog(`Client ajouté — ${c.prenom} ${c.nom}`);}
  save(KEYS.cl,data);
  closeModal('client-modal');
  renderClients();
+ if(typeof renderDashboard==='function')renderDashboard();
+ if(typeof renderCalendar==='function')renderCalendar();
+ if(typeof window.renderReservations==='function')window.renderReservations();
 }
 function editClient(id){
  const sid=String(id);
@@ -988,12 +1016,12 @@ function deleteClient(id){
  const sid=String(id);
  const c=load(KEYS.cl).find(x=>String(x.id)===sid);
  if(!c)return;
- const actives=load(KEYS.res).filter(r=>String(r.clientId)===sid&&r.statut==='en cours');
+ const actives=load(KEYS.res).filter(r=>!r._deleted&&String(r.clientId)===sid&&r.statut==='en cours');
  if(actives.length){
  alAlert('Impossible de supprimer '+c.prenom+' '+c.nom+' : '+actives.length+' location(s) en cours. Clôturez ou supprimez les réservations actives d\'abord.');
  return;
 }
- const historiques=load(KEYS.res).filter(r=>String(r.clientId)===sid);
+ const historiques=load(KEYS.res).filter(r=>!r._deleted&&String(r.clientId)===sid);
  const msg=historiques.length
  ? c.prenom+' '+c.nom+' a '+historiques.length+' réservation(s) dans l\'historique. Confirmer la suppression ?'
  : 'Supprimer ce client ?';
@@ -1004,6 +1032,9 @@ function deleteClient(id){
  save(KEYS.cl,load(KEYS.cl).map(x=>String(x.id)===sid ?{...x,_deleted: true,updatedAt: new Date().toISOString()}: x));
  addLog('Client supprimé — '+c.prenom+' '+c.nom);
  renderClients();
+ if(typeof renderDashboard==='function')renderDashboard();
+ if(typeof renderCalendar==='function')renderCalendar();
+ if(typeof window.renderReservations==='function')window.renderReservations();
 }
 });
 }
@@ -1026,8 +1057,8 @@ function computeAlerts(){
  const c=clients.find(x=>idEq(x.id,r.clientId));
  const info={
  r,v,c,
- vName: v ? `${v.marque}${v.modele}(${v.immat})` : '—',
- cName: c ? `${c.prenom}${c.nom}` : '—',
+ vName: v ? [v.marque, v.modele].filter(Boolean).join(' ') + (v.immat ? ' (' + v.immat + ')' : '') || '—' : '—',
+ cName: c ? [c.prenom, c.nom].filter(Boolean).join(' ') || '—' : '—',
  finStr: fin.toLocaleDateString('fr-FR'),
  diffDays: Math.round((today-fin)/(1000*60*60*24))
 };
@@ -2159,7 +2190,7 @@ function showBackupStatus(msg,color){
  }
  if(typeof invooParametresUi==='object'&&typeof invooParametresUi.attach==='function'){
   invooParametresUi.attach({
-   KEYS,getSettings,addLog,alConfirm
+   KEYS,save,getSettings,addLog,alAlert,alConfirm,renderDashboard
   });
  }
  if(typeof invooRapportModals==='object'&&typeof invooRapportModals.attach==='function'){
@@ -2186,7 +2217,7 @@ function showBackupStatus(msg,color){
   invooMaintenanceUi.attach({
    load,save,KEYS,uid,
    alAlert,alConfirm,addLog,closeModal,
-   renderDashboard,shouldSkipRender
+   renderDashboard,renderVehicules,shouldSkipRender
   });
  }
  if(typeof invooPhotosUi==='object'&&typeof invooPhotosUi.attach==='function'){

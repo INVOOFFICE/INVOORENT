@@ -77,8 +77,9 @@
     var vehs = load(KEYS.veh).filter(function (v) {
       return !v._deleted;
     });
+    /** Disponibilité : seules les locations actives occupent la grille (pas terminées / annulées). */
     var reservations = load(KEYS.res).filter(function (r) {
-      return !r._deleted && r.statut !== 'annulée';
+      return !r._deleted && r.statut === 'en cours';
     });
     var clients = load(KEYS.cl).filter(function (c) {
       return !c._deleted;
@@ -132,7 +133,9 @@
           var client = clients.find(function (c) {
             return idEq(c.id, r.clientId);
           });
-          var clientName = client ? client.prenom + ' ' + client.nom : 'Client';
+          var clientName = client
+            ? [client.prenom, client.nom].filter(Boolean).join(' ') || 'Client'
+            : 'Client';
           var d1 = new Date(r.debut);
           var d2 = new Date(r.fin);
           var d1Str = r.debut;
@@ -172,8 +175,8 @@
         if (info && info.type === 'booked') {
           var prevDs = toLocalDateStr(new Date(new Date(ds).getTime() - 86400000));
           var nextDs = toLocalDateStr(new Date(new Date(ds).getTime() + 86400000));
-          var prevSame = dayMap[prevDs] && dayMap[prevDs].resId === info.resId;
-          var nextSame = dayMap[nextDs] && dayMap[nextDs].resId === info.resId;
+          var prevSame = dayMap[prevDs] && idEq(dayMap[prevDs].resId, info.resId);
+          var nextSame = dayMap[nextDs] && idEq(dayMap[nextDs].resId, info.resId);
           var posClass = 'middle';
           if (!prevSame && !nextSame) posClass = 'solo';
           else if (!prevSame) posClass = 'start';

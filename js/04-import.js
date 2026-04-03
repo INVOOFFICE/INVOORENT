@@ -1,36 +1,78 @@
 (function(){
+ function normImportHeader(k){
+  return String(k||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+ }
+ /** En-têtes CSV (libellés + anciens slugs) → clés canoniques internes. */
+ const VEH_HEADER_MAP={
+  immatriculation: 'immat',immat: 'immat',
+  marque: 'marque',
+  modele: 'modele',
+  annee: 'annee',
+  categorie: 'cat',cat: 'cat',
+  carburant: 'carburant',
+  couleur: 'couleur',
+  kilometrage: 'km',km: 'km',
+  'tarif / jour (mad)': 'tarif','tarif/jour(mad)': 'tarif',tarif: 'tarif',
+  statut: 'statut',
+  'assurance expire le': 'assurance',assurance: 'assurance',
+  'vignette expire le': 'vignette',vignette: 'vignette',
+  'visite technique le': 'visite',visite: 'visite',
+  'assistance (echeance le)': 'assistance',assistance: 'assistance',
+  notes: 'notes'
+ };
+ function mapVehImportRow(raw){
+  const out={};
+  Object.keys(raw).forEach(function(k){
+   const nk=normImportHeader(k);
+   const canon=VEH_HEADER_MAP[nk];
+   if(!canon)return;
+   const v=raw[k];
+   if(v!==undefined&&v!==null&&String(v).trim()!==''){
+    if(out[canon]===undefined||String(out[canon]).trim()==='')out[canon]=v;
+   }
+  });
+  return out;
+ }
  const IMPORT_CONFIG={
  veh:{
  title: 'Import en masse — Véhicules',
- instructions: 'Importez plusieurs véhicules à la fois via un fichier CSV. La première ligne doit contenir les en-têtes. Les colonnes obligatoires sont : immat,marque,modele. Les autres colonnes sont facultatives. Le séparateur peut être une virgule(,)ou un point-virgule(;).',
+ instructions: 'Importez plusieurs véhicules via un fichier CSV (virgule ou point-virgule). La première ligne doit reprendre exactement les en-têtes du modèle : Immatriculation, Marque, Modèle, etc. Obligatoires : Immatriculation, Marque, Modèle. Dates documents au format AAAA-MM-JJ (ex. 2026-06-15). Statut : disponible, loué ou maintenance.',
  columns:[
-{key: 'immat',label: 'immat *',required: true},
-{key: 'marque',label: 'marque *',required: true},
-{key: 'modele',label: 'modele *',required: true},
-{key: 'annee',label: 'annee',required: false},
-{key: 'categorie',label: 'categorie',required: false},
-{key: 'tarif',label: 'tarif',required: false},
-{key: 'couleur',label: 'couleur',required: false},
-{key: 'carburant',label: 'carburant',required: false},
-{key: 'km',label: 'km',required: false},
-{key: 'statut',label: 'statut',required: false},
-{key: 'notes',label: 'notes',required: false},
+{key: 'immat',csvHeader: 'Immatriculation',label: 'Immatriculation *',required: true},
+{key: 'marque',csvHeader: 'Marque',label: 'Marque *',required: true},
+{key: 'modele',csvHeader: 'Modèle',label: 'Modèle *',required: true},
+{key: 'annee',csvHeader: 'Année',label: 'Année',required: false},
+{key: 'cat',csvHeader: 'Catégorie',label: 'Catégorie',required: false},
+{key: 'carburant',csvHeader: 'Carburant',label: 'Carburant',required: false},
+{key: 'couleur',csvHeader: 'Couleur',label: 'Couleur',required: false},
+{key: 'km',csvHeader: 'Kilométrage',label: 'Kilométrage',required: false},
+{key: 'tarif',csvHeader: 'Tarif / Jour (MAD)',label: 'Tarif / Jour (MAD)',required: false},
+{key: 'statut',csvHeader: 'Statut',label: 'Statut',required: false},
+{key: 'assurance',csvHeader: 'Assurance expire le',label: 'Assurance expire le',required: false},
+{key: 'vignette',csvHeader: 'Vignette expire le',label: 'Vignette expire le',required: false},
+{key: 'visite',csvHeader: 'Visite technique le',label: 'Visite technique le',required: false},
+{key: 'assistance',csvHeader: 'Assistance (échéance le)',label: 'Assistance (échéance le)',required: false},
 ],
  storageKey: 'autoloc_veh',
  buildRecord: function(row){
+ const catVal=(row.cat||row.categorie||'Citadine').toString().trim();
  return{
  id: 'v_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
  immat:(row.immat||'').trim(),
  marque:(row.marque||'').trim(),
  modele:(row.modele||'').trim(),
- annee: row.annee ? parseInt(row.annee): '',
- categorie:(row.categorie||'Citadine').trim(),
- tarif: row.tarif ? parseFloat(row.tarif): 0,
+ annee: row.annee!==undefined&&row.annee!==''? parseInt(row.annee,10): '',
+ cat: catVal,
+ categorie: catVal,
+ tarif: row.tarif!==undefined&&row.tarif!==''? parseFloat(String(row.tarif).replace(',','.')): 0,
  couleur:(row.couleur||'').trim(),
  carburant:(row.carburant||'Essence').trim(),
- km: row.km ? parseInt(row.km): 0,
+ km: row.km!==undefined&&row.km!==''? parseInt(row.km,10): 0,
  statut:(row.statut||'disponible').trim(),
- notes:(row.notes||'').trim(),
+ assurance:(row.assurance||'').trim(),
+ vignette:(row.vignette||'').trim(),
+ visite:(row.visite||'').trim(),
+ assistance:(row.assistance||'').trim(),
  photos:[],
  createdAt: new Date().toISOString(),
  updatedAt: new Date().toISOString(),
@@ -38,9 +80,9 @@
 },
  validate: function(row,i){
  const errs=[];
- if(!row.immat||!row.immat.trim())errs.push('Ligne '+i+' : immat manquant');
- if(!row.marque||!row.marque.trim())errs.push('Ligne '+i+' : marque manquante');
- if(!row.modele||!row.modele.trim())errs.push('Ligne '+i+' : modèle manquant');
+ if(!row.immat||!String(row.immat).trim())errs.push('Ligne '+i+' : Immatriculation manquante');
+ if(!row.marque||!String(row.marque).trim())errs.push('Ligne '+i+' : Marque manquante');
+ if(!row.modele||!String(row.modele).trim())errs.push('Ligne '+i+' : Modèle manquant');
  return errs;
 },
  renderFn: 'renderVehicules',
@@ -115,13 +157,13 @@
  window.downloadImportTemplate=function(){
  const cfg=IMPORT_CONFIG[_importType];
  if(!cfg)return;
- const headers=cfg.columns.map(function(c){return c.key;}).join(';');
+ const headers=cfg.columns.map(function(c){return c.csvHeader||c.key;}).join(';');
  const example=cfg.columns.map(function(c){
  const samples={
  immat:'12345-A-6',marque:'Renault',modele:'Clio',
- annee:'2022',categorie:'Citadine',tarif:'300',
- couleur:'Blanc',carburant:'Essence',km:'45000',
- statut:'disponible',notes:'',
+ annee:'2022',cat:'Citadine',carburant:'Essence',couleur:'Blanc',km:'45000',
+ tarif:'300',statut:'disponible',
+ assurance:'2026-12-31',vignette:'2026-06-30',visite:'2026-03-15',assistance:'2026-12-01',
  prenom:'Mohamed',nom:'Benali',tel:'+212600000000',
  email:'m.benali@mail.com',cin:'AB123456',permis:'12345678',
  ville:'Tanger',nat:'Marocaine',adresse:'Rue Hassan II'
@@ -204,7 +246,8 @@
 }
  function parseAndPreview(text){
  const cfg=IMPORT_CONFIG[_importType];
- const rows=parseCSV(text);
+ let rows=parseCSV(text);
+ if(_importType==='veh'){rows=rows.map(mapVehImportRow);}
  if(!rows.length){
  showImportError(['Fichier vide ou format non reconnu.']);return;
 }
@@ -216,9 +259,11 @@
  _importParsed=rows;
  document.getElementById('import-preview-count').textContent=rows.length;
  const cols=cfg.columns.map(function(c){return c.key;});
- const labels=cfg.columns.map(function(c){return c.key;});
+ const labels=cfg.columns.map(function(c){
+  return c.csvHeader||(c.label||'').replace(/\s*\*$/,'').trim()||c.key;
+ });
  let th='<thead style="position:sticky;top:0;background:var(--surface2)"><tr>';
- labels.forEach(function(l){th+='<th style="padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text3);font-size:0.70rem;text-transform:uppercase;letter-spacing:.04em;">'+l+'</th>';});
+ labels.forEach(function(l){th+='<th style="padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text3);font-size:0.70rem;letter-spacing:.02em;">'+window.AutoLocUtils.escapeHtml(l)+'</th>';});
  th+='</tr></thead><tbody>';
  const previewRows=rows.slice(0,8);
  previewRows.forEach(function(row){

@@ -139,7 +139,7 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
 }
  const hm=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
  setStatus('Synchronisé à '+hm,'#059669');
-['renderDashboard','renderVehicules','renderClients','renderReservations','renderMaintenance'].forEach(fn=>{
+['renderDashboard','renderVehicules','renderClients','renderReservations','renderCalendar','renderMaintenance'].forEach(fn=>{
  if(typeof window[fn]==='function')try{window[fn]();}catch(e){}
 });
 }catch(e){

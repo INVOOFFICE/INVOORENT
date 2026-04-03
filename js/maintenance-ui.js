@@ -18,6 +18,12 @@
   var maintFilter = 'all';
   var editingMaintId = null;
 
+  function idEq(a, b) {
+    return global.AutoLocCoreUtils && typeof global.AutoLocCoreUtils.idEq === 'function'
+      ? global.AutoLocCoreUtils.idEq(a, b)
+      : String(a) === String(b);
+  }
+
   function load() {
     return ctx.load.apply(null, arguments);
   }
@@ -55,7 +61,7 @@
       editingMaintId = String(id);
       var mid = editingMaintId;
       var m = load(ctx.KEYS.maint).find(function (x) {
-        return String(x.id) === mid;
+        return String(x.id) === mid && !x._deleted;
       });
       if (m) {
         sel.value = m.vehId;
@@ -123,7 +129,7 @@
     }
     var oldM = editingMaintId
       ? load(ctx.KEYS.maint).find(function (x) {
-          return String(x.id) === String(editingMaintId);
+          return String(x.id) === String(editingMaintId) && !x._deleted;
         })
       : null;
     var data = load(ctx.KEYS.maint);
@@ -138,7 +144,7 @@
     if (m.km > 0) {
       var vehs = load(ctx.KEYS.veh);
       vehs = vehs.map(function (v) {
-        return String(v.id) === String(vehId)
+        return idEq(v.id, vehId)
           ? { ...v, km: Math.max(v.km || 0, m.km), updatedAt: new Date().toISOString() }
           : v;
       });
@@ -147,7 +153,7 @@
     if (m.statut === 'planifiée') {
       var vehsPlan = load(ctx.KEYS.veh);
       vehsPlan = vehsPlan.map(function (v) {
-        return String(v.id) === String(vehId) && v.statut === 'disponible'
+        return idEq(v.id, vehId) && v.statut === 'disponible'
           ? { ...v, statut: 'maintenance', updatedAt: new Date().toISOString() }
           : v;
       });
@@ -157,15 +163,15 @@
       var autresPlanifiees = data.filter(function (x) {
         return (
           !x._deleted &&
-          String(x.id) !== String(m.id) &&
-          String(x.vehId) === String(m.vehId) &&
+          !idEq(x.id, m.id) &&
+          idEq(x.vehId, m.vehId) &&
           x.statut === 'planifiée'
         );
       });
       if (!autresPlanifiees.length) {
         var vehsBack = load(ctx.KEYS.veh);
         vehsBack = vehsBack.map(function (v) {
-          return String(v.id) === String(m.vehId) && v.statut === 'maintenance'
+          return idEq(v.id, m.vehId) && v.statut === 'maintenance'
             ? { ...v, statut: 'disponible', updatedAt: new Date().toISOString() }
             : v;
         });
@@ -176,6 +182,9 @@
     ctx.closeModal('maint-modal');
     global.renderMaintenance();
     global.renderMaintAlerts();
+    if (typeof ctx.renderDashboard === 'function') ctx.renderDashboard();
+    if (typeof ctx.renderVehicules === 'function') ctx.renderVehicules();
+    if (typeof global.renderCalendar === 'function') global.renderCalendar();
   };
 
   global.deleteMaintenance = function (id) {
@@ -187,16 +196,42 @@
       okLabel: 'Supprimer',
       onOk: function () {
         var sid = String(id);
+        var all = load(ctx.KEYS.maint);
+        var row = all.find(function (x) {
+          return String(x.id) === sid && !x._deleted;
+        });
+        if (!row) return;
         save(
           ctx.KEYS.maint,
-          load(ctx.KEYS.maint).map(function (x) {
+          all.map(function (x) {
             return String(x.id) === sid
               ? { ...x, _deleted: true, updatedAt: new Date().toISOString() }
               : x;
           })
         );
+        if (row.statut === 'planifiée') {
+          var reste = load(ctx.KEYS.maint).filter(function (x) {
+            return (
+              !x._deleted &&
+              idEq(x.vehId, row.vehId) &&
+              x.statut === 'planifiée'
+            );
+          });
+          if (!reste.length) {
+            var vehsRel = load(ctx.KEYS.veh);
+            vehsRel = vehsRel.map(function (v) {
+              return idEq(v.id, row.vehId) && v.statut === 'maintenance'
+                ? { ...v, statut: 'disponible', updatedAt: new Date().toISOString() }
+                : v;
+            });
+            save(ctx.KEYS.veh, vehsRel);
+          }
+        }
         global.renderMaintenance();
         global.renderMaintAlerts();
+        if (typeof ctx.renderDashboard === 'function') ctx.renderDashboard();
+        if (typeof ctx.renderVehicules === 'function') ctx.renderVehicules();
+        if (typeof global.renderCalendar === 'function') global.renderCalendar();
       }
     });
   };
@@ -205,8 +240,9 @@
     var sid = String(id);
     var data = load(ctx.KEYS.maint);
     var m = data.find(function (x) {
-      return String(x.id) === sid;
+      return String(x.id) === sid && !x._deleted;
     });
+    if (!m) return;
     data = data.map(function (x) {
       return String(x.id) === sid
         ? { ...x, statut: 'effectuée', updatedAt: new Date().toISOString() }
@@ -215,14 +251,12 @@
     save(ctx.KEYS.maint, data);
     if (m) {
       var autresMaint = data.filter(function (x) {
-        return (
-          !x._deleted && String(x.vehId) === String(m.vehId) && x.statut === 'planifiée'
-        );
+        return !x._deleted && idEq(x.vehId, m.vehId) && x.statut === 'planifiée';
       });
       if (!autresMaint.length) {
         var vehs = load(ctx.KEYS.veh);
         vehs = vehs.map(function (v) {
-          return String(v.id) === String(m.vehId) && v.statut === 'maintenance'
+          return idEq(v.id, m.vehId) && v.statut === 'maintenance'
             ? { ...v, statut: 'disponible', updatedAt: new Date().toISOString() }
             : v;
         });
@@ -232,7 +266,9 @@
     ctx.addLog('Maintenance marquée effectuée');
     global.renderMaintenance();
     global.renderMaintAlerts();
-    ctx.renderDashboard();
+    if (typeof ctx.renderDashboard === 'function') ctx.renderDashboard();
+    if (typeof ctx.renderVehicules === 'function') ctx.renderVehicules();
+    if (typeof global.renderCalendar === 'function') global.renderCalendar();
   };
 
   global.renderMaintenance = function () {
@@ -259,7 +295,7 @@
     tbody.innerHTML = data
       .map(function (m) {
         var v = vehs.find(function (x) {
-          return String(x.id) === String(m.vehId);
+          return idEq(x.id, m.vehId);
         });
         var dateD = new Date(m.date);
         dateD.setHours(0, 0, 0, 0);
@@ -345,7 +381,7 @@
     var alerts = [];
     maints.forEach(function (m) {
       var v = vehs.find(function (x) {
-        return String(x.id) === String(m.vehId);
+        return idEq(x.id, m.vehId);
       });
       var dateD = new Date(m.date);
       dateD.setHours(0, 0, 0, 0);
@@ -412,6 +448,9 @@
   global.invooMaintenanceUi = {
     attach: function (c) {
       ctx = c;
+      global.resetMaintenanceEditState = function () {
+        editingMaintId = null;
+      };
     }
   };
 })(typeof window !== 'undefined' ? window : this);

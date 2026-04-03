@@ -37,18 +37,18 @@ global.invooGuideHTML=function invooGuideHTML(){
  '<path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14a2 2 0 012 2v1"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
  2,'Véhicules','Gestion complète de votre flotte automobile',
  cards(
- ['Informations enregistrées',['Immatriculation (format libre, majuscules auto, unique par véhicule)','Marque, modèle, année de mise en circulation','Catégorie : Citadine, Berline, SUV, 4x4, Utilitaire, Luxe','Tarif journalier en MAD (sert au calcul automatique des réservations)','Couleur, carburant (Essence / Diesel / Hybride / Électrique)','Kilométrage actuel (mis à jour manuellement)']],
+ ['Informations enregistrées',['Immatriculation (contrôle des formats MAR / ancien / CD / étranger, majuscules auto, unique par véhicule)','Marque, modèle, année','Catégorie : Citadine, Berline, SUV, 4x4, Utilitaire, Luxe','Tarif journalier en MAD (calcul des réservations)','Couleur, carburant (Essence / Diesel / Hybride / Électrique)','Kilométrage et dates documents (assurance, vignette, visite, assistance)']],
  ['Statuts du véhicule',[t('green','Disponible')+' — libre pour une nouvelle réservation',t('blue','Loué')+' — actuellement en location (changement automatique)',t('orange','Maintenance')+' — indisponible pour révision ou réparation','Le statut Loué est géré automatiquement par les réservations']],
  ['Actions disponibles',['📷 <strong>Photos</strong> — ajouter l\'état du véhicule avant/après location','📋 <strong>Historique</strong> — voir toutes les locations passées avec stats','🔧 <strong>Maintenance</strong> — planifier ou noter une intervention','✏️ <strong>Modifier</strong> — mettre à jour les informations','🗑️ <strong>Supprimer</strong> — impossible si une location est en cours']]
  )+
  steps(
  ['1','Ajouter un véhicule','Cliquez sur "+ Ajouter" en haut à droite. Remplissez au minimum l\'immatriculation, la marque et le modèle, puis enregistrez.'],
  ['2','Filtrer la flotte','Utilisez les boutons : '+t('gray','Tous')+' '+t('green','Disponibles')+' '+t('blue','Loués')+' '+t('orange','Maintenance')+' pour filtrer rapidement.'],
- ['3','Recherche rapide','Tapez une immatriculation ou une marque dans la barre de recherche en haut pour trouver un véhicule instantanément.'],
+ ['3','Recherche rapide','Utilisez la <strong>recherche globale</strong> (barre en haut de l\'app) : immatriculation, marque ou modèle renvoient vers la fiche.'],
  ['4','Mettre à jour le kilométrage','Modifiez le véhicule après chaque retour pour garder un kilométrage précis dans vos contrats.']
  )+
  tip('warn','⚠️','<strong>Immatriculation unique :</strong> le système bloque l\'enregistrement si deux véhicules ont la même plaque.')+
- tip('info','📥','<strong>Import en masse :</strong> vous pouvez importer plusieurs véhicules à la fois via un fichier CSV (voir section Import).')
+ tip('info','📥','<strong>Import en masse :</strong> depuis la page Véhicules → bouton Import ; modèle CSV avec en-têtes français (voir rubrique Import CSV).')
  ));
  /* ── 3. CLIENTS ─────────────────────────────────────── */
  parts.push(sec('g-clients','rgba(45,212,191,0.15)','#99f6e4',
@@ -64,8 +64,8 @@ global.invooGuideHTML=function invooGuideHTML(){
  ['3','Consulter l\'historique','Cliquez sur "Historique" sur la fiche client pour voir toutes ses locations et son CA total.'],
  ['4','Supprimer un client','Protégé : impossible si une location est en cours. Une confirmation est demandée si un historique existe.']
  )+
- tip('info','🔍','<strong>Recherche rapide :</strong> la barre de recherche filtre en temps réel sur nom, prénom, téléphone et CIN.')+
- tip('info','📥','<strong>Import en masse :</strong> importez votre liste de clients existants via un fichier CSV (voir section Import).')
+ tip('info','🔍','<strong>Recherche sur la page Clients :</strong> filtre en temps réel sur nom, prénom, téléphone, CIN, email, permis, ville, etc.')+
+ tip('info','📥','<strong>Import en masse :</strong> page Clients → bouton Import (CSV avec en-têtes prenom, nom, tel…).')
  ));
  /* ── 4. RÉSERVATIONS ────────────────────────────────── */
  parts.push(sec('g-reservations','rgba(251,191,36,0.12)','#f59e0b',
@@ -74,7 +74,7 @@ global.invooGuideHTML=function invooGuideHTML(){
  cards(
  ['Informations d\'une réservation',['Client (sélection depuis votre liste)','Véhicule disponible (seuls les véhicules libres apparaissent)','Date de départ et date de retour prévue','Lieu de prise en charge','Montant total calculé automatiquement : jours × tarif','Notes internes (non imprimées sur le contrat)']],
  ['Statuts d\'une réservation',[t('blue','En cours')+' — location active, véhicule marqué Loué',t('green','Terminée')+' — clôturée, véhicule remis Disponible',t('red','Annulée')+' — annulée, véhicule remis Disponible']],
- ['Actions disponibles',['💳 <strong>Paiements</strong> — gérer les versements et la caution','📄 <strong>Contrat</strong> — générer et imprimer le contrat PDF','✏️ <strong>Modifier</strong> — changer les dates, lieu ou notes','✅ <strong>Clôturer</strong> — terminer la location','❌ <strong>Annuler</strong> — annuler sans supprimer l\'historique']]
+ ['Actions disponibles',['💳 <strong>Paiements</strong> — versements et caution','📄 <strong>Contrat</strong> — aperçu et PDF','✏️ <strong>Modifier</strong> — dates, véhicule, lieu, statut (en cours / terminée / annulée), notes','✅ <strong>Clôturer</strong> — passer en terminée et libérer le véhicule','🗑️ <strong>Supprimer</strong> — masque la réservation (soft-delete) et libère le véhicule si besoin']]
  )+
  steps(
  ['1','Créer une réservation','Cliquez sur "+ Nouvelle réservation". Sélectionnez client, véhicule et dates. Le total est calculé automatiquement.'],
@@ -103,14 +103,14 @@ global.invooGuideHTML=function invooGuideHTML(){
  '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
  6,'Maintenance','Suivi des entretiens et réparations de votre flotte',
  cards(
- ['Informations d\'une intervention',['Véhicule concerné','Date de l\'intervention','Type : Vidange, Pneus, Freins, Carrosserie, Révision, Autre','Description libre du travail effectué','Coût en MAD','Kilométrage au moment de l\'intervention','Prochain entretien prévu (date ou kilométrage)']],
- ['Alertes de maintenance',['🔴 <strong>En retard</strong> — date dépassée ou kilométrage atteint','🟠 <strong>Bientôt</strong> — échéance dans moins de 15 jours ou 500 km','🟢 <strong>OK</strong> — aucune intervention urgente prévue','Ces alertes remontent automatiquement dans le tableau de bord']]
+ ['Informations d\'une intervention',['Véhicule','Date prévue','Type : Vidange, Révision générale, Contrôle technique, Freins, Pneus, etc.','Statut <strong>planifiée</strong> ou <strong>effectuée</strong>','Coût (MAD), km au compteur, km seuil d\'alerte','Notes libres','Une planification passe le véhicule en statut Maintenance s\'il était disponible']],
+ ['Alertes (page + tableau de bord)',['🔴 <strong>En retard</strong> — date prévue dépassée','⚠️ <strong>Km seuil</strong> — approche du kilométrage cible (barre de progression)','Bouton <strong>Fait</strong> pour passer en effectuée rapidement']]
  )+
  steps(
- ['1','Enregistrer une intervention','Bouton "+ Maintenance" ou depuis la fiche véhicule. Renseignez le type, la date, le coût et la description.'],
- ['2','Planifier le prochain entretien','Ajoutez la date ou le kilométrage du prochain entretien pour recevoir une alerte automatique.'],
- ['3','Suivre les coûts','Le rapport mensuel inclut le total des coûts de maintenance pour calculer la marge nette réelle.'],
- ['4','Filtrer par véhicule','Utilisez les filtres pour voir l\'historique de maintenance d\'un véhicule spécifique.']
+ ['1','Planifier','Bouton <strong>Planifier</strong> sur la page Maintenance, ou icône maintenance sur une ligne véhicule.'],
+ ['2','Renseigner la fiche','Date prévue obligatoire ; coût et km optionnels ; km seuil pour l\'alerte kilométrique.'],
+ ['3','Filtrer la liste','Boutons <strong>Toutes / Planifiées / Effectuées</strong> en haut de page.'],
+ ['4','Terminer une intervention','Bouton <strong>✓ Fait</strong> ou passez le statut à effectuée dans la modale — le véhicule redevient disponible s\'il n\'y a plus d\'autre planification.']
  )+
  tip('info','💡','Les coûts de maintenance sont déduits du CA dans le <strong>rapport mensuel</strong> pour afficher la marge nette réelle.')+
  tip('warn','⚠️','Un véhicule en statut <strong>Maintenance</strong> n\'apparaît pas dans la liste de sélection lors d\'une nouvelle réservation.')
@@ -120,11 +120,11 @@ global.invooGuideHTML=function invooGuideHTML(){
  '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>',
  7,'Calendrier','Vision graphique des disponibilités et réservations',
  cards(
- ['Vue mensuelle',['Navigation mois par mois avec flèches gauche/droite','Chaque jour affiche les réservations actives','Code couleur : '+t('blue','En cours')+' '+t('green','Terminée')+' '+t('red','Annulée'),'Cliquer sur une réservation ouvre sa fiche complète']],
- ['Légende & navigation',['Bouton "Aujourd\'hui" pour revenir au mois courant','Le mois et l\'année sont affichés clairement','Jours passés légèrement grisés pour la lisibilité','Week-ends visuellement distincts des jours ouvrés']]
+ ['Vue mensuelle',['Une ligne par véhicule, une colonne par jour du mois','Les périodes <strong>louées</strong> correspondent aux réservations <strong>en cours</strong> (pas les locations terminées ou annulées)','Jours en <strong>maintenance</strong> (lettre M) si le véhicule est en statut maintenance sans location ce jour-là','Aperçu du prénom client sur le début de plage ; infobulle avec nom complet et dates']],
+ ['Légende & navigation',['Loué (teinte menthe), Maintenance (ambre), Disponible (neutre)','Bouton <strong>Aujourd\'hui</strong>, flèches mois précédent / suivant','Week-ends et jour courant mis en évidence']]
  )+
- tip('info','💡','Le calendrier est idéal pour vérifier <strong>d\'un coup d\'œil</strong> les disponibilités avant de créer une nouvelle réservation.')+
- tip('info','📱','Sur mobile, le calendrier s\'adapte automatiquement à la taille de l\'écran pour rester lisible.')
+ tip('info','💡','Le calendrier sert à la <strong>disponibilité</strong> : seules les locations actives bloquent les cases. L\'historique détaillé reste dans Réservations.')+
+ tip('info','📱','Sur petit écran, faites défiler horizontalement la grille si besoin.')
  ));
  /* ── 8. CONTRAT PDF ─────────────────────────────────── */
  parts.push(sec('g-contrat','rgba(59,130,246,0.16)','#93c5fd',
@@ -193,14 +193,14 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
  12,'Import en masse (CSV)','Importer des données depuis Excel ou un fichier CSV',
  cards(
-['Données importables',['🚗 <strong>Véhicules</strong> — colonnes : immat*, marque*, modele*, annee, categorie, tarif, couleur, carburant, km, statut, notes','👤 <strong>Clients</strong> — colonnes : prenom*, nom*, tel*, email, cin, permis, ville, nat, adresse','* = colonne obligatoire']],
- ['Format accepté',['Fichier .csv avec séparateur virgule (,) ou point-virgule (;) — détection automatique','Première ligne = en-têtes de colonnes (noms en minuscules)','Encodage UTF-8 recommandé pour les accents','Export depuis Excel : "Enregistrer sous" → CSV UTF-8']]
+['Données importables',['🚗 <strong>Véhicules</strong> — en-têtes du modèle : Immatriculation, Marque, Modèle, Année, Catégorie, Carburant, Couleur, Kilométrage, Tarif / Jour (MAD), Statut, Assurance / Vignette / Visite / Assistance (dates), etc. (voir « Télécharger le modèle CSV »)','👤 <strong>Clients</strong> — prenom*, nom*, tel* + email, cin, permis, ville, nat, adresse (* obligatoire)']],
+ ['Format accepté',['CSV avec <strong>,</strong> ou <strong>;</strong> — détection automatique','Accents et casse acceptés sur les en-têtes véhicules ; clients : en-têtes techniques (prenom, nom, tel…)','UTF-8 recommandé','Pour les véhicules, reprendre exactement la ligne d\'en-tête du fichier modèle']]
  )+
  steps(
-['1','Ouvrir l\'import','Paramètres → section "Import de données" → choisissez le type (Véhicules ou Clients).'],
- ['2','Préparer votre fichier','Dans Excel : une ligne par enregistrement, première ligne = noms de colonnes en minuscules. Enregistrez en CSV.'],
- ['3','Choisir le fichier','Cliquez sur "Choisir un fichier CSV" et sélectionnez votre fichier. Un aperçu des 8 premières lignes s\'affiche.'],
- ['4','Vérifier et confirmer','Si des erreurs apparaissent (champs manquants), corrigez le CSV et rechargez. Cliquez "Importer" pour valider.']
+['1','Ouvrir l\'import','Page <strong>Véhicules</strong> ou <strong>Clients</strong> → bouton <strong>Import</strong>.'],
+ ['2','Modèle','Téléchargez le modèle CSV depuis la modale pour avoir la bonne ligne d\'en-têtes.'],
+ ['3','Choisir le fichier','Glissez-déposez ou parcourez vos fichiers ; aperçu des premières lignes.'],
+ ['4','Confirmer','Corrigez les erreurs signalées puis validez l\'import.']
  )+
  tip('info','💡','L\'import est <strong>additif</strong> : il ajoute les nouvelles données sans écraser les existantes. Idéal pour une migration depuis un ancien logiciel.')+
  tip('warn','⚠️','Vérifiez que les immatriculations (véhicules) et les CIN/tél (clients) sont <strong>uniques</strong> dans votre fichier avant d\'importer.')
@@ -212,13 +212,13 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  cards(
  ['Informations agence',['Nom de votre agence (apparaît dans les contrats et rapports)','Slogan affiché sur le contrat','Téléphone, email, site web','Adresse et ville','RC / Numéro de patente (affiché sur le contrat)','IBAN bancaire (pour les virements clients)']],
  ['Conditions générales',['Texte libre multi-lignes','Chaque ligne devient une clause numérotée dans le contrat','Conditions par défaut fournies, modifiables librement']],
- ['Stockage & données',['Jauge d\'utilisation du stockage local','Bouton de sauvegarde manuelle (export JSON)','Restauration depuis une sauvegarde précédente','Section import CSV (véhicules, clients, réservations)']],
+ ['Stockage & données',['Jauge du stockage navigateur (localStorage / OPFS)','Export / import de sauvegarde JSON depuis cette page','L\'import CSV véhicules et clients se fait depuis les pages concernées']],
  ['Synchronisation Supabase (optionnel)',['Configuration URL et clé API Supabase','Sync bidirectionnelle automatique toutes les 5 minutes','Push immédiat à chaque modification','Fonctionne en complément du stockage local (pas de remplacement)']]
  )+
  steps(
  ['1','Configurer votre agence','Renseignez nom, téléphone, ville et RC. Ces infos apparaissent sur tous vos contrats.'],
  ['2','Personnaliser les conditions','Modifiez les conditions générales selon les règles de votre agence. Enregistrez.'],
- ['3','Sauvegarder vos données','Cliquez "Exporter la sauvegarde" régulièrement. Un rappel automatique apparaît après 7 jours sans backup.'],
+ ['3','Sauvegarder vos données','Section <strong>Sauvegarde & restauration</strong> → <strong>Exporter sauvegarde (.json)</strong> régulièrement.'],
  ['4','Activer la sync Supabase','Si vous souhaitez accéder à vos données sur plusieurs appareils, créez un compte Supabase gratuit et entrez l\'URL + clé API.']
  )+
  tip('info','💡','Toutes vos données restent <strong>sur votre appareil</strong>. Supabase est une option de synchronisation, pas une obligation.')+
@@ -229,14 +229,14 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
  14,'Sauvegarde & Restauration','Protéger et récupérer toutes vos données',
  cards(
-['Sauvegarde manuelle',['Paramètres → bouton "Exporter la sauvegarde"','Télécharge un fichier JSON horodaté sur votre ordinateur','Contient 100% de vos données : véhicules, clients, réservations, paiements, maintenance, paramètres agence','Fichier nommé : INVOORENT_backup_AAAA-MM-JJ.json']],
- ['Rappel automatique',['Un bandeau orange apparaît si aucune sauvegarde depuis 7 jours','Bouton "Sauvegarder maintenant" dans le bandeau','Bouton "Plus tard" reporte l\'alerte de 24 heures','Le rappel disparaît automatiquement après une sauvegarde réussie']],
- ['Restauration',['Paramètres → bouton "Restaurer une sauvegarde"','Sélectionnez votre fichier JSON de sauvegarde','Une confirmation est demandée : les données actuelles seront remplacées','L\'application recharge automatiquement après restauration']]
+['Sauvegarde manuelle',['Paramètres → <strong>Exporter sauvegarde (.json)</strong>','Nom du fichier du type <code>INVOORENT_backup_AAAA-MM-JJ.json</code>','Contenu : véhicules, clients, réservations, maintenance, journal, paramètres, photos (selon votre stockage)']],
+ ['Rappel automatique',['Après <strong>7 jours</strong> sans export, un bandeau peut s\'afficher en haut de l\'app','Boutons pour exporter tout de suite ou reporter d\'environ <strong>24 h</strong>','Un export réussi met à jour le compteur et masque le bandeau']],
+ ['Restauration',['<strong>Importer sauvegarde</strong> dans Paramètres — choisir le fichier JSON','Validation de la structure puis confirmation (données actuelles remplacées)','Rechargement de l\'application après restauration']]
  )+
  steps(
  ['1','Exporter régulièrement','Faites une sauvegarde au minimum chaque semaine, idéalement après chaque grosse journée de travail.'],
  ['2','Stocker en lieu sûr','Copiez le fichier JSON sur une clé USB, Google Drive, WhatsApp ou envoyez-le par email à vous-même.'],
- ['3','Restaurer si besoin','En cas de problème (changement d\'appareil, réinitialisation), ouvrez Paramètres → Restaurer et choisissez votre dernier fichier.'],
+ ['3','Restaurer si besoin','Paramètres → <strong>Importer sauvegarde</strong> et sélectionnez votre dernier fichier JSON.'],
  ['4','Vérifier la restauration','Après restauration, vérifiez que vos véhicules, clients et réservations sont bien présents dans chaque section.']
  )+
  tip('warn','⚠️','La restauration <strong>remplace toutes les données actuelles</strong> par celles de la sauvegarde. Assurez-vous de choisir le bon fichier.')+
@@ -301,7 +301,7 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  <div class="guide-section-icon" style="background:rgba(45,212,191,0.15)">
  <svg fill="none" viewBox="0 0 24 24" stroke="#99f6e4" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
  </div>
- <div class="guide-section-title"><h3>Support & Assistance</h3><p>Besoin d'aide ? Nous sommes là.</p></div>
+ <div class="guide-section-title"><h3>18. Support & Assistance</h3><p>Besoin d'aide ? Nous sommes là.</p></div>
  </div>
  ${tip('info','✅','<strong>INVOORENT</strong> est fourni avec une licence à vie. En cas de question ou de problème, contactez-nous via WhatsApp pour une assistance rapide.')}
  <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
