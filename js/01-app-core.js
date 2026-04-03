@@ -634,7 +634,7 @@ async function _syncCacheFromOPFS(forceFresh){
   }
   if(!all)return false;
  }
- if(OPFS._ready){
+ if(OPFS._ready&&!_isRestoring){
   const lsTs=parseInt(localStorage.getItem(LAST_PERSIST_TS_KEY)||'0',10);
   const opfsTs=Number(all._updatedAt||0);
   if(lsTs>opfsTs+750){
@@ -647,9 +647,9 @@ async function _syncCacheFromOPFS(forceFresh){
    merged._updatedAt=Date.now();
    const wr=await OPFS.writeAll(merged);
    if(wr){
-    OPFS.invalidateRuntimeCache();
-    all=await OPFS.readAll(true);
-    if(!all)return false;
+   OPFS.invalidateRuntimeCache();
+   all=await OPFS.readAll(true);
+   if(!all)return false;
    }
   }
  }
@@ -2031,6 +2031,7 @@ const doRestore=async()=>{
   [KEYS.maint]: Array.isArray(d.maint)? d.maint : [],
   [KEYS.settings]: (d.settings&&typeof d.settings==='object') ? d.settings : {},
   _restoredAt: Date.now(),
+  _updatedAt: Date.now(),
   photos: (d.photos&&typeof d.photos==='object') ? d.photos : {}
  };
  if(OPFS._ready){
@@ -2038,14 +2039,12 @@ const doRestore=async()=>{
   if(!ok)throw new Error('Restauration OPFS impossible');
   localStorage.removeItem('autoloc_photos');
  }else{
-  if(d.veh)localStorage.setItem(KEYS.veh,JSON.stringify(normalized[KEYS.veh]));
-  if(d.cl)localStorage.setItem(KEYS.cl,JSON.stringify(normalized[KEYS.cl]));
-  if(d.res)localStorage.setItem(KEYS.res,JSON.stringify(normalized[KEYS.res]));
-  if(d.log)localStorage.setItem(KEYS.log,JSON.stringify(normalized[KEYS.log]));
-  if(d.maint)localStorage.setItem(KEYS.maint,JSON.stringify(normalized[KEYS.maint]));
-  localStorage.setItem(KEYS.settings,JSON.stringify(normalized[KEYS.settings]));
+  for(const key of Object.values(KEYS)){
+   localStorage.setItem(key,JSON.stringify(normalized[key]));
+  }
   localStorage.setItem('autoloc_photos',JSON.stringify(normalized.photos));
  }
+ try{localStorage.setItem(LAST_PERSIST_TS_KEY,String(normalized._updatedAt));}catch(_e){}
  invalidateCache();
  if(OPFS._ready){
   await _syncCacheFromOPFS(true);
