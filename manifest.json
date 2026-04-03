@@ -50,13 +50,13 @@
     {
       "name": "Nouvelle réservation",
       "short_name": "Réservation",
-      "url": "#reservations",
+      "url": "./index.html#reservations",
       "description": "Créer une nouvelle réservation"
     },
     {
       "name": "Véhicules",
       "short_name": "Véhicules",
-      "url": "#vehicules",
+      "url": "./index.html#vehicules",
       "description": "Gérer la flotte"
     }
   ]

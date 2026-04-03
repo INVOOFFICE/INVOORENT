@@ -1617,13 +1617,27 @@ const DEMO_DURATION=60 * 60;
  showPanel('admin');
 }
 }
+ /** Raccourcis PWA / lien direct : index.html#vehicules, #reservations, etc. */
+ function consumeInvooHashRoute(){
+ try{
+ const raw=(location.hash||'').replace(/^#/,'').trim().toLowerCase();
+ if(!raw)return null;
+ const allowed=new Set(['dashboard','vehicules','clients','reservations','calendrier','maintenance','parametres','guide']);
+ if(!allowed.has(raw))return null;
+ if(history.replaceState){
+ history.replaceState(null,'',location.pathname+location.search);
+ }
+ return raw;
+ }catch(e){return null;}
+ }
  function hideLogin(){
  document.getElementById('login-screen').classList.add('hidden');
  document.getElementById('sidebar').style.display='';
  document.getElementById('main').style.display='';
  window.dispatchEvent(new CustomEvent('invoo-login-hidden'));
  try{
- const lastPage=sessionStorage.getItem('autoloc_current_page')||'dashboard';
+ const fromHash=consumeInvooHashRoute();
+ const lastPage=fromHash||sessionStorage.getItem('autoloc_current_page')||'dashboard';
  const navLink=document.querySelector(`nav a[data-page="${lastPage}"]`);
  if(navLink)navigate(navLink);
 }catch(e){}

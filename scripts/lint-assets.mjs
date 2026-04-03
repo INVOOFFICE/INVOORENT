@@ -3,7 +3,7 @@
  * Usage : npm run lint  (depuis la racine du dépôt)
  * Note : extension .mjs ⇒ module ESM ; ne pas utiliser node --input-type=module avec un chemin fichier (erreur Node récent).
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = process.cwd();
@@ -57,3 +57,13 @@ if (missing.length > 0) {
 }
 
 console.log(`lint-assets OK — ${scriptPaths.length} fichier(s) <script src> présent(s) dans ASSETS.`);
+
+const missingFiles = assetStrings.filter((rel) => !existsSync(join(root, rel)));
+if (missingFiles.length > 0) {
+ console.error(
+  'lint-assets : fichier(s) listé(s) dans sw.js ASSETS mais absent(s) du disque :\n',
+  missingFiles.map((p) => `  - ${p}`).join('\n')
+ );
+ process.exit(1);
+}
+console.log(`lint-assets OK — ${assetStrings.length} entrée(s) ASSETS existent sur le disque.`);
