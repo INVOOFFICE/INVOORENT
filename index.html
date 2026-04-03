@@ -41,11 +41,11 @@
 <script defer src="js/06-core-utils.js"></script>
 <script defer src="js/07-master-key-utils.js"></script>
 <script defer src="js/license-activation.js"></script>
-<script defer src="js/01-app-core.js"></script>
 <script defer src="js/storage.js"></script>
 <script defer src="js/auth.js"></script>
+<!-- 01-app-core après storage/auth : façades APP.* et preloadOPFS/checkAuth prêtes ; OPFS branché à l’exécution via getters. -->
+<script defer src="js/01-app-core.js"></script>
 <script defer src="js/app.js"></script>
-<script defer src="js/sw-register.js"></script>
 <div id="pwa-install-banner" class="pwa-install-banner" aria-live="polite">
 <div class="pwa-install-inner">
 <div class="pwa-install-icon-wrap">
@@ -65,5 +65,6 @@
 <script defer src="js/03-supabase-sync.js"></script>
 <script defer src="js/04-import.js"></script>
 <script defer src="js/05-save-patch.js"></script>
+<script defer src="js/sw-register.js"></script>
 </body>
 </html>

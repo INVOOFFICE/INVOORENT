@@ -1,5 +1,6 @@
 // Prefer injecting this from a build step when available.
-const CACHE_NAME='INVOORENT-v63';
+const CACHE_NAME='INVOORENT-v71';
+/* ASSETS : garder aligné avec index.html (chaque <script src=…> + href manifest/css/icônes). */
 const ASSETS=[
  'index.html',
  'paiement.html',
@@ -43,12 +44,12 @@ const ASSETS=[
  'js/guide-html.js',
  'js/parametres-ui.js',
  'js/reservations-modal.js',
- 'js/01-app-core.js',
  'js/06-core-utils.js',
  'js/07-master-key-utils.js',
  'js/license-activation.js',
  'js/storage.js',
  'js/auth.js',
+ 'js/01-app-core.js',
  'js/app.js',
  'js/02-backup.js',
  'js/03-supabase-sync.js',
@@ -77,20 +78,19 @@ self.addEventListener('activate',e=>{
  self.clients.claim();
 });
 
-async function networkFirst(request){
- try{
-  const response=await fetch(request);
-  const clone=response.clone();
-  caches.open(CACHE_NAME).then(cache=>cache.put(request,clone));
-  return response;
- }catch(_err){
-  const cached=await caches.match(request);
-  if(cached)return cached;
-  if(request.mode==='navigate'){
-   return (await caches.match('index.html'))||(await caches.match('offline.html'));
-  }
-  return new Response('Offline',{status:503,statusText:'Offline'});
- }
+async function matchInCache(pathFromScope){
+ const base=self.registration.scope;
+ const abs=new URL(pathFromScope,base).href;
+ return (await caches.match(abs))||(await caches.match(pathFromScope));
+}
+
+/** Navigation hors ligne / URL inconnue : index.html (app shell) d’abord ; offline.html seulement en dernier recours. */
+async function navigateOfflineFallback(){
+ const indexPage=await matchInCache('index.html');
+ if(indexPage)return indexPage;
+ const offlinePage=await matchInCache('offline.html');
+ if(offlinePage)return offlinePage;
+ return new Response('Offline',{status:503,statusText:'Offline'});
 }
 
 async function cacheFirst(request){
@@ -103,33 +103,17 @@ async function cacheFirst(request){
   return response;
  }catch(_err){
   if(request.mode==='navigate'){
-   return (await caches.match('index.html'))||(await caches.match('offline.html'));
+   return navigateOfflineFallback();
   }
   return new Response('Offline',{status:503,statusText:'Offline'});
  }
 }
 
-function isAppShellRequest(request,url){
- if(request.method!=='GET')return false;
- if(request.mode==='navigate')return true;
- const p=url.pathname;
- if(p.startsWith('/api/'))return false;
- return(
-  /\.(html|js|css|json|png|jpe?g|webp|svg|ico|woff2?)$/i.test(p)||
-  p.includes('/assets/')||
-  p.includes('/css/')||
-  p.includes('/js/')
- );
-}
-
+/* Même origine, GET : cache d’abord (évite l’attente réseau hors ligne si la ressource est précachée).
+   Appels tiers (ex. Supabase) : autre origine → pas interceptés ici. */
 self.addEventListener('fetch',e=>{
  if(e.request.method!=='GET')return;
  const url=new URL(e.request.url);
  if(url.origin!==self.location.origin)return;
-
- if(isAppShellRequest(e.request,url)){
-  e.respondWith(cacheFirst(e.request));
-  return;
- }
- e.respondWith(networkFirst(e.request));
+ e.respondWith(cacheFirst(e.request));
 });

@@ -1,12 +1,12 @@
 /**
  * Façade APP-GUIDE (local-first) : l’implémentation OPFS vit dans 01-app-core.js (objet OPFS).
- * Expose window.APP.opfs.ready une fois 01-app-core chargé.
+ * Peut être chargé avant 01-app-core : `ready` lit window.OPFS à l’accès (pas au parse).
  */
 (function(){
  window.APP=window.APP||{};
- if(!window.APP.opfs&&window.OPFS){
+ if(!window.APP.opfs){
  window.APP.opfs={
- get ready(){return!!window.OPFS._ready;}
+ get ready(){return!!(window.OPFS&&window.OPFS._ready);}
  };
  }
  window.APP.storage=window.APP.storage||{

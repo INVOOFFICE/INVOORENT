@@ -3,6 +3,7 @@
   "private": true,
   "description": "INVOORENT app statique — tests optionnels",
   "scripts": {
+    "lint": "node scripts/lint-assets.mjs",
     "test": "node scripts/verify-backup-schema.mjs"
   }
 }
