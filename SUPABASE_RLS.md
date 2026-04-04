@@ -7,6 +7,12 @@ Ce projet active Row Level Security (RLS) sur:
 - `invoo_reservations`
 - `invoo_maintenances`
 
+## Temps reel (mises a jour instantanees entre appareils)
+
+L'app s'abonne aux changements Postgres (Realtime). Il faut **ajouter les 4 tables** a la publication `supabase_realtime` (Dashboard **Database → Publications** ou `ALTER PUBLICATION supabase_realtime ADD TABLE invoo_vehicules;` etc.). Sinon les autres utilisateurs ne voient les changements qu'au prochain pull ou en rafraichissant la page.
+
+Ouvrez la console du navigateur : un message `[INVOORENT Realtime] Abonné aux changements` confirme que le WebSocket est actif.
+
 ## Ce qui est applique
 
 - `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` sur les 4 tables.

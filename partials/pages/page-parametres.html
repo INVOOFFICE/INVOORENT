@@ -280,7 +280,8 @@ create policy "maint_delete_anon" on invoo_maintenances for delete to anon using
 -- 3) Pour un usage multi-utilisateur, ajouter owner_id et remplacer
 --    (true) par auth.uid() = owner_id.
 --
--- --- Temps réel (mises à jour sans recharger la page) ---
+-- --- Temps réel (obligatoire pour voir les changements des autres sans F5) ---
+-- Sans publication Realtime, la sync REST (toutes les 5 min ou clic) reste seule active.
 -- Dashboard Supabase → Database → Publications → supabase_realtime :
 -- ajoutez les 4 tables invoo_* (ou SQL une fois par table) :
 --   alter publication supabase_realtime add table invoo_vehicules;

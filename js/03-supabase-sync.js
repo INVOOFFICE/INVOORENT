@@ -19,8 +19,11 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  let _skipPushFromSaved=false;
  let _sbClient=null;
  let _sbCh=null;
+ /** Tables ayant reçu un événement Realtime pendant un pullAll — rejouées après la fin du pull. */
+ let _deferredRealtimeTables=new Set();
  const _rtDebounce={};
  const RT_DEBOUNCE_MS=400;
+ let _rtSubscribed=false;
  function refreshRenderedViews(){
 ['renderDashboard','renderVehicules','renderClients','renderReservations','renderCalendar','renderMaintenance'].forEach(function(fn){
  if(typeof window[fn]==='function')try{window[fn]();}catch(e){}
@@ -45,7 +48,10 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  function scheduleRealtimeSync(table){
  const localKey=TABLE_TO_LOCAL[table];
  if(!localKey||!SHARED_SYNC_KEYS.includes(localKey))return;
- if(_pulling)return;
+ if(_pulling){
+  _deferredRealtimeTables.add(table);
+  return;
+ }
  clearTimeout(_rtDebounce[table]);
  _rtDebounce[table]=setTimeout(function(){
   delete _rtDebounce[table];
@@ -62,24 +68,41 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
   })();
  },RT_DEBOUNCE_MS);
 }
+ function flushDeferredRealtime(){
+ if(_deferredRealtimeTables.size===0)return;
+ const tables=Array.from(_deferredRealtimeTables);
+ _deferredRealtimeTables.clear();
+ tables.forEach(function(t){scheduleRealtimeSync(t);});
+ }
  function startRealtime(){
- if(typeof supabase==='undefined'||typeof supabase.createClient!=='function')return;
+ _rtSubscribed=false;
+ if(typeof supabase==='undefined'||typeof supabase.createClient!=='function'){
+  console.warn('[INVOORENT Realtime] Client Supabase indisponible (assets/vendor/supabase.umd.js).');
+  return;
+ }
  stopRealtime();
  if(!isReady())return;
  const c=getCfg();
  try{
   _sbClient=supabase.createClient(c.url,c.key,{
-   auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+   auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
+   realtime:{params:{eventsPerSecond:10}}
   });
-  const ch=_sbClient.channel('invoo-realtime-sync',{config:{broadcast:{self:true},presence:{enabled:false}}});
+  const ch=_sbClient.channel('invoo-realtime-sync',{
+   config:{broadcast:{self:false},presence:{enabled:false}}
+  });
   Object.values(TABLE_MAP).forEach(function(table){
    ch.on('postgres_changes',{event:'*',schema:'public',table:table},function(){
     scheduleRealtimeSync(table);
    });
   });
   ch.subscribe(function(status,err){
-   if(status==='CHANNEL_ERROR'){
-    console.warn('[INVOORENT Realtime] channel',err);
+   if(status==='SUBSCRIBED'){
+    _rtSubscribed=true;
+    console.info('[INVOORENT Realtime] Abonné aux changements (invoo_*).');
+   }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+    _rtSubscribed=false;
+    console.warn('[INVOORENT Realtime]',status,err||'');
    }
   });
   _sbCh=ch;
@@ -87,6 +110,7 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
   console.warn('[INVOORENT Realtime]',e.message);
   _sbClient=null;
   _sbCh=null;
+  _rtSubscribed=false;
  }
 }
  function getCfg(){try{return JSON.parse(localStorage.getItem(CFG_KEY)||'{}');}catch(e){return{};}}
@@ -222,7 +246,10 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
 }catch(e){
  setStatus('Erreur : '+e.message,'#EF4444');
  console.warn('[AutoLoc Supabase v3]',e.message);
-}finally{_pulling=false;}
+}finally{
+ _pulling=false;
+ flushDeferredRealtime();
+}
 }
  async function pushRecord(localKey,item){
  if(_skipPushFromSaved)return;
@@ -284,7 +311,7 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  const on=!(cfg.autoSync!==false);
  setCfg(Object.assign({},cfg,{autoSync:on}));
  renderToggle(on);
- if(on){if(isReady()){startAuto();startRealtime();pullAll(false);}}
+ if(on){if(isReady()){startRealtime();startAuto();pullAll(false);}}
  else{stopAuto();setStatus('Sync auto désactivée','#8E90A6');}
 },
  saveConfig: async function(){
@@ -295,9 +322,9 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  setStatus('Connexion en cours…','#059669');
  setCfg({url,key,autoSync:true});
  try{
+ startRealtime();
  await pullAll(false);
  startAuto();
- startRealtime();
  renderToggle(true);
  setStatus('Connecté à Supabase','#059669');
 }catch(e){
@@ -312,6 +339,12 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  setStatus('Déconnecté','#8E90A6');
 }
 };
+ document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible'||!isReady())return;
+  if(isAutoEnabled()||_rtSubscribed){
+   pullAll(true).catch(function(){});
+  }
+ });
  window.addEventListener('load',function(){
  injectTopBadge();
  const cfg=getCfg();
@@ -323,9 +356,9 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  if(isReady()&&isAutoEnabled()){
  setStatus('Chargement…','#059669');
  setTimeout(function(){
+  startRealtime();
   pullAll(false).then(function(){
    startAuto();
-   startRealtime();
   });
  },1500);
 }else{
