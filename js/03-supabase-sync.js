@@ -22,8 +22,66 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  /** Tables ayant reçu un événement Realtime pendant un pullAll — rejouées après la fin du pull. */
  let _deferredRealtimeTables=new Set();
  const _rtDebounce={};
- const RT_DEBOUNCE_MS=400;
+ /** Secours seulement si le payload Realtime est incomplet — chemin rapide sans ce délai. */
+ const RT_DEBOUNCE_MS=200;
  let _rtSubscribed=false;
+ function readLocalArray(localKey){
+ let localArr=[];
+ try{
+ localArr=(typeof _memCache!=='undefined'&&_memCache[localKey]!==undefined)
+ ?_memCache[localKey]
+ :JSON.parse(localStorage.getItem(localKey)||'[]');
+ if(!Array.isArray(localArr))localArr=[];
+}catch(e){localArr=[];}
+ return localArr.slice();
+}
+ function writeLocalMerged(localKey,merged){
+ if(typeof _memCache!=='undefined')_memCache[localKey]=merged;
+ try{localStorage.setItem(localKey,JSON.stringify(merged));}catch(e){}
+ if(typeof OPFS!=='undefined'&&OPFS._ready)OPFS.write(localKey,merged).catch(function(){});
+ try{
+  _skipPushFromSaved=true;
+  window.dispatchEvent(new CustomEvent('autoloc:saved',{detail:{key:localKey,data:merged}}));
+ }catch(e){}
+ finally{_skipPushFromSaved=false;}
+}
+ /**
+  * Applique une ligne Postgres telle qu’envoyée par Realtime (sans GET complet).
+  * Retourne true si appliqué, false → laisser scheduleRealtimeSync faire un pull complet.
+  */
+ function applyRealtimePayload(table,payload){
+ const localKey=TABLE_TO_LOCAL[table];
+ if(!localKey||!SHARED_SYNC_KEYS.includes(localKey)||!payload)return false;
+ const et=String(payload.eventType||payload.event_type||'');
+ const rowNew=payload.new;
+ const rowOld=payload.old;
+ if(et==='DELETE'&&rowOld&&rowOld.id!=null&&rowOld.id!==''){
+  const id=String(rowOld.id);
+  const merged=readLocalArray(localKey).filter(function(x){return!x||String(x.id)!==id;});
+  writeLocalMerged(localKey,merged);
+  return true;
+ }
+ if((et==='INSERT'||et==='UPDATE')&&rowNew&&rowNew.id!=null&&rowNew.id!==''&&rowNew.data!==undefined&&rowNew.data!==null){
+  const id=String(rowNew.id);
+  const rd=new Date(rowNew.updated_at||rowNew.updatedAt||0).getTime();
+  const arr=readLocalArray(localKey);
+  const idx=arr.findIndex(function(x){return x&&String(x.id)===id;});
+  const item=Object.assign({},rowNew.data,{id});
+  if(rowNew.deleted_at)item._deleted=true;
+  if(idx>=0){
+   const loc=arr[idx];
+   const ld=new Date(loc.updatedAt||loc.createdAt||0).getTime();
+   if(ld>rd)return true;
+   arr[idx]=item;
+  }else{
+   if(rowNew.deleted_at)return true;
+   arr.push(item);
+  }
+  writeLocalMerged(localKey,arr);
+  return true;
+ }
+ return false;
+}
  const _RENDER_ORDER=['renderDashboard','renderVehicules','renderClients','renderReservations','renderCalendar','renderMaintenance'];
  const _PAGE_TO_RENDER={
   dashboard:'renderDashboard',
@@ -108,13 +166,27 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  try{
   _sbClient=supabase.createClient(c.url,c.key,{
    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
-   realtime:{params:{eventsPerSecond:10}}
+   realtime:{params:{eventsPerSecond:25}}
   });
   const ch=_sbClient.channel('invoo-realtime-sync',{
    config:{broadcast:{self:false},presence:{enabled:false}}
   });
   Object.values(TABLE_MAP).forEach(function(table){
-   ch.on('postgres_changes',{event:'*',schema:'public',table:table},function(){
+   ch.on('postgres_changes',{event:'*',schema:'public',table:table},function(payload){
+    if(_pulling){
+     _deferredRealtimeTables.add(table);
+     return;
+    }
+    try{
+     if(applyRealtimePayload(table,payload)){
+      refreshRenderedViews();
+      const hm=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      setStatus('Mis à jour '+hm,'#059669');
+      return;
+     }
+    }catch(e){
+     console.warn('[INVOORENT Realtime] patch',e.message);
+    }
     scheduleRealtimeSync(table);
    });
   });

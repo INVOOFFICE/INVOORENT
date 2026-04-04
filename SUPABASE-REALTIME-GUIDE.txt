@@ -1,0 +1,258 @@
+================================================================================
+  SUPABASE REAL-TIME SYNCHRONIZATION — IMPLEMENTATION GUIDE (INVOORENT)
+  How we combined REST sync + Postgres Realtime, reusable steps for other apps
+================================================================================
+
+This document describes the pattern used in this repository (offline-first PWA,
+local arrays in localStorage/OPFS + optional Supabase). File references are
+relative to the project root.
+
+
+--------------------------------------------------------------------------------
+1. HIGH-LEVEL ARCHITECTURE
+--------------------------------------------------------------------------------
+
+- Primary store: browser (localStorage + optional OPFS). The app works without
+  Supabase.
+
+- Remote mirror: one row per entity in Postgres, columns:
+    id          text PRIMARY KEY
+    data        jsonb        -- full JSON document for that record
+    deleted_at  timestamptz  -- NULL = active; soft-delete timestamp otherwise
+    updated_at  timestamptz  -- server-side change time (merge key)
+
+- REST API (PostgREST): pull all rows, upsert rows, patch for soft-delete.
+
+- Realtime: WebSocket subscription to postgres_changes on those tables. On each
+  notification, re-run a MERGE for that table (pull + merge + write local +
+  optional push), then refresh the UI.
+
+- Conflict rule: compare local updatedAt/createdAt with remote updated_at;
+  newer wins. Not a CRDT; simultaneous offline edits on the same id can lose
+  one side after sync.
+
+
+--------------------------------------------------------------------------------
+2. DATABASE SIDE (SUPABASE / POSTGRES)
+--------------------------------------------------------------------------------
+
+STEP A — Create tables (example names: invoo_* ; adapt to your project)
+
+  - Same shape for every synced collection:
+      id text primary key,
+      data jsonb,
+      deleted_at timestamptz,
+      updated_at timestamptz default now()
+
+  - Execute once in SQL Editor (see partials/pages/page-parametres.html for the
+    full script used here).
+
+STEP B — Row Level Security (RLS)
+
+  - ENABLE ROW LEVEL SECURITY on each table.
+  - Add explicit policies for role `anon` (SELECT, INSERT, UPDATE, DELETE) if
+    you use the anon key from the browser (personal / single-tenant only).
+  - For real multi-tenant SaaS, replace `USING (true)` with checks on
+    auth.uid() / owner_id and use authenticated users instead of anon.
+
+STEP C — Realtime publication (CRITICAL for instant multi-device updates)
+
+  Without this step, Postgres changes are NOT broadcast to clients: only the
+  periodic REST pull (e.g. every 5 minutes) or manual refresh will update UI.
+
+  Option 1 — Dashboard:
+    Database → Publications → supabase_realtime → enable your tables.
+
+  Option 2 — SQL (once per table):
+    alter publication supabase_realtime add table your_table_name;
+
+  Repeat for every table you listen to with postgres_changes.
+
+STEP D — Replica identity (optional but useful for UPDATE/DELETE payloads)
+
+  If you need full old_row in Realtime payloads:
+    alter table your_table replica identity full;
+  (Not always required if you always re-fetch via REST after an event.)
+
+
+--------------------------------------------------------------------------------
+3. FRONTEND DEPENDENCIES & SECURITY HEADERS
+--------------------------------------------------------------------------------
+
+STEP A — Supabase JS client (WebSocket Realtime)
+
+  - This project vendors the UMD bundle:
+      assets/vendor/supabase.umd.js
+    (from @supabase/supabase-js; see package.json devDependencies for version.)
+
+  - Load it BEFORE your sync module, e.g. in index.html:
+      <script defer src="assets/vendor/supabase.umd.js"></script>
+      <script defer src="js/03-supabase-sync.js"></script>
+
+STEP B — Content Security Policy (CSP)
+
+  - REST calls: https://*.supabase.co
+  - Realtime WebSocket: wss://*.supabase.co
+
+  Example meta tag fragment:
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co
+
+  Without wss://, the browser blocks the Realtime connection.
+
+
+--------------------------------------------------------------------------------
+4. REST SYNC LAYER (ALREADY PRESENT BEFORE REALTIME)
+--------------------------------------------------------------------------------
+
+Implemented in js/03-supabase-sync.js (conceptually portable):
+
+  - Pull: GET .../rest/v1/{table}?select=id,data,deleted_at,updated_at
+  - Upsert: POST with header Prefer: resolution=merge-duplicates
+  - Soft delete: PATCH row setting deleted_at and updated_at
+
+  - syncKey(localKey, table):
+      * Builds maps by id from remote + local arrays
+      * Merges using updated timestamps
+      * Writes merged array to localStorage + in-memory cache + OPFS if used
+      * Dispatches a custom event so the rest of the app refreshes UI
+      * Pushes any local-winning rows back to Supabase (upsert queue)
+
+  - pullAll(): loops all mapped tables; sets a global “pull in progress” flag.
+
+
+--------------------------------------------------------------------------------
+5. REALTIME LAYER (POSTGRES_CHANGES)
+--------------------------------------------------------------------------------
+
+STEP A — createClient
+
+  supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    },
+    realtime: { params: { eventsPerSecond: 10 } }  // optional throttle
+  });
+
+  We avoid Supabase Auth in this app; the anon key is sent as configured by the
+  client library for Realtime.
+
+STEP B — One channel, multiple table listeners
+
+  const ch = client.channel('unique-channel-name', {
+    config: { broadcast: { self: false }, presence: { enabled: false } }
+  });
+
+  For each table:
+    ch.on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'your_table' },
+      () => { scheduleSyncForThatTable('your_table'); }
+    );
+
+  ch.subscribe((status, err) => { /* log SUBSCRIBED / errors */ });
+
+  Important: register all .on('postgres_changes', ...) BEFORE subscribe().
+
+STEP C — Debounce per table
+
+  Bursts of writes fire many events. Debounce (e.g. 400 ms) per table name before
+  calling syncKey + UI refresh.
+
+STEP D — Do not lose events during a full REST pull
+
+  While pullAll() runs, set _pulling = true. If Realtime fires in between, push
+  the table name into a Set; in pullAll’s finally block, flush that Set and
+  schedule sync again. Otherwise those changes never merge until next event.
+
+STEP E — Avoid push storms after a merge
+
+  syncKey dispatches your “data saved” event so lists re-render. Your push
+  handler must NOT re-upsert every row to Supabase on that event when the merge
+  came from Realtime/pull. Use a boolean flag (e.g. _skipPushFromSaved) set true
+  only around the dispatch from syncKey, and make pushRecord() return
+  immediately when that flag is true.
+
+
+--------------------------------------------------------------------------------
+6. UI REFRESH AFTER SYNC
+--------------------------------------------------------------------------------
+
+  - After merge, refresh lists so the active screen updates immediately.
+
+  - Pattern used here: detect .page.active (e.g. page-clients → clients), call
+    that page’s render function first, then defer other renders with
+    setTimeout(0) so the visible view is not blocked by heavy dashboard work.
+
+  - Separately, a short debounced “dirty render” on the same custom event can
+    re-render only the currently active route (see _scheduleDirtyRender in
+    js/01-app-core.js).
+
+
+--------------------------------------------------------------------------------
+7. WIRING REALTIME TO APP LIFECYCLE
+--------------------------------------------------------------------------------
+
+  - startRealtime(): when URL + anon key are configured (and after stopRealtime
+    to avoid duplicate channels).
+
+  - stopRealtime(): on disconnect / logout; remove channel and clear debounce
+    timers.
+
+  - Call startRealtime() before or early alongside the first pullAll() so the
+    socket is ready; deferred-table logic handles overlap with pull.
+
+  - Optional: document.visibilitychange → silent pullAll() when tab becomes
+    visible again (recovers throttled WebSocket / background tabs).
+
+
+--------------------------------------------------------------------------------
+8. CHECKLIST TO REUSE IN ANOTHER PROJECT
+--------------------------------------------------------------------------------
+
+  [ ] Postgres tables with id, data jsonb, deleted_at, updated_at
+  [ ] RLS policies matching your threat model (anon vs authenticated)
+  [ ] Tables added to publication supabase_realtime
+  [ ] Map REST: merge/upsert/soft-delete documented and tested
+  [ ] CSP allows https://*.supabase.co and wss://*.supabase.co
+  [ ] @supabase/supabase-js loaded (bundled or CDN)
+  [ ] createClient + channel + postgres_changes for each table
+  [ ] Debounce Realtime handler per table
+  [ ] Queue Realtime tables while full pull runs; flush in pull’s finally
+  [ ] Guard push-on-save when applying remote merge (skipPush flag)
+  [ ] UI: refresh visible view first after merge
+  [ ] Console log on SUBSCRIBED to verify Realtime in production debugging
+
+
+--------------------------------------------------------------------------------
+9. LIMITATIONS & SECURITY (READ THIS)
+--------------------------------------------------------------------------------
+
+  - jsonb `data` is readable by anyone with project admin / service role. Not
+    end-to-end encryption.
+
+  - Anon key + permissive RLS = anyone with the key can read/write those rows.
+    Suitable for private projects or obfuscated keys, not public multi-tenant
+    data without stronger RLS and auth.
+
+  - Realtime delivery is “best effort”; combine with periodic REST pull for
+    resilience.
+
+  - Service worker caching: bump cache version when you change sync scripts so
+    clients load the latest Realtime code.
+
+
+--------------------------------------------------------------------------------
+10. KEY FILES IN THIS REPOSITORY
+--------------------------------------------------------------------------------
+
+  js/03-supabase-sync.js     — REST + Realtime + merge + lifecycle
+  index.html                 — CSP + script order (supabase.umd.js before sync)
+  partials/pages/page-parametres.html — SQL schema + RLS + publication comments
+  SUPABASE_RLS.md            — RLS + Realtime notes (Markdown)
+
+
+================================================================================
+  End of guide — adapt names (invoo_*, event names, storage keys) to your app.
+================================================================================
