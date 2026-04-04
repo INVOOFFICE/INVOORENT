@@ -314,7 +314,7 @@
         return (
           '<tr style="' +
           (overdue ? 'background:rgba(251,191,36,0.10);' : '') +
-          '"><td><strong>' +
+          '"><td data-label="Véhicule"><strong>' +
           (v
             ? window.AutoLocUtils.escapeHtml(v.marque) +
               ' ' +
@@ -322,17 +322,17 @@
             : '—') +
           '</strong><br><span style="font-size:0.72rem;color:var(--text3)">' +
           (v ? window.AutoLocUtils.escapeHtml(v.immat) : '') +
-          '</span></td><td>' +
+          '</span></td><td data-label="Type">' +
           window.AutoLocUtils.escapeHtml(m.type) +
-          '</td><td style="color:' +
+          '</td><td data-label="Date" style="color:' +
           (overdue ? 'var(--danger)' : 'var(--text)') +
           ';font-weight:' +
           (overdue ? '600' : '400') +
           '">' +
           new Date(m.date).toLocaleDateString('fr-FR') +
-          '</td><td>' +
+          '</td><td data-label="Km">' +
           (m.km ? m.km.toLocaleString('fr-FR') + ' km' : '—') +
-          '</td><td>\n ' +
+          '</td><td data-label="Seuil km">\n ' +
           (m.kmSeuil
             ? '<div style="font-size:0.8rem;color:' +
               (kmAlert ? '#fbbf24' : 'var(--text2)') +
@@ -348,23 +348,27 @@
               (kmAlert ? '#f59e0b' : '#2dd4bf') +
               '"></div></div></div>'
             : '—') +
-          '\n</td><td><span class="' +
+          '\n</td><td data-label="Statut"><span class="' +
           badgeCls +
           '">' +
           window.AutoLocUtils.escapeHtml(badgeLbl) +
-          '</span></td><td style="font-size:0.78rem;color:var(--text2);max-width:150px">' +
+          '</span></td><td data-label="Notes" style="font-size:0.78rem;color:var(--text2);max-width:150px">' +
           window.AutoLocUtils.escapeHtml(m.notes || '—') +
-          '</td><td style="display:flex;gap:5px;">\n ' +
+          '</td><td><div class="row-actions">\n ' +
           (m.statut !== 'effectuée'
-            ? '<button class="btn btn-sm btn-outline" onclick="markMaintDone(\'' +
+            ? '<button type="button" class="btn btn-sm btn-outline" aria-label="Marquer comme effectuée — ' +
+              window.AutoLocUtils.escapeHtml(
+                (v ? v.marque + ' ' + v.modele + ' · ' : '') + (m.type || 'intervention')
+              ) +
+              '" onclick="markMaintDone(\'' +
               window.AutoLocUtils.escapeHtml(m.id) +
               '\')" style="color:var(--success);border-color:var(--success);font-size:0.72rem">✓ Fait</button>'
             : '') +
-          '<button class="btn-icon" title="Modifier" onclick="openMaintModal(\'' +
+          '<button type="button" class="btn-icon" title="Modifier" aria-label="Modifier l\'intervention" onclick="openMaintModal(\'' +
           window.AutoLocUtils.escapeHtml(m.id) +
-          '\')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn-icon" title="Supprimer" onclick="deleteMaintenance(\'' +
+          '\')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button type="button" class="btn-icon" title="Supprimer" aria-label="Supprimer l\'intervention" onclick="deleteMaintenance(\'' +
           window.AutoLocUtils.escapeHtml(m.id) +
-          '\')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td></tr>'
+          '\')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div></td></tr>'
         );
       })
       .join('');
@@ -436,7 +440,11 @@
             (overdue ? 'maint-badge-alerte' : 'maint-badge-planifiee') +
             '">' +
             (overdue ? 'En retard' : kmAlert ? '⚠ Km seuil' : '') +
-            '</span><button class="btn btn-sm btn-primary" onclick="markMaintDone(\'' +
+            '</span><button type="button" class="btn btn-sm btn-primary" aria-label="Marquer comme effectuée — ' +
+            window.AutoLocUtils.escapeHtml(
+              (v ? v.marque + ' ' + v.modele + ' · ' : '') + (m.type || 'intervention')
+            ) +
+            '" onclick="markMaintDone(\'' +
             window.AutoLocUtils.escapeHtml(m.id) +
             '\')" style="margin-left:8px;font-size:0.72rem">✓ Fait</button></div>'
           );

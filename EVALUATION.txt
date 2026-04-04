@@ -1,0 +1,347 @@
+================================================================================
+  INVOORENT (offline) — ÉVALUATION GLOBALE
+================================================================================
+  Date          : 4 avril 2026
+  Contexte      : usage personnel, stockage 100% local, PWA offline
+  Version SW    : INVOORENT-v92
+  Note globale  : 69 / 100
+================================================================================
+
+
+--------------------------------------------------------------------------------
+1. PERFORMANCE PWA / OFFLINE                                           15 / 20
+--------------------------------------------------------------------------------
+
+  [OK] Cache-first SW         Précachage complet de 58 assets ; fallback
+                              offline.html → index.html robuste.
+
+  [OK] Vendors lazy           Chart.js / XLSX / jsPDF chargés à la demande
+                              via vendor-loader.js ; toujours précachés SW.
+
+  [OK] OPFS debounced         Flush 180 ms ; hasPendingWrites() vérifié
+                              avant fermeture de page (beforeunload/pagehide).
+
+  [OK] _dirty flags           Re-renders évités si la page n'a pas changé
+                              depuis le dernier affichage.
+
+  [OK] _memCache              Zéro lecture localStorage répétée dans les
+                              fonctions de rendu.
+
+  [~~] XHR synchrone          partials-loader.js bloque le parser HTML au
+                              chargement (~50-150 ms mesurables). Inévitable
+                              sans build step, mais impact perceptible sur
+                              connexion lente.
+
+  [~~] Renders complets       renderVehicules() / renderClients() recréent
+                              tout le tbody à chaque save. Pas d'update
+                              incrémental du DOM.
+
+  [~~] renderDashboard        Appelle renderAlerts() + renderDocsAlerts()
+                              systématiquement : 3 passes complètes sur
+                              toutes les réservations et véhicules.
+
+  [ ] Stale-while-revalidate  Absent. Une ressource corrompue en cache ne
+                              se rafraîchit jamais sans incrémenter CACHE_NAME.
+
+
+--------------------------------------------------------------------------------
+2. QUALITÉ DU CODE JS                                                  14 / 20
+--------------------------------------------------------------------------------
+
+  [OK] Pattern .attach()      Dependency injection propre ; modules
+                              indépendants et testables isolément.
+
+  [OK] Soft-delete cohérent   _deleted respecté dans tous les filtres,
+                              jointures et exports métier.
+
+  [OK] Gestion d'erreurs      try/catch quasi systématique ; dégradation
+                              gracieuse localStorage → OPFS.
+
+  [OK] Réconciliation storage Merge timestamp-based OPFS vs localStorage
+                              au démarrage ; réparation automatique si
+                              le fichier OPFS est absent.
+
+  [OK] Extraction modules     ~15 modules extraits du monolithe initial
+                              (reservations-modal, contract-print,
+                              dashboard-charts, calendar-view, etc.).
+
+  [~~] 01-app-core.js         2 249 lignes. Reste le monolithe central :
+                              CRUD véhicules/clients, auth, dashboard,
+                              alertes, backup, initialisation OPFS.
+
+  [~~] Code non formaté       Minifié sans build step. Une ligne = une
+                              fonction entière. Diffs illisibles, revue
+                              de code difficile.
+
+  [~~] uid()                  Date.now().toString(36) + 4 chars aléatoires
+                              base-36. Collision ~0,3 % sur 1 000 enregistre-
+                              ments créés dans la même milliseconde.
+
+  [~~] onclick= inline        Couplage fort HTML/JS dans les templates
+                              générés. Impose unsafe-inline en CSP.
+
+  [ ] Pas de types            Aucun TypeScript ni JSDoc sur les interfaces
+                              entre modules (paramètres de .attach(), KEYS,
+                              structures de données).
+
+
+--------------------------------------------------------------------------------
+3. SÉCURITÉ CÔTÉ CLIENT                                                12 / 15
+--------------------------------------------------------------------------------
+
+  Contexte : pas de serveur, données 100 % locales.
+
+  [OK] PBKDF2-SHA256          210 000 itérations pour le mot de passe login
+                              et la clé maître. Standard industrie 2024.
+
+  [OK] AES-GCM OPFS           Données chiffrées au repos. Clé non-exportable
+                              (CryptoKey) stockée dans IndexedDB.
+
+  [OK] Brute-force            Lockout 30 s après 5 tentatives, persisté en
+                              sessionStorage (login) et localStorage (master).
+                              TTL 24 h pour reset automatique.
+
+  [OK] Migration DK           La dérivée brute (dk en clair) supprimée de
+                              localStorage après migration vers CryptoKey ;
+                              seul un vérificateur (dkv = SHA-256(dk)) reste.
+
+  [OK] Timing-safe login      Comparaison PBKDF2 par XOR caractère à
+                              caractère (corrigé — anciennement got===rec.dk).
+
+  [OK] escapeHtml()           Systématique dans tous les renderers dynamiques
+                              (renderVehicules, renderClients, renderAlerts,
+                              rapport-modals, etc.).
+
+  [~~] LICENSE_SECRET         'INVRENT9338' visible dans license-activation.js.
+                              Par design (local-first), mais toute personne
+                              inspectant le JS peut générer des licences.
+
+  [~~] CSP unsafe-inline      Nécessaire pour les onclick= dans les templates.
+                              Neutralise la protection XSS par nonce/hash.
+
+  [~~] Demo token             btoa(JSON.stringify({ts})) — falsifiable depuis
+                              la console navigateur. Acceptable pour une démo
+                              locale sans enjeu de sécurité réel.
+
+
+--------------------------------------------------------------------------------
+4. UI/UX MOBILE                                                        12 / 20
+--------------------------------------------------------------------------------
+
+  [OK] Dark mode complet      Thème cohérent #0f1923, contraste travaillé,
+                              color-scheme: dark déclaré.
+
+  [OK] Sidebar mobile         Overlay semi-transparent, fermeture automatique
+                              à la navigation, animation CSS.
+
+  [OK] PWA installable        manifest.json complet (id, scope, shortcuts),
+                              prompt natif Android + bannière iOS manuelle.
+
+  [OK] Toasts SW              sw-register.js gère le cycle de vie du service
+                              worker proprement (toast "Mise à jour disponible"
+                              + rechargement contrôlé par l'utilisateur).
+
+  [OK] Modales adaptées       width: min(X, 100%), scroll interne, fond
+                              flou sur overlay.
+
+  [ ] Tables non-responsives  Les 4 tableaux principaux (véhicules, clients,
+                              réservations, maintenance) débordent horizontal-
+                              ement sur mobile. Pas de overflow-x: auto sur
+                              le wrapper ni de layout card alternatif.
+                              Point bloquant sur smartphone.
+
+  [ ] Boutons d'action denses Série de 4-5 btn-icon (~16 px) dans la dernière
+                              colonne des tableaux. Zones de tap trop petites
+                              (recommandation Apple/Google : 44 px minimum).
+
+  [~~] Calendrier             Grille véhicule × jour pouvant atteindre
+                              30 colonnes. Illisible sur écran < 400 px.
+
+  [~~] Dropdown recherche     Peut sortir du viewport sur petit écran si
+                              la barre de recherche est en haut de page.
+
+
+--------------------------------------------------------------------------------
+5. ACCESSIBILITÉ                                                         4 / 10
+--------------------------------------------------------------------------------
+
+  Note : AUDIT-STATUT.txt acte explicitement que l'accessibilité n'a pas
+  été traitée. Ce score reflète l'état réel, pas un oubli.
+
+  [OK] lang="fr"              Déclaré sur <html>.
+
+  [OK] aria-live              Présent sur la zone de toast de mise à jour SW.
+
+  [OK] aria-hidden            Sur les hints de date décoratifs
+                              (input-date-hint).
+
+  [ ] Modales sans ARIA       Aucun role="dialog", aria-modal="true",
+                              aria-labelledby. Les lecteurs d'écran
+                              n'identifient pas les dialogues comme tels.
+
+  [ ] Pas de focus trap       Tab peut sortir des modales ouvertes.
+                              WCAG 2.1 §2.1.2 (niveau A, critique).
+
+  [ ] Boutons icônes          title="Modifier" uniquement. Non lu sur mobile
+                              et par certains lecteurs d'écran. aria-label
+                              absent sur tous les btn-icon.
+
+  [ ] Pas de skip-link        La navigation clavier depuis zéro doit
+                              traverser toute la sidebar avant d'atteindre
+                              le contenu principal.
+
+  [ ] Contrastes non audités  Palette dark custom non vérifiée WCAG AA.
+                              Exemple : var(--text3) #8E90A6 sur fond #0f1923
+                              → ratio estimé ~3,5:1 (seuil requis : 4,5:1).
+
+
+--------------------------------------------------------------------------------
+6. FIABILITÉ DES DONNÉES                                               12 / 15
+--------------------------------------------------------------------------------
+
+  [OK] Double-write           save() écrit localStorage de façon synchrone
+                              puis OPFS en async. Pas de perte sur fermeture
+                              brutale du navigateur.
+
+  [OK] Réconciliation TS      Si localStorage plus récent que OPFS au
+                              démarrage (ex. : autre onglet), merge automatique
+                              avant de peupler le cache mémoire.
+
+  [OK] Réparation OPFS        _repairOpfsFromLocalStorage() recrée le fichier
+                              OPFS depuis localStorage si le fichier est absent
+                              ou corrompu.
+
+  [OK] Backup/restore         invooValidateBackupStructure() vérifie la
+                              structure avant import. Test Node automatisé
+                              (npm test). Import avec confirmation explicite.
+
+  [OK] Conflit de réservation Chevauchement de dates détecté et bloqué à
+                              la sauvegarde, avec nom du client en conflit.
+
+  [OK] Validation formulaires Immatriculation (3 formats marocains + étranger),
+                              email, téléphone, dates, tarif ≥ 0, année 1950-2100.
+
+  [OK] Race condition corrigée _memCacheVersion empêche _syncCacheFromOPFS()
+                              d'écraser un save() arrivé pendant son exécution
+                              async (corrigé — 4 avril 2026).
+
+  [OK] Dirty flags Supabase   autoloc:saved dispatché après chaque syncKey()
+                              pour mettre à jour les _dirty flags (corrigé).
+
+  [~~] uid() collision        Probabilité très faible (~0,3 % sur 1 000
+                              enregistrements simultanés) mais pas de
+                              UUID v4 complet (122 bits d'entropie).
+
+  [~~] 3 saves consécutifs    saveReservation() peut déclencher jusqu'à
+                              3 save(KEYS.veh) successifs. Non-atomique :
+                              3 événements autoloc:saved, 3 re-renders
+                              potentiels.
+
+  [~~] Supabase timestamp     Merge last-write-wins basé sur updatedAt.
+                              Drift d'horloge entre appareils peut favoriser
+                              une version plus ancienne.
+
+
+================================================================================
+  RÉCAPITULATIF
+================================================================================
+
+  Critère                       Note    Barre
+  ─────────────────────────────────────────────────────────────────────────────
+  Performance PWA / offline     15/20   ████████████████░░░░
+  Qualité du code JS            14/20   ██████████████░░░░░░
+  Sécurité côté client          12/15   ████████████░░░
+  UI/UX Mobile                  12/20   ████████████░░░░░░░░
+  Accessibilité                  4/10   ████░░░░░░
+  Fiabilité des données         12/15   ████████████░░░
+  ─────────────────────────────────────────────────────────────────────────────
+  TOTAL                         69/100
+
+
+================================================================================
+  POINTS FORTS
+================================================================================
+
+  - Architecture storage exemplaire pour une app locale : OPFS chiffré AES-GCM
+    + localStorage mirror + reconciliation + réparation automatique.
+
+  - Authentification sérieuse : PBKDF2-SHA256 / 210 000 itérations,
+    brute-force protection, clé AES non-exportable en IndexedDB.
+
+  - Offline réellement fonctionnel : toutes les features disponibles sans
+    réseau, sync Supabase optionnelle et non bloquante.
+
+  - Module .attach() cohérent : dependency injection propre entre les ~15
+    modules extraits et le core.
+
+
+================================================================================
+  LEVIERS D'AMÉLIORATION (impact / effort)
+================================================================================
+
+  PRIORITÉ HAUTE (gain rapide)
+
+  1. Tables responsives
+     Ajouter overflow-x: auto sur le wrapper des tableaux + media query
+     pour basculer en layout card sur mobile (< 600 px).
+     Gain estimé : +4 pts UI/UX.
+
+  2. ARIA sur les modales
+     Ajouter role="dialog", aria-modal="true", aria-labelledby sur chaque
+     .modal-overlay ; focus automatique sur le premier champ à l'ouverture.
+     Gain estimé : +2 pts accessibilité.
+
+  3. aria-label sur les boutons icônes
+     Remplacer title="..." par aria-label="..." sur tous les btn-icon
+     (Modifier, Supprimer, Historique, etc.).
+     Gain estimé : +1 pt accessibilité.
+
+  PRIORITÉ MOYENNE
+
+  4. Focus trap dans les modales
+     Intercepter Tab/Shift+Tab pour rester dans la modale ouverte.
+     Gain estimé : +1 pt accessibilité (WCAG 2.1 niveau A).
+
+  5. Continuer l'extraction de 01-app-core.js
+     Extraire : dashboard + alertes, CRUD véhicules/clients, section auth.
+     Gain estimé : +2 pts qualité code.
+
+  6. Consolider les saves dans saveReservation()
+     Réduire les 3 save(KEYS.veh) en un seul appel consolidé.
+     Gain estimé : +1 pt fiabilité + UX (moins de re-renders).
+
+  PRIORITÉ BASSE
+
+  7. Remplacer uid() par crypto.randomUUID()
+     Disponible dans les contextes sécurisés (HTTPS/localhost).
+     Gain estimé : élimination du risque de collision.
+
+  8. Audit contrastes WCAG AA
+     Vérifier les combinaisons --text3 / --text2 sur les fonds sombres.
+     Gain estimé : +1 pt accessibilité.
+
+
+================================================================================
+  CORRECTIONS APPLIQUÉES LE 4 AVRIL 2026
+================================================================================
+
+  sw.js
+    - clients.claim() déplacé dans e.waitUntil() (B1)
+
+  js/03-supabase-sync.js
+    - Upserts parallélisés Promise.all() (P1)
+    - autoloc:saved dispatché après syncKey() (B2 complément)
+
+  js/01-app-core.js
+    - _memCacheVersion : race condition OPFS vs save() corrigée (B2)
+    - getSettings() lit _memCache en priorité (B3)
+    - _showBannerWarning : textContent → innerHTML, espace et &amp; (B4)
+    - Espaces manquants dans renderAlerts() — 5 occurrences (B5)
+    - editVeh() / editClient() filtrent !x._deleted (B6)
+    - renderClients() utilise AutoLocCoreUtils.idEq() (B7)
+    - Comparaison PBKDF2 login : XOR timing-safe (S1)
+    - countPhotos() calculé une seule fois par ligne (P3)
+
+================================================================================
+  Fin du rapport — INVOORENT EVALUATION — 4 avril 2026
+================================================================================

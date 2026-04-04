@@ -1,5 +1,6 @@
 <!-- Sidebar, overlay, #main, topbar, bannières — pages injectées après (partials-loader) -->
 <!-- INVOORENT — sidebar + main (pages métier) -->
+<a href="#main" class="skip-link">Aller au contenu principal</a>
 <aside id="sidebar">
 <div class="sidebar-brand">
 <div class="sidebar-brand-inner">
@@ -124,7 +125,7 @@
 </div>
 <main id="main">
 <div class="topbar">
-<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+<button type="button" class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 <line x1="3" y1="6" x2="21" y2="6"/>
 <line x1="3" y1="12" x2="21" y2="12"/>
@@ -138,8 +139,8 @@
 <path d="M21 21l-4.35-4.35"/>
 </svg>
 <input type="text" id="global-search" placeholder="Rechercher véhicule, client, réservation" oninput="onGlobalSearch(event)" onkeydown="onSearchKey(event)" autocomplete="off">
-<button id="search-clear" onclick="clearSearch()" style="display:none">
-<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<button type="button" id="search-clear" onclick="clearSearch()" style="display:none" aria-label="Effacer la recherche">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
 <path d="M18 6L6 18M6 6l12 12"/>
 </svg>
 </button>
@@ -150,8 +151,8 @@
 <div class="topbar-actions">
 <span class="topbar-date" id="top-date">
 </span>
-<button class="btn btn-outline btn-sm" onclick="exportExcel()" title="Exporter Excel">
-<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px">
+<button type="button" class="btn btn-outline btn-sm" onclick="exportExcel()" title="Exporter Excel" aria-label="Exporter les données vers Excel">
+<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px" aria-hidden="true">
 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
 <polyline points="7 10 12 15 17 10"/>
 <line x1="12" y1="15" x2="12" y2="3"/>

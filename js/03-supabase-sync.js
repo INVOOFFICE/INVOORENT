@@ -123,9 +123,8 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  if(typeof _memCache!=='undefined')_memCache[localKey]=merged;
  try{localStorage.setItem(localKey,JSON.stringify(merged));}catch(e){}
  if(typeof OPFS!=='undefined'&&OPFS._ready)OPFS.write(localKey,merged).catch(()=>{});
- for(const row of upsertQueue){
- await supaUpsert(table,row);
-}
+ try{window.dispatchEvent(new CustomEvent('autoloc:saved',{detail:{key:localKey,data:merged}}));}catch(e){}
+ await Promise.all(upsertQueue.map(row=>supaUpsert(table,row)));
 }
  async function pullAll(silent){
  if(_pulling||!isReady())return;

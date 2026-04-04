@@ -158,7 +158,11 @@
       totalCA.toLocaleString('fr-FR') +
       'MAD</strong><span>CA généré</span></div></div> ' +
       buildHistTimeline(reservations, vehs, clientsActive);
-    modalEl.classList.add('open');
+    if (typeof global.openModal === 'function') global.openModal('hist-modal');
+    else {
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden', 'false');
+    }
   };
 
   global.showHistVeh = function (id) {
@@ -228,7 +232,11 @@
         }),
         clients
       );
-    modalEl.classList.add('open');
+    if (typeof global.openModal === 'function') global.openModal('hist-modal');
+    else {
+      modalEl.classList.add('open');
+      modalEl.setAttribute('aria-hidden', 'false');
+    }
   };
 
   global.invooHistoryModals = {

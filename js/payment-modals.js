@@ -104,11 +104,11 @@
         : '') +
       '<div class="pay-section-title">Caution</div><div class="caution-row"><label>Montant</label><input type="number" id="caution-input" value="' +
       caution +
-      '" placeholder="0" style="width:90px;padding:6px 10px;border:1.5px solid #93c5fd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:#dcedfd;color:#0f1923;"><span style="font-size:0.83rem;color:var(--text2)">MAD</span><div class="caution-status"><button class="caution-btn ' +
+      '" placeholder="0" style="width:90px;padding:6px 10px;border:1.5px solid #93c5fd;border-radius:8px;font-size:0.85rem;font-family:inherit;background:#dcedfd;color:#0f1923;"><span style="font-size:0.83rem;color:var(--text2)">MAD</span><div class="caution-status"><button type="button" class="caution-btn ' +
       (cautionStatut === 'encaissee' ? 'active-encaissee' : '') +
-      '" onclick="setCautionStatut(\'encaissee\')">Encaissée</button><button class="caution-btn ' +
+      '" onclick="setCautionStatut(\'encaissee\')" aria-label="Marquer la caution comme encaissée">Encaissée</button><button type="button" class="caution-btn ' +
       (cautionStatut === 'restituee' ? 'active-restituee' : '') +
-      '" onclick="setCautionStatut(\'restituee\')">Restituée</button></div><button class="btn btn-sm btn-outline" onclick="saveCaution()">Enreg.</button></div> ' +
+      '" onclick="setCautionStatut(\'restituee\')" aria-label="Marquer la caution comme restituée">Restituée</button></div><button type="button" class="btn btn-sm btn-outline" onclick="saveCaution()" aria-label="Enregistrer le montant de la caution">Enreg.</button></div> ' +
       (caution > 0
         ? '<p style="font-size:0.74rem;color:var(--text3);margin:-4px 0 10px;padding-left:4px">Statut caution :<strong style="color:' +
           (cautionStatut === 'restituee'
@@ -159,15 +159,15 @@
                 '· ' +
                 global.AutoLocUtils.escapeHtml(fmt(p.date)) +
                 (p.note ? ' · ' + global.AutoLocUtils.escapeHtml(p.note) : '') +
-                '</small></div><button class="pay-item-del" onclick="deletePaiement(' +
+                '</small></div><button type="button" class="pay-item-del" onclick="deletePaiement(' +
                 i +
-                ')" title="Supprimer"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>'
+                ')" title="Supprimer ce versement" aria-label="Supprimer ce versement"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div>'
               );
             })
             .join('')) +
       '</div><div class="pay-section-title">Ajouter un versement</div><div class="pay-add-top" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;"><div class="form-group"><label>Montant(MAD)</label><input type="number" id="pay-montant" placeholder="' +
       (reste > 0 ? reste : '') +
-      '" class="inline-input"></div><div class="form-group"><label>Type</label><select id="pay-type" class="inline-input"><option value="avance">Avance</option><option value="solde">Solde</option><option value="autre">Autre</option></select></div><div class="form-group"><label>Mode</label><select id="pay-mode" class="inline-input"><option>Espèces</option><option>Virement</option><option>Chèque</option></select></div><button class="btn btn-primary pay-add-submit" onclick="addPaiement()" style="margin-bottom:0;align-self:flex-end;height:38px"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pay-add-bottom" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;"><div class="form-group"><label>Date du versement</label><input type="date" id="pay-date" value="' +
+      '" class="inline-input"></div><div class="form-group"><label>Type</label><select id="pay-type" class="inline-input"><option value="avance">Avance</option><option value="solde">Solde</option><option value="autre">Autre</option></select></div><div class="form-group"><label>Mode</label><select id="pay-mode" class="inline-input"><option>Espèces</option><option>Virement</option><option>Chèque</option></select></div><button type="button" class="btn btn-primary pay-add-submit" onclick="addPaiement()" aria-label="Ajouter le versement" style="margin-bottom:0;align-self:flex-end;height:38px"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pay-add-bottom" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;"><div class="form-group"><label>Date du versement</label><input type="date" id="pay-date" value="' +
       new Date().toISOString().slice(0, 10) +
       '" class="inline-input"></div><div class="form-group"><label>Note(optionnel)</label><input type="text" id="pay-note" placeholder="ex: solde final,reçu N°…" class="inline-input"></div></div> ';
     x.initNativeDatePickers();

@@ -616,3 +616,93 @@ input[type="number"]{
   grid-column:1 / -1;
  }
 }
+
+/* STRATEGY-85: skip link (A-1), touch targets icônes (U-1), iOS zoom inputs (U-2), calendrier scroll (U-3) */
+.skip-link{
+ position:absolute;
+ left:16px;
+ top:-100%;
+ z-index:99999;
+ background:var(--accent2);
+ color:#0f1923;
+ padding:8px 16px;
+ border-radius:0 0 8px 8px;
+ font-weight:700;
+ font-size:0.88rem;
+ text-decoration:none;
+ transition:top 0.15s ease;
+}
+.skip-link:focus{
+ top:0;
+ outline:2px solid var(--accent3);
+ outline-offset:2px;
+}
+.btn-icon{
+ min-width:36px;
+ min-height:36px;
+}
+.cal-table-wrap--scroll{
+ overflow-x:auto;
+ -webkit-overflow-scrolling:touch;
+ width:100%;
+ max-width:100%;
+}
+@media (max-width:768px){
+ .btn-icon{
+  min-width:44px;
+  min-height:44px;
+ }
+ input,select,textarea{
+  font-size:16px !important;
+ }
+}
+
+/* STRATEGY-85 U-4 / U-5 — tables en cartes sur petit écran */
+@media (max-width:600px){
+ .data-table thead{display:none;}
+ .data-table tbody tr{
+  display:block;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  margin-bottom:10px;
+  padding:10px 12px;
+ }
+ .data-table tbody td{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:5px 0;
+  border:none;
+  font-size:0.82rem;
+  gap:8px;
+ }
+ .data-table tbody td[data-label]::before{
+  content:attr(data-label);
+  font-weight:600;
+  color:var(--text3);
+  font-size:0.75rem;
+  min-width:100px;
+  flex-shrink:0;
+ }
+ .data-table tbody td:last-child{
+  border-top:1px solid var(--border);
+  margin-top:6px;
+  padding-top:8px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:6px;
+ }
+ .data-table tbody td:last-child::before{display:none;}
+ .row-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:flex-end;
+ }
+ .row-actions .btn-icon{
+  min-width:40px;
+  min-height:40px;
+  border-radius:10px;
+ }
+}

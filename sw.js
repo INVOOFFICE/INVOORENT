@@ -1,5 +1,5 @@
 // Prefer injecting this from a build step when available.
-const CACHE_NAME='INVOORENT-v92';
+const CACHE_NAME='INVOORENT-v103';
 /* ASSETS : garder aligné avec index.html (chaque <script src=…> + href manifest/css/icônes). */
 const ASSETS=[
  'index.html',
@@ -49,6 +49,8 @@ const ASSETS=[
  'js/license-activation.js',
  'js/storage.js',
  'js/auth.js',
+ 'js/alerts-ui.js',
+ 'js/dashboard-ui.js',
  'js/01-app-core.js',
  'js/app.js',
  'js/02-backup.js',
@@ -69,13 +71,10 @@ self.addEventListener('message',e=>{
 });
 self.addEventListener('activate',e=>{
  e.waitUntil(
- caches.keys().then(keys=>
- Promise.all(
- keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))
-)
-)
-);
- self.clients.claim();
+  caches.keys()
+   .then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k))))
+   .then(()=>self.clients.claim())
+ );
 });
 
 async function matchInCache(pathFromScope){

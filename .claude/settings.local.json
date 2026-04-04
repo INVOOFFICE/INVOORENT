@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check \"C:/Users/M2B PRO/Desktop/GITHUB/RENT/offline/js/01-app-core.js\")",
+      "Bash(node --check \"C:/Users/M2B PRO/Desktop/GITHUB/RENT/offline/js/03-supabase-sync.js\")",
+      "Bash(node --check \"C:/Users/M2B PRO/Desktop/GITHUB/RENT/offline/sw.js\")",
+      "Bash(npm test:*)"
+    ]
+  }
+}
