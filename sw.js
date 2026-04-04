@@ -1,5 +1,5 @@
 // Prefer injecting this from a build step when available.
-const CACHE_NAME='INVOORENT-v109';
+const CACHE_NAME='INVOORENT-v110';
 /* ASSETS : garder aligné avec index.html (chaque <script src=…> + href manifest/css/icônes). */
 const ASSETS=[
  'index.html',
