@@ -596,22 +596,22 @@ function _scheduleDirtyRender(){
  if(_saveRenderTimer)return;
  _saveRenderTimer=setTimeout(function(){
   _saveRenderTimer=null;
-  const pg=sessionStorage.getItem('autoloc_current_page')||'dashboard';
-  const link=document.querySelector('nav a[data-page="'+pg+'"]');
-  if(link&&_dirty[pg]){
-   _dirty[pg]=false;
-   if(pg==='dashboard'){renderDashboard();if(typeof renderMaintAlerts==='function')renderMaintAlerts();}
-   else if(pg==='vehicules'&&typeof renderVehicules==='function')renderVehicules();
-   else if(pg==='clients'&&typeof renderClients==='function')renderClients();
-   else if(pg==='reservations'&&typeof window.renderReservations==='function')window.renderReservations();
-   else if(pg==='calendrier'&&typeof renderCalendar==='function')renderCalendar();
-   else if(pg==='maintenance'&&typeof renderMaintenance==='function')renderMaintenance();
-   else if(pg==='parametres'&&typeof renderParametres==='function'){
-    renderParametres();
-    setTimeout(function(){if(typeof renderStorageGauge==='function')renderStorageGauge();},50);
-   }
-   else if(pg==='guide'&&typeof renderGuide==='function')renderGuide();
+  const active=document.querySelector('.page.active');
+  if(!active||!active.id||active.id.indexOf('page-')!==0)return;
+  const pg=active.id.slice(5);
+  if(!_dirty[pg])return;
+  _dirty[pg]=false;
+  if(pg==='dashboard'){renderDashboard();if(typeof renderMaintAlerts==='function')renderMaintAlerts();}
+  else if(pg==='vehicules'&&typeof renderVehicules==='function')renderVehicules();
+  else if(pg==='clients'&&typeof renderClients==='function')renderClients();
+  else if(pg==='reservations'&&typeof window.renderReservations==='function')window.renderReservations();
+  else if(pg==='calendrier'&&typeof renderCalendar==='function')renderCalendar();
+  else if(pg==='maintenance'&&typeof renderMaintenance==='function')renderMaintenance();
+  else if(pg==='parametres'&&typeof renderParametres==='function'){
+   renderParametres();
+   setTimeout(function(){if(typeof renderStorageGauge==='function')renderStorageGauge();},50);
   }
+  else if(pg==='guide'&&typeof renderGuide==='function')renderGuide();
  },30);
 }
 // Storage contract:
@@ -1060,12 +1060,18 @@ function renderClients(){
  let data=load(KEYS.cl).filter(c=>!c._deleted);
  if(q)data=data.filter(c=>`${c.prenom||''}${c.nom||''}${c.tel||''}${c.cin||''}${c.email||''}${c.permis||''}${c.ville||''}${c.nat||''}${c.adresse||''}`.toLowerCase().includes(q));
  const resData=load(KEYS.res).filter(r=>!r._deleted);
+ const locCountByClient=new Map();
+ resData.forEach(function(r){
+  const cid=r&&r.clientId;
+  if(cid===undefined||cid===null||cid==='')return;
+  const key=String(cid);
+  locCountByClient.set(key,(locCountByClient.get(key)||0)+1);
+ });
  const tbody=document.getElementById('client-tbody');
  if(!tbody)return;
  if(!data.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty-state"><svg viewBox="0 0 48 48" fill="none"><circle cx="20" cy="18" r="8" fill="#F5F5F7" stroke="#D0D0D8" stroke-width="1.5"/><path d="M6 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#D0D0D8" stroke-width="1.5" stroke-linecap="round"/><circle cx="38" cy="12" r="8" fill="#0C0E14"/><path d="M35 12h6M38 9v6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg><h4>Aucun client</h4><p>Ajoutez votre premier client</p></div></td></tr>`;return;}
  tbody.innerHTML=data.map(c=>{
- const _idEqCl=window.AutoLocCoreUtils&&typeof window.AutoLocCoreUtils.idEq==='function'?window.AutoLocCoreUtils.idEq:(a,b)=>String(a)===String(b);
- const locs=resData.filter(r=>_idEqCl(r.clientId,c.id)).length;
+ const locs=locCountByClient.get(String(c.id))||0;
  const _clPhotoCount=PHOTOS_ENABLED?countPhotos('cl',c.id):0;
  const photosBtn=PHOTOS_ENABLED ? `<button type="button" class="btn-icon" title="Photos" aria-label="Photos de ${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}" data-type="cl" data-id="${window.AutoLocUtils.escapeHtml(c.id)}" data-title="${window.AutoLocUtils.escapeHtml(c.prenom)} ${window.AutoLocUtils.escapeHtml(c.nom)}" onclick="openPhotosModalFromBtn(this)" style="position:relative"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
  ${_clPhotoCount>0?`<span style="position:absolute;top:-4px;right:-4px;background:#2dd4bf;color:#0f1923;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${_clPhotoCount}</span>`:''}

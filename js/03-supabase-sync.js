@@ -24,11 +24,33 @@ const SHARED_SYNC_KEYS=(Array.isArray(window.AUTOLOC_SYNC_KEYS)&&window.AUTOLOC_
  const _rtDebounce={};
  const RT_DEBOUNCE_MS=400;
  let _rtSubscribed=false;
+ const _RENDER_ORDER=['renderDashboard','renderVehicules','renderClients','renderReservations','renderCalendar','renderMaintenance'];
+ const _PAGE_TO_RENDER={
+  dashboard:'renderDashboard',
+  vehicules:'renderVehicules',
+  clients:'renderClients',
+  reservations:'renderReservations',
+  calendrier:'renderCalendar',
+  maintenance:'renderMaintenance'
+ };
+ /** Rafraîchit d’abord la page visible (temps réel perçu plus rapide sur Clients, etc.), puis le reste après cession du thread. */
  function refreshRenderedViews(){
-['renderDashboard','renderVehicules','renderClients','renderReservations','renderCalendar','renderMaintenance'].forEach(function(fn){
- if(typeof window[fn]==='function')try{window[fn]();}catch(e){}
-});
-}
+  let pg='';
+  try{
+   const active=document.querySelector('.page.active');
+   if(active&&active.id&&active.id.indexOf('page-')===0){pg=active.id.slice(5);}
+  }catch(e){}
+  const primary=pg&&_PAGE_TO_RENDER[pg]?_PAGE_TO_RENDER[pg]:null;
+  if(primary&&typeof window[primary]==='function'){
+   try{window[primary]();}catch(e){}
+  }
+  setTimeout(function(){
+   _RENDER_ORDER.forEach(function(fn){
+    if(fn===primary)return;
+    if(typeof window[fn]==='function')try{window[fn]();}catch(e){}
+   });
+  },0);
+ }
  function clearRealtimeDebounce(){
  Object.keys(_rtDebounce).forEach(function(t){
   clearTimeout(_rtDebounce[t]);
