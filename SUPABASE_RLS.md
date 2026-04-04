@@ -2,10 +2,10 @@
 
 Ce projet active Row Level Security (RLS) sur:
 
-- `autoloc_vehicules`
-- `autoloc_clients`
-- `autoloc_reservations`
-- `autoloc_maintenances`
+- `invoo_vehicules`
+- `invoo_clients`
+- `invoo_reservations`
+- `invoo_maintenances`
 
 ## Ce qui est applique
 

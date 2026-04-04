@@ -206,29 +206,31 @@
 <span class="supa-sql-toggle" aria-hidden="true">-</span>
 </summary>
 <pre id="supa-sql-block" style="font-family:var(--font-mono);font-size:0.72rem;color:#A8B4C8;line-height:1.7;white-space:pre-wrap;margin:10px 0 0">-- ============================================================
--- INVOORENT - Schema + RLS (usage perso / petite equipe)
--- Executer ce script UNE SEULE FOIS dans Supabase SQL Editor
+-- INVOORENT — schéma + RLS (usage perso / petite équipe)
+-- À exécuter UNE SEULE FOIS dans Supabase → SQL Editor
+-- Tables : préfixe invoo_ (produit INVOORENT). Si vous aviez déjà
+-- autoloc_* d’une ancienne version, renommez-les ou migrez les données.
 -- ============================================================
 
-create table if not exists autoloc_vehicules (
+create table if not exists invoo_vehicules (
  id text primary key,
  data jsonb,
  deleted_at timestamptz,
  updated_at timestamptz default now()
 );
-create table if not exists autoloc_clients (
+create table if not exists invoo_clients (
  id text primary key,
  data jsonb,
  deleted_at timestamptz,
  updated_at timestamptz default now()
 );
-create table if not exists autoloc_reservations (
+create table if not exists invoo_reservations (
  id text primary key,
  data jsonb,
  deleted_at timestamptz,
  updated_at timestamptz default now()
 );
-create table if not exists autoloc_maintenances (
+create table if not exists invoo_maintenances (
  id text primary key,
  data jsonb,
  deleted_at timestamptz,
@@ -236,47 +238,55 @@ create table if not exists autoloc_maintenances (
 );
 
 -- Activer RLS sur toutes les tables
-alter table autoloc_vehicules enable row level security;
-alter table autoloc_clients enable row level security;
-alter table autoloc_reservations enable row level security;
-alter table autoloc_maintenances enable row level security;
+alter table invoo_vehicules enable row level security;
+alter table invoo_clients enable row level security;
+alter table invoo_reservations enable row level security;
+alter table invoo_maintenances enable row level security;
 
 -- Supprimer d'anciennes policies trop larges si elles existent
-drop policy if exists "anon all" on autoloc_vehicules;
-drop policy if exists "anon all" on autoloc_clients;
-drop policy if exists "anon all" on autoloc_reservations;
-drop policy if exists "anon all" on autoloc_maintenances;
+drop policy if exists "anon all" on invoo_vehicules;
+drop policy if exists "anon all" on invoo_clients;
+drop policy if exists "anon all" on invoo_reservations;
+drop policy if exists "anon all" on invoo_maintenances;
 
 -- Policies explicites pour role anon (app locale + cle anon)
 -- Vehicules
-create policy "veh_select_anon" on autoloc_vehicules for select to anon using (true);
-create policy "veh_insert_anon" on autoloc_vehicules for insert to anon with check (true);
-create policy "veh_update_anon" on autoloc_vehicules for update to anon using (true) with check (true);
-create policy "veh_delete_anon" on autoloc_vehicules for delete to anon using (true);
+create policy "veh_select_anon" on invoo_vehicules for select to anon using (true);
+create policy "veh_insert_anon" on invoo_vehicules for insert to anon with check (true);
+create policy "veh_update_anon" on invoo_vehicules for update to anon using (true) with check (true);
+create policy "veh_delete_anon" on invoo_vehicules for delete to anon using (true);
 
 -- Clients
-create policy "cl_select_anon" on autoloc_clients for select to anon using (true);
-create policy "cl_insert_anon" on autoloc_clients for insert to anon with check (true);
-create policy "cl_update_anon" on autoloc_clients for update to anon using (true) with check (true);
-create policy "cl_delete_anon" on autoloc_clients for delete to anon using (true);
+create policy "cl_select_anon" on invoo_clients for select to anon using (true);
+create policy "cl_insert_anon" on invoo_clients for insert to anon with check (true);
+create policy "cl_update_anon" on invoo_clients for update to anon using (true) with check (true);
+create policy "cl_delete_anon" on invoo_clients for delete to anon using (true);
 
 -- Reservations
-create policy "res_select_anon" on autoloc_reservations for select to anon using (true);
-create policy "res_insert_anon" on autoloc_reservations for insert to anon with check (true);
-create policy "res_update_anon" on autoloc_reservations for update to anon using (true) with check (true);
-create policy "res_delete_anon" on autoloc_reservations for delete to anon using (true);
+create policy "res_select_anon" on invoo_reservations for select to anon using (true);
+create policy "res_insert_anon" on invoo_reservations for insert to anon with check (true);
+create policy "res_update_anon" on invoo_reservations for update to anon using (true) with check (true);
+create policy "res_delete_anon" on invoo_reservations for delete to anon using (true);
 
 -- Maintenances
-create policy "maint_select_anon" on autoloc_maintenances for select to anon using (true);
-create policy "maint_insert_anon" on autoloc_maintenances for insert to anon with check (true);
-create policy "maint_update_anon" on autoloc_maintenances for update to anon using (true) with check (true);
-create policy "maint_delete_anon" on autoloc_maintenances for delete to anon using (true);
+create policy "maint_select_anon" on invoo_maintenances for select to anon using (true);
+create policy "maint_insert_anon" on invoo_maintenances for insert to anon with check (true);
+create policy "maint_update_anon" on invoo_maintenances for update to anon using (true) with check (true);
+create policy "maint_delete_anon" on invoo_maintenances for delete to anon using (true);
 
 -- Notes securite:
 -- 1) Utiliser uniquement la cle anon cote client.
 -- 2) Ne jamais exposer la cle service_role dans l'app.
 -- 3) Pour un usage multi-utilisateur, ajouter owner_id et remplacer
---    (true) par auth.uid() = owner_id.</pre>
+--    (true) par auth.uid() = owner_id.
+--
+-- --- Temps réel (mises à jour sans recharger la page) ---
+-- Dashboard Supabase → Database → Publications → supabase_realtime :
+-- ajoutez les 4 tables invoo_* (ou SQL une fois par table) :
+--   alter publication supabase_realtime add table invoo_vehicules;
+--   alter publication supabase_realtime add table invoo_clients;
+--   alter publication supabase_realtime add table invoo_reservations;
+--   alter publication supabase_realtime add table invoo_maintenances;</pre>
 </details>
 </div>
 <div style="display:flex;flex-direction:column;gap:12px">

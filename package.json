@@ -5,5 +5,8 @@
   "scripts": {
     "lint": "node scripts/lint-assets.mjs",
     "test": "node scripts/verify-backup-schema.mjs"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.101.1"
   }
 }

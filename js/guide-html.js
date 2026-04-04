@@ -284,7 +284,7 @@ tip('warn','⚠️','Cette section est informative tant que la fonctionnalité r
  cards(
  ['Principe de fonctionnement',['Vos données restent toujours en local (OPFS + localStorage) — la sync est un complément','À chaque modification (ajout, suppression, paiement), les données sont poussées vers Supabase instantanément','Pull automatique toutes les 5 minutes pour récupérer les changements d\'un autre appareil','Stratégie offline-first : l\'app fonctionne normalement même sans connexion']],
  ['Configuration requise (une seule fois)',['Créer un compte gratuit sur supabase.com','Créer un nouveau projet (gratuit jusqu\'à 500 MB)','Copier l\'URL du projet et la clé anon/public','Coller dans Paramètres → Synchronisation Supabase → Enregistrer']],
- ['Tables Supabase à créer',['Exécuter le script SQL fourni dans l\'éditeur SQL Supabase (1 fois)','4 tables : autoloc_vehicules, autoloc_clients, autoloc_reservations, autoloc_maintenances','Schéma simple : id (text), data (jsonb), deleted_at, updated_at']]
+ ['Tables Supabase à créer',['Exécuter le script SQL fourni dans l\'éditeur SQL Supabase (1 fois)','4 tables : invoo_vehicules, invoo_clients, invoo_reservations, invoo_maintenances (INVOORENT)','Schéma simple : id (text), data (jsonb), deleted_at, updated_at']]
  )+
  steps(
  ['1','Créer le projet Supabase','Allez sur supabase.com → New Project. Notez l\'URL (https://xxx.supabase.co) et la clé API (anon/public).'],

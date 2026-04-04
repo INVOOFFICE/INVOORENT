@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; worker-src 'self' blob:">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; worker-src 'self' blob:">
 <link rel="stylesheet" href="css/styles.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f1923">
@@ -64,6 +64,7 @@
 </div>
 </div>
 <script defer src="js/02-backup.js"></script>
+<script defer src="assets/vendor/supabase.umd.js"></script>
 <script defer src="js/03-supabase-sync.js"></script>
 <script defer src="js/04-import.js"></script>
 <script defer src="js/05-save-patch.js"></script>

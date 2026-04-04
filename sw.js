@@ -1,5 +1,5 @@
 // Prefer injecting this from a build step when available.
-const CACHE_NAME='INVOORENT-v103';
+const CACHE_NAME='INVOORENT-v105';
 /* ASSETS : garder aligné avec index.html (chaque <script src=…> + href manifest/css/icônes). */
 const ASSETS=[
  'index.html',
@@ -21,6 +21,7 @@ const ASSETS=[
  'assets/vendor/chart.umd.js',
  'assets/vendor/xlsx.full.min.js',
  'assets/vendor/jspdf.umd.min.js',
+ 'assets/vendor/supabase.umd.js',
  'assets/autoloc-icon-192.png',
  'assets/autoloc-icon-512.png',
  'css/styles.css',
