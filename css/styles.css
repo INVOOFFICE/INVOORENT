@@ -1,109 +1,55 @@
 :root{--font-display:'Syne','Segoe UI',system-ui,-apple-system,sans-serif;--font-body:'DM Sans','Segoe UI',system-ui,-apple-system,sans-serif;--font-mono:'DM Mono','Consolas','Menlo','Monaco',monospace}
-/* Sauvegarde recommandée : petite carte centrée sous la topbar (thème surface / teal, pas bandeau orange pleine largeur) */
-#backup-reminder-banner{
- left:var(--sidebar-w) !important;
- right:0 !important;
- top:calc(var(--topbar-h) + 10px) !important;
- background:transparent !important;
- border:none !important;
- box-shadow:none !important;
- padding:0 20px !important;
- z-index:48 !important;
- display:none;
- justify-content:center;
+/* Rappel sauvegarde : modale (remplace l’ancienne bannière sous la topbar) */
+#backup-reminder-modal .modal.backup-reminder-modal{
+ max-width:min(440px,calc(100vw - 32px));
+}
+#backup-reminder-modal .backup-reminder-modal-body{
+ padding-top:2px;
+}
+#backup-reminder-modal .backup-reminder-modal-row{
+ display:flex;
+ gap:14px;
  align-items:flex-start;
- pointer-events:none;
 }
-#backup-reminder-banner.visible{display:flex !important;}
-#backup-reminder-banner .backup-reminder-inner{
- pointer-events:auto;
- max-width:min(440px,100%) !important;
- width:100%;
- margin:0 !important;
- padding:10px 12px !important;
- gap:10px !important;
- flex-wrap:wrap;
- align-items:center !important;
- background:var(--surface) !important;
- border:1px solid rgba(45,212,191,0.28) !important;
- border-radius:var(--radius-lg) !important;
- box-shadow:var(--shadow-md),0 0 0 1px rgba(45,212,191,0.05) !important;
-}
-#backup-reminder-banner .backup-reminder-icon{
- width:30px !important;
- height:30px !important;
- background:rgba(45,212,191,0.12) !important;
- border:1px solid rgba(45,212,191,0.22) !important;
-}
-#backup-reminder-banner .backup-reminder-icon svg{
- color:#5eead4 !important;
- stroke:#5eead4;
-}
-#backup-reminder-banner .backup-reminder-text strong{
- display:block;
- color:var(--text) !important;
- font-size:0.8rem !important;
- font-weight:700;
- letter-spacing:-0.02em;
-}
-#backup-reminder-banner .backup-reminder-text span{
- color:var(--text2) !important;
- font-size:0.74rem !important;
- line-height:1.45;
-}
-#backup-reminder-banner .backup-reminder-actions{
+#backup-reminder-modal .backup-reminder-modal-icon-wrap{
  flex-shrink:0;
- gap:8px !important;
+ width:48px;
+ height:48px;
+ border-radius:12px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:rgba(251,191,36,0.14);
+ border:1px solid rgba(251,191,36,0.35);
 }
-#backup-reminder-banner .backup-reminder-btn{
- background:linear-gradient(135deg,#2dd4bf 0%,#0d9488 100%) !important;
- color:#06211e !important;
- border:none !important;
- border-radius:9px !important;
- padding:7px 12px !important;
- font-size:0.78rem !important;
- font-weight:700 !important;
- box-shadow:0 2px 10px rgba(45,212,191,0.25) !important;
- white-space:nowrap;
+#backup-reminder-modal .backup-reminder-modal-icon-wrap svg{
+ width:26px;
+ height:26px;
+ color:var(--warning);
+ stroke:var(--warning);
 }
-#backup-reminder-banner .backup-reminder-btn:hover{
- background:linear-gradient(135deg,#5eead4 0%,#14b8a6 100%) !important;
- transform:translateY(-1px);
+#backup-reminder-modal .backup-reminder-modal-text{
+ margin:0;
+ font-size:0.88rem;
+ line-height:1.55;
+ color:var(--text2);
 }
-#backup-reminder-banner .backup-reminder-dismiss{
- background:var(--surface2) !important;
- color:var(--text2) !important;
- border:1px solid var(--border) !important;
- border-radius:9px !important;
- padding:7px 11px !important;
- font-size:0.76rem !important;
+#backup-reminder-modal .backup-reminder-modal-footer{
+ flex-wrap:wrap;
+ gap:10px;
 }
-#backup-reminder-banner .backup-reminder-dismiss:hover{
- background:var(--surface3) !important;
- color:var(--text) !important;
- border-color:var(--border2) !important;
-}
-/* Éviter que le contenu passe sous la carte fixe */
-#main:has(#backup-reminder-banner.visible) .page{
- padding-top:52px;
+#backup-reminder-modal .backup-reminder-modal-footer .btn-primary{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
 }
 @media (max-width:768px){
- #main:has(#backup-reminder-banner.visible) .page{
-  padding-top:58px;
- }
- #backup-reminder-banner{
-  left:0 !important;
-  right:0 !important;
-  padding:0 12px !important;
-  top:calc(var(--topbar-h) + 8px) !important;
- }
- #sidebar.open ~ main #backup-reminder-banner{display:none !important;}
- #backup-reminder-banner .backup-reminder-inner{
-  max-width:100% !important;
-  padding:10px 11px !important;
+ #backup-reminder-modal .backup-reminder-modal-footer .btn{
+  flex:1 1 auto;
+  min-height:44px;
  }
 }
-/* PWA : petite carte centrée en bas (même logique surface / teal que la bannière sauvegarde) */
+/* PWA : petite carte centrée en bas */
 #pwa-install-banner.pwa-install-banner{
  display:none;
  position:fixed;
@@ -410,27 +356,6 @@ input[type="number"]{
  -webkit-tap-highlight-color:transparent;
  position:relative;
  z-index:2;
-}
-
-/* Mobile : bannière sauvegarde — même carte compacte (complète les règles en tête de fichier) */
-@media (max-width:768px){
- #backup-reminder-banner .backup-reminder-inner{
-  align-items:flex-start !important;
- }
- #backup-reminder-banner .backup-reminder-text{
-  flex:1 1 200px;
-  min-width:0;
- }
- #backup-reminder-banner .backup-reminder-actions{
-  width:100%;
-  justify-content:stretch;
- }
- #backup-reminder-banner .backup-reminder-btn,
- #backup-reminder-banner .backup-reminder-dismiss{
-  flex:1;
-  min-height:40px;
-  justify-content:center;
- }
 }
 
 .supa-sql-summary{

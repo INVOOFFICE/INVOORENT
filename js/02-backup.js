@@ -14,10 +14,8 @@
  if(!ts)return false;
  return(Date.now()-ts)<(SNOOZE_HOURS * 60 * 60 * 1000);
 }
- function showBanner(days){
- const banner=document.getElementById('backup-reminder-banner');
+ function showBackupReminderModal(days){
  const txt=document.getElementById('backup-reminder-days-text');
- if(!banner)return;
  if(txt){
  if(days>=999){
  txt.textContent='Vous n\'avez jamais exporté de sauvegarde — faites-le maintenant pour protéger vos données.';
@@ -25,20 +23,14 @@
  txt.textContent=`Vous n'avez pas sauvegardé depuis ${days} jour${days>1 ? 's' : ''} — exportez maintenant pour éviter toute perte.`;
 }
 }
- banner.classList.add('visible');
+ if(typeof openModal==='function'){
+  openModal('backup-reminder-modal');
+ }
 }
- function hideBanner(){
- const banner=document.getElementById('backup-reminder-banner');
- if(banner){
- banner.style.transition='opacity 0.2s,transform 0.2s';
- banner.style.opacity='0';
- banner.style.transform='translateY(-8px)';
- setTimeout(()=>{
- banner.classList.remove('visible');
- banner.style.opacity='';
- banner.style.transform='';
-},220);
-}
+ function hideBackupReminderModal(){
+ if(typeof closeModal==='function'){
+  closeModal('backup-reminder-modal');
+ }
 }
  function checkBackupReminder(){
  const loginScreen=document.getElementById('login-screen');
@@ -46,20 +38,20 @@
  if(isSnoozed())return;
  const days=daysSinceBackup();
  if(days>=WARN_AFTER_DAYS){
- showBanner(days);
+ showBackupReminderModal(days);
 }
 }
  window.backupReminderDoExport=function(){
  localStorage.setItem(KEY_LAST_BACKUP,Date.now().toString());
  localStorage.removeItem(KEY_SNOOZED);
- hideBanner();
+ hideBackupReminderModal();
  if(typeof exportBackup==='function'){
  exportBackup();
 }
 };
  window.backupReminderSnooze=function(){
  localStorage.setItem(KEY_SNOOZED,Date.now().toString());
- hideBanner();
+ hideBackupReminderModal();
 };
  document.addEventListener('DOMContentLoaded',function(){
  const origExport=window.exportBackup;
@@ -67,7 +59,7 @@
  window.exportBackup=function(){
  localStorage.setItem(KEY_LAST_BACKUP,Date.now().toString());
  localStorage.removeItem(KEY_SNOOZED);
- hideBanner();
+ hideBackupReminderModal();
  return origExport.apply(this,arguments);
 };
 }

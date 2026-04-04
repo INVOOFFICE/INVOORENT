@@ -178,29 +178,3 @@
 <button class="alert-dismiss" onclick="document.getElementById('alert-banner').classList.remove('visible')" title="Masquer">o.</button>
 </div>
 </div>
-<div id="backup-reminder-banner">
-<div class="backup-reminder-inner">
-<div class="backup-reminder-icon" aria-hidden="true">
-<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-<line x1="12" y1="9" x2="12" y2="13"/>
-<line x1="12" y1="17" x2="12.01" y2="17"/>
-</svg>
-</div>
-<div class="backup-reminder-text">
-<strong>⚠️ Sauvegarde recommandée</strong>
-<span id="backup-reminder-days-text">Vous n'avez pas sauvegardé vos données depuis plus de 7 jours — exportez maintenant pour éviter toute perte.</span>
-</div>
-<div class="backup-reminder-actions">
-<button class="backup-reminder-btn" onclick="backupReminderDoExport()">
-<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;display:inline;margin-right:5px;vertical-align:middle">
-<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-<polyline points="7 10 12 15 17 10"/>
-<line x1="12" y1="15" x2="12" y2="3"/>
-</svg>
- Sauvegarder maintenant
- </button>
-<button class="backup-reminder-dismiss" onclick="backupReminderSnooze()">Plus tard</button>
-</div>
-</div>
-</div>

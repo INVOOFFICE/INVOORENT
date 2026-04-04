@@ -898,7 +898,12 @@ function closeModal(id){
  }
  const mo=document.querySelector('.modal-overlay.open');
  if(!mo)return;
- if(e.key==='Escape'){e.preventDefault();if(mo.id)closeModal(mo.id);return;}
+ if(e.key==='Escape'){
+  e.preventDefault();
+  if(mo.id==='backup-reminder-modal'&&typeof backupReminderSnooze==='function'){backupReminderSnooze();}
+  else if(mo.id){closeModal(mo.id);}
+  return;
+ }
  if(e.key==='Tab')overlayTabTrap(mo,e);
  });
 })();
