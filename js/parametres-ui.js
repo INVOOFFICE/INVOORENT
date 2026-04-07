@@ -7,20 +7,22 @@
  'use strict';
 
  global.INVOO_CONDITIONS_DEFAUT =
-  "Le véhicule est remis au locataire en bon état de marche et de propreté. Il doit être restitué dans le même état, faute de quoi les frais de remise en état seront prélevés sur la caution.\n" +
-  "Le locataire s'engage à respecter le Code de la Route marocain en vigueur et à ne pas dépasser les limitations de vitesse autorisées.\n" +
-  "Le véhicule ne peut être conduit que par les personnes expressément mentionnées au présent contrat et titulaires d'un permis de conduire valide.\n" +
-  "Il est strictement interdit de conduire le véhicule sous l'emprise de l'alcool, de stupéfiants ou de toute autre substance altérant les facultés. Tout accident survenu dans ces conditions exclut toute couverture d'assurance et engage la pleine responsabilité du locataire.\n" +
-  "Le véhicule ne peut quitter le territoire du Royaume du Maroc sans autorisation écrite et préalable de l'agence. Toute infraction à cette clause annule automatiquement la couverture d'assurance.\n" +
-  "Le carburant est à la charge exclusive du locataire. Le véhicule doit être restitué avec le même niveau de carburant qu'au départ, sous peine de facturation au tarif en vigueur majoré de 20%.\n" +
-  "En cas d'accident, de panne, de vol ou de tentative de vol, le locataire doit immédiatement contacter l'agence et les autorités compétentes (Police / Gendarmerie). Un constat amiable signé par les deux parties doit être établi sans délai.\n" +
-  "Toute contravention, amende ou infraction au Code de la Route intervenue pendant la période de location est à la charge exclusive du locataire, y compris les frais administratifs de traitement.\n" +
-  "En cas de restitution tardive sans accord écrit préalable de l'agence, une journée supplémentaire complète sera facturée au tarif contractuel pour toute heure de dépassement.\n" +
-  "La caution versée au départ sera restituée intégralement dans un délai de 24h après vérification du bon état du véhicule et du kilométrage. Tout dommage non signalé à l'état des lieux de départ sera déduit de la caution sans préavis.\n" +
-  "L'agence se réserve le droit de récupérer le véhicule sans préavis en cas de non-paiement, d'utilisation frauduleuse, ou de mise en danger manifeste du véhicule, sans qu'aucun remboursement ne soit dû.\n" +
-  "Tout litige relatif au présent contrat sera soumis à la juridiction compétente du lieu du siège de l'agence, conformément à la législation marocaine en vigueur.";
+  "Le véhicule doit être rendu propre et en bon état ; frais sur la caution en cas de dommage.\n" +
+  "Respect obligatoire du Code de la Route marocain et des limitations de vitesse.\n" +
+  "Seules les personnes mentionnées dans le contrat avec un permis valide peuvent conduire.\n" +
+  "Interdiction de conduire sous alcool, drogues ou substances altérant les facultés.\n" +
+  "Sortie du Maroc interdite sans autorisation écrite de l'agence.\n" +
+  "Carburant à la charge du locataire, restitution au même niveau sous peine de majoration.\n" +
+  "En cas d'accident, panne ou vol : contacter immédiatement l'agence et les autorités ; constat amiable requis.\n" +
+  "Amendes et infractions à la charge du locataire.\n" +
+  "Retard de restitution = facturation d'une journée complète par heure de dépassement non autorisée.\n" +
+  "La caution est restituée après vérification ; l'agence peut récupérer le véhicule en cas de non-paiement ou usage frauduleux.";
 
  var ctx = null;
+ var _logoPendingDataUrl = null;
+ var _logoPendingW = 0;
+ var _logoPendingH = 0;
+ var _logoRemoveAfterSave = false;
 
  function condDef() {
   return global.INVOO_CONDITIONS_DEFAUT || '';
@@ -95,8 +97,145 @@
    (rows.length ? '<div style="border-top:1px solid var(--border);padding-top:8px">' + rows + '</div>' : '');
  }
 
+ function setLogoFilenameUi(name) {
+  var el = document.getElementById('p-logo-filename');
+  if (el) el.textContent = name || '';
+ }
+
+ function syncLogoHeightSlider() {
+  var el = document.getElementById('p-logo-height');
+  var num = document.getElementById('p-logo-height-num');
+  if (!el) return;
+  var min = Number(el.min) || 16;
+  var max = Number(el.max) || 400;
+  var raw = Number(el.value);
+  if (!Number.isFinite(raw)) raw = min;
+  var v = Math.min(max, Math.max(min, Math.round(raw)));
+  el.value = String(v);
+  if (num) num.textContent = String(v);
+  el.setAttribute('aria-valuenow', String(v));
+  var pct = max <= min ? 0 : ((v - min) / (max - min)) * 100;
+  el.style.setProperty('--p-logo-fill', pct + '%');
+ }
+
+ function bindLogoHeightSlider() {
+  var el = document.getElementById('p-logo-height');
+  if (!el || el.dataset.invooHeightSliderBound === '1') return;
+  el.dataset.invooHeightSliderBound = '1';
+  el.addEventListener('input', syncLogoHeightSlider);
+  el.addEventListener('change', syncLogoHeightSlider);
+  syncLogoHeightSlider();
+ }
+
+ function processLogoParamFile(file, fin) {
+  if (!file || !fin) return;
+  if (!/^image\//.test(file.type)) {
+   if (typeof ctx.alAlert === 'function') {
+    ctx.alAlert('Veuillez choisir une image (JPEG, PNG, WebP ou GIF).');
+   }
+   fin.value = '';
+   setLogoFilenameUi('');
+   return;
+  }
+  var fr = new FileReader();
+  fr.onload = function () {
+   var img = new Image();
+   img.onload = function () {
+    var maxH = 400;
+    var nh = Math.min(img.height, maxH);
+    var nw = Math.max(1, Math.round((img.width * nh) / img.height));
+    var canvas = document.createElement('canvas');
+    canvas.width = nw;
+    canvas.height = nh;
+    var cx = canvas.getContext('2d');
+    cx.drawImage(img, 0, 0, nw, nh);
+    var url = canvas.toDataURL('image/jpeg', 0.88);
+    _logoPendingDataUrl = url;
+    _logoPendingW = nw;
+    _logoPendingH = nh;
+    _logoRemoveAfterSave = false;
+    var prevImg = document.getElementById('p-logo-preview');
+    var wrap = document.getElementById('p-logo-preview-wrap');
+    if (prevImg) prevImg.src = url;
+    if (wrap) wrap.style.display = 'flex';
+    setLogoFilenameUi(file.name || 'Image sélectionnée');
+   };
+   img.onerror = function () {
+    if (typeof ctx.alAlert === 'function') ctx.alAlert('Impossible de lire cette image.');
+    fin.value = '';
+    setLogoFilenameUi('');
+   };
+   img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+ }
+
+ function bindLogoParamControls() {
+  if (global._invooLogoUiBound) return;
+  global._invooLogoUiBound = true;
+  var fin = document.getElementById('p-logo-file');
+  var dz = document.getElementById('p-logo-dropzone');
+  if (fin) {
+   fin.addEventListener('change', function () {
+    var file = fin.files && fin.files[0];
+    if (!file) return;
+    processLogoParamFile(file, fin);
+   });
+  }
+  if (dz && fin) {
+   ['dragenter', 'dragover'].forEach(function (ev) {
+    dz.addEventListener(ev, function (e) {
+     e.preventDefault();
+     e.stopPropagation();
+    });
+   });
+   dz.addEventListener('dragover', function () {
+    dz.classList.add('p-logo-dropzone--drag');
+   });
+   dz.addEventListener('dragleave', function (e) {
+    var r = e.relatedTarget;
+    if (!r || !dz.contains(r)) dz.classList.remove('p-logo-dropzone--drag');
+   });
+   dz.addEventListener('drop', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dz.classList.remove('p-logo-dropzone--drag');
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    try {
+     if (typeof DataTransfer !== 'undefined' && fin.files) {
+      var dt = new DataTransfer();
+      dt.items.add(f);
+      fin.files = dt.files;
+     }
+    } catch (err) {}
+    processLogoParamFile(f, fin);
+   });
+  }
+  var btnRm = document.getElementById('p-logo-remove');
+  if (btnRm) {
+   btnRm.addEventListener('click', function () {
+    _logoRemoveAfterSave = true;
+    _logoPendingDataUrl = null;
+    _logoPendingW = 0;
+    _logoPendingH = 0;
+    if (fin) fin.value = '';
+    setLogoFilenameUi('');
+    var wrap = document.getElementById('p-logo-preview-wrap');
+    if (wrap) wrap.style.display = 'none';
+   });
+  }
+ }
+
  function renderParametres() {
   var s = ctx.getSettings();
+  _logoPendingDataUrl = null;
+  _logoPendingW = 0;
+  _logoPendingH = 0;
+  _logoRemoveAfterSave = false;
+  var fin = document.getElementById('p-logo-file');
+  if (fin) fin.value = '';
+  setLogoFilenameUi('');
   document.getElementById('p-nom').value = s.nom || 'INVOORENT';
   document.getElementById('p-slogan').value = s.slogan || 'Gérez, louez, développez';
   document.getElementById('p-tel').value = s.tel || '';
@@ -108,11 +247,49 @@
   document.getElementById('p-iban').value = s.iban || '';
   document.getElementById('p-conditions').value =
    typeof s.conditions === 'string' ? s.conditions : condDef();
+  var pEl = document.getElementById('p-etat-lieux-contrat');
+  if (pEl) pEl.checked = s.etatLieuxContrat === true;
+  var wrap = document.getElementById('p-logo-preview-wrap');
+  var prevImg = document.getElementById('p-logo-preview');
+  if (s.logoDataUrl && String(s.logoDataUrl).indexOf('data:image') === 0) {
+   if (prevImg) prevImg.src = s.logoDataUrl;
+   if (wrap) wrap.style.display = 'flex';
+   setLogoFilenameUi('Logo enregistré');
+  } else {
+   if (wrap) wrap.style.display = 'none';
+  }
+  var lhEl = document.getElementById('p-logo-height');
+  if (lhEl) {
+   lhEl.value = s.logoHeightPx != null && s.logoHeightPx !== '' ? String(s.logoHeightPx) : '48';
+   bindLogoHeightSlider();
+   syncLogoHeightSlider();
+  }
+  var lia = document.getElementById('p-logo-infos-agence');
+  if (lia) lia.checked = s.logoAfficherInfosAgence !== false;
+  var ft = document.getElementById('p-document-footer');
+  if (ft) ft.value = typeof s.documentFooter === 'string' ? s.documentFooter : '';
  }
 
  function saveParametres() {
   var KEYS = ctx.KEYS;
-  var s = {
+  var prev = ctx.getSettings() || {};
+  var lhRaw = document.getElementById('p-logo-height');
+  var lh = parseInt(lhRaw && lhRaw.value, 10);
+  if (!Number.isFinite(lh)) lh = 48;
+  lh = Math.min(400, Math.max(16, lh));
+  var logoDataUrl = prev.logoDataUrl || '';
+  var logoImgWidth = prev.logoImgWidth || 0;
+  var logoImgHeight = prev.logoImgHeight || 0;
+  if (_logoRemoveAfterSave) {
+   logoDataUrl = '';
+   logoImgWidth = 0;
+   logoImgHeight = 0;
+  } else if (_logoPendingDataUrl) {
+   logoDataUrl = _logoPendingDataUrl;
+   logoImgWidth = _logoPendingW;
+   logoImgHeight = _logoPendingH;
+  }
+  var s = Object.assign({}, prev, {
    nom: document.getElementById('p-nom').value.trim(),
    slogan: document.getElementById('p-slogan').value.trim(),
    tel: document.getElementById('p-tel').value.trim(),
@@ -123,7 +300,25 @@
    patente: document.getElementById('p-patente').value.trim(),
    iban: document.getElementById('p-iban').value.trim(),
    conditions: document.getElementById('p-conditions').value,
-  };
+   etatLieuxContrat: (function () {
+    var pEl = document.getElementById('p-etat-lieux-contrat');
+    return pEl ? !!pEl.checked : false;
+   })(),
+   logoDataUrl: logoDataUrl,
+   logoImgWidth: logoImgWidth,
+   logoImgHeight: logoImgHeight,
+   logoHeightPx: lh,
+   logoAfficherInfosAgence: (function () {
+    var lia = document.getElementById('p-logo-infos-agence');
+    return lia ? !!lia.checked : true;
+   })(),
+   documentFooter:
+    (document.getElementById('p-document-footer') && document.getElementById('p-document-footer').value) || '',
+  });
+  _logoPendingDataUrl = null;
+  _logoPendingW = 0;
+  _logoPendingH = 0;
+  _logoRemoveAfterSave = false;
   if (s.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) {
    if (typeof ctx.alAlert === 'function') {
     ctx.alAlert('Adresse email invalide.');
@@ -161,6 +356,14 @@
    }, 2500);
   }
   ctx.addLog('Paramètres mis à jour');
+  if (s.logoDataUrl && String(s.logoDataUrl).indexOf('data:image') === 0) {
+   setLogoFilenameUi('Logo enregistré');
+  } else {
+   setLogoFilenameUi('');
+  }
+  if (typeof global.syncEtatLieuxBlockVisibility === 'function') {
+   global.syncEtatLieuxBlockVisibility();
+  }
   if (typeof ctx.renderDashboard === 'function') {
    ctx.renderDashboard();
   }
@@ -197,6 +400,8 @@
  global.invooParametresUi = {
   attach: function (c) {
    ctx = c;
+   bindLogoParamControls();
+   bindLogoHeightSlider();
    global.renderParametres = renderParametres;
    global.saveParametres = saveParametres;
    global.resetConditions = resetConditions;

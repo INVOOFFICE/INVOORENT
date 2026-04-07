@@ -13,6 +13,86 @@
    : String(a) === String(b);
  }
 
+ /** px CSS → mm jsPDF (96 dpi) */
+ function pxToMm(px) {
+  return (Number(px) || 0) * 0.264583;
+ }
+
+ /** Évite RC: RC: … si le champ patente contient déjà RC ou Patente. */
+ function formatPatenteContrat(pat) {
+  var t = String(pat == null ? '' : pat).trim();
+  if (!t) return '';
+  if (/^RC\b/i.test(t) || /^Patente\b/i.test(t)) return t;
+  return 'RC / Patente : ' + t;
+ }
+
+ function buildContractHeaderLeftHtml(s) {
+  var agenceNom = s.nom || 'INVOORENT';
+  var agenceSlogan = s.slogan || 'Gérez, louez, développez';
+  var agenceVille = s.ville || 'Tanger,Maroc';
+  var agenceTel = s.tel || '+212 5XX XX XX XX';
+  var esc = window.AutoLocUtils.escapeHtml;
+  var textBlock =
+   '<h2>' +
+   esc(agenceNom).replace(/(\S+)$/, '<span>$1</span>') +
+   '</h2><p>' +
+   esc(agenceSlogan) +
+   '</p><p style="margin-top:4px;font-size:0.72rem;color:#9A9A9A">' +
+   esc(agenceVille) +
+   '— Tél: ' +
+   esc(agenceTel) +
+   (s.email ? ' — ' + esc(s.email) : '') +
+   (s.site ? ' — ' + esc(s.site) : '') +
+   '</p>\n ' +
+   (s.patente
+    ? '<p style="font-size:0.7rem;color:#9A9A9A;margin-top:2px">' +
+      esc(formatPatenteContrat(s.patente)) +
+      '</p>'
+    : '');
+  var logoUrl = s.logoDataUrl || '';
+  var hasLogo = logoUrl.indexOf('data:image') === 0;
+  var logoH = Math.min(400, Math.max(16, parseInt(s.logoHeightPx, 10) || 48));
+  var showInfos = s.logoAfficherInfosAgence !== false;
+  if (!hasLogo) {
+   return '<div class="contrat-logo">' + textBlock + '</div>';
+  }
+  var safeSrc = String(logoUrl).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  var logoImg =
+   '<img class="contrat-header-logo-img" src="' +
+   safeSrc +
+   '" alt="" style="height:' +
+   logoH +
+   'px;width:auto;max-width:100%;object-fit:contain;display:block" />';
+  if (!showInfos) {
+   return '<div class="contrat-header-logo-only">' + logoImg + '</div>';
+  }
+  return (
+   '<div class="contrat-header-brand-split">' +
+   '<div class="contrat-header-logo-wrap">' +
+   logoImg +
+   '</div><div class="contrat-logo">' +
+   textBlock +
+   '</div></div>'
+  );
+ }
+
+ function buildDocumentFooterHtml(s) {
+  var t = s.documentFooter;
+  if (!t || !String(t).trim()) return '';
+  var esc =
+   window.AutoLocUtils && typeof window.AutoLocUtils.escapeHtml === 'function'
+    ? window.AutoLocUtils.escapeHtml
+    : function (x) {
+       return String(x)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/"/g, '&quot;');
+      };
+  return (
+   '<div class="contrat-doc-footer">' + esc(t).replace(/\n/g, '<br>') + '</div>'
+  );
+ }
+
  global.printContrat = function (id) {
   if (!ctx) return;
   global._printContratId = id;
@@ -74,28 +154,17 @@
    secHtml += '</div></div>';
   }
   const contratNum = 'CTR-' + id.slice(-6).toUpperCase();
+  const useEtatLieuxContrat = s.etatLieuxContrat === true;
   const etatHtml =
-   global.invooEtatLieux && typeof global.invooEtatLieux.buildContractHtml === 'function'
+   useEtatLieuxContrat &&
+   global.invooEtatLieux &&
+   typeof global.invooEtatLieux.buildContractHtml === 'function'
     ? global.invooEtatLieux.buildContractHtml(r.etatLieux)
     : '';
   document.getElementById('contrat-body').innerHTML =
-   '\n<div class="contrat-header"><div class="contrat-logo"><h2>' +
-   window.AutoLocUtils.escapeHtml(agenceNom).replace(/(\S+)$/, '<span>$1</span>') +
-   '</h2><p>' +
-   window.AutoLocUtils.escapeHtml(agenceSlogan) +
-   '</p><p style="margin-top:4px;font-size:0.72rem;color:#9A9A9A">' +
-   window.AutoLocUtils.escapeHtml(agenceVille) +
-   '— Tél: ' +
-   window.AutoLocUtils.escapeHtml(agenceTel) +
-   (s.email ? ' — ' + window.AutoLocUtils.escapeHtml(s.email) : '') +
-   (s.site ? ' — ' + window.AutoLocUtils.escapeHtml(s.site) : '') +
-   '</p>\n ' +
-   (s.patente
-    ? '<p style="font-size:0.7rem;color:#9A9A9A;margin-top:2px">RC / Patente : ' +
-      window.AutoLocUtils.escapeHtml(s.patente) +
-      '</p>'
-    : '') +
-   '\n</div><div class="contrat-meta"><span>N° Contrat</span><strong>' +
+   '\n<div class="contrat-header"><div class="contrat-header-left">' +
+   buildContractHeaderLeftHtml(s) +
+   '</div><div class="contrat-meta"><span>N° Contrat</span><strong>' +
    window.AutoLocUtils.escapeHtml(contratNum) +
    '</strong><span style="margin-top:6px;display:block">Date : ' +
    new Date().toLocaleDateString('fr-FR') +
@@ -231,7 +300,9 @@
    (c ? window.AutoLocUtils.escapeHtml(c.prenom) + ' ' + window.AutoLocUtils.escapeHtml(c.nom) : '') +
    '</p></div><div class="contrat-sig-box"><p>Cachet et signature de l\'agence</p><p style="margin-top:4px;font-size:0.7rem">' +
    window.AutoLocUtils.escapeHtml(agenceNom) +
-   '</p></div></div>\n ';
+   '</p></div></div>' +
+   buildDocumentFooterHtml(s) +
+   '\n ';
   ctx.openModal('contrat-modal');
  };
 
@@ -251,7 +322,7 @@
    const s = ctx.getSettings();
    const agenceNom = s.nom || 'INVOORENT';
    const agenceSlogan = s.slogan || 'Gérez, louez, développez';
-   const agenceVille = s.ville || 'Tanger,Maroc';
+   const agenceVille = s.ville || 'Tanger, Maroc';
    const agenceTel = s.tel || '+212 5XX XX XX XX';
    const res = r || {};
    const clientId = res.clientId;
@@ -276,97 +347,253 @@
    const fmtNum = function (n) {
     return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
    };
-   const conditions = (s.conditions || ctx.conditionsDefaut).split('\n').filter(function (l) {
+   const conditionsRaw = (s.conditions || ctx.conditionsDefaut).split('\n').filter(function (l) {
     return l.trim();
    });
+   var conditions = conditionsRaw.slice(0, 14);
+   const useEtatLieuxContrat = s.etatLieuxContrat === true;
    const W = 210;
-   const ml = 15;
-   const mr = 15;
+   const ml = 10;
+   const mr = 10;
    const cw = W - ml - mr;
-   const PAGE_MAX_Y = 283;
-   function ensurePage(doc, y, needMm) {
-    if (y + needMm <= PAGE_MAX_Y) return y;
+   const PAGE_MAX_Y = 287;
+   function ensurePage(yy, needMm) {
+    if (yy + needMm <= PAGE_MAX_Y) return yy;
     doc.addPage();
-    return 15;
+    return 10;
    }
-   var y = 15;
-   const txt = function (t, x, yy, opts) {
+   var y = 10;
+
+   const BLUE = [26, 60, 110];
+   const BLUE_LIGHT = [46, 92, 154];
+   const BLUE_MUTED = [160, 184, 216];
+   const BLUE_LINE = [58, 106, 170];
+   const ORANGE_RESTE = [255, 153, 102];
+   const TEXT_DARK = [26, 26, 26];
+   const TEXT_MED = [85, 85, 85];
+   const TEXT_DIM = [136, 136, 136];
+   const TEXT_LIGHT = [153, 153, 153];
+   const WHITE = [255, 255, 255];
+
+   function txt(t, x, yy, opts) {
     doc.text(String(t || ''), x, yy, opts);
-   };
-   const line = function (x1, y1, x2, y2, color) {
-    doc.setDrawColor(color || '#0C0E14');
-    doc.line(x1, y1, x2, y2);
-   };
-   const rect = function (x, yy, w, h, fillColor, strokeColor) {
-    if (fillColor) doc.setFillColor(fillColor);
-    if (strokeColor) doc.setDrawColor(strokeColor);
-    else doc.setDrawColor(255, 255, 255, 0);
-    doc.roundedRect(x, yy, w, h, 2, 2, fillColor ? (strokeColor ? 'FD' : 'F') : 'S');
-   };
-   const setFont = function (size, style, color) {
-    doc.setFontSize(size);
-    doc.setFont('helvetica', style || 'normal');
-    if (color) doc.setTextColor(color);
-    else doc.setTextColor('#0C0E14');
-   };
-   setFont(16, 'bold', '#0C0E14');
-   txt(agenceNom, ml, y);
-   setFont(8, 'normal', '#777777');
-   txt(agenceSlogan, ml, y + 5);
-   txt(agenceVille + ' — Tél: ' + agenceTel + (s.email ? ' — ' + s.email : ''), ml, y + 10);
-   if (s.patente) {
-    setFont(7, 'normal', '#AAAAAA');
-    txt('RC / Patente : ' + s.patente, ml, y + 14);
    }
-   setFont(7, 'normal', '#777777');
-   txt('N° Contrat', W - mr, y, { align: 'right' });
-   setFont(11, 'bold', '#0C0E14');
-   txt(contratNum, W - mr, y + 5, { align: 'right' });
-   setFont(7, 'normal', '#777777');
-   txt('Date : ' + new Date().toLocaleDateString('fr-FR'), W - mr, y + 10, { align: 'right' });
-   y += 18;
-   line(ml, y, W - mr, y, '#0C0E14');
-   y += 6;
-   rect(ml, y - 4, cw, 10, '#E6FFFA', '#99F6E4');
-   setFont(8, 'bold', '#312E81');
-   txt('CONTRAT DE LOCATION DE VÉHICULE', W / 2, y + 2, { align: 'center' });
-   y += 12;
-   const section = function (title) {
-    y = ensurePage(doc, y, 14);
-    setFont(7, 'bold', '#0C0E14');
-    txt(title, ml, y);
-    doc.setDrawColor('#E4E0D8');
-    line(ml, y + 1.5, W - mr, y + 1.5, '#E4E0D8');
-    y += 6;
-   };
-   const grid2 = function (pairs) {
-    var rows = Math.ceil(pairs.length / 2);
-    var gh = rows * 9 + 4;
-    y = ensurePage(doc, y, gh);
-    const colW = cw / 2 - 4;
-    pairs.forEach(function (pair, i) {
-     const col = i % 2;
-     const row = Math.floor(i / 2);
-     const x = ml + col * (colW + 8);
-     const yy = y + row * 9;
-     setFont(6.5, 'normal', '#777777');
-     txt(pair[0], x, yy);
-     setFont(8, 'bold', '#0C0E14');
-     txt(String(pair[1] || '—'), x, yy + 4);
-    });
-    y += rows * 9 + 2;
-   };
-   section('INFORMATIONS DU LOCATAIRE');
-   grid2([
+   function setTextRgb(arr) {
+    doc.setTextColor(arr[0], arr[1], arr[2]);
+   }
+   function setFillRgb(arr) {
+    doc.setFillColor(arr[0], arr[1], arr[2]);
+   }
+   function setDrawRgb(arr) {
+    doc.setDrawColor(arr[0], arr[1], arr[2]);
+   }
+
+   var logoUrlPdf = s.logoDataUrl || '';
+   var hasLogoPdf = logoUrlPdf.indexOf('data:image') === 0;
+   var showInfosPdf = s.logoAfficherInfosAgence !== false;
+   var logoHpxPdf = Math.min(400, Math.max(16, parseInt(s.logoHeightPx, 10) || 48));
+   var imgWp = s.logoImgWidth || 0;
+   var imgHp = s.logoImgHeight || 0;
+   var hMmLogo = pxToMm(logoHpxPdf);
+   var wMmLogo =
+    imgWp > 0 && imgHp > 0 ? hMmLogo * (imgWp / imgHp) : Math.min(34, hMmLogo * 2.4);
+   var headerH = 11;
+   var logoGapMm = 4;
+   var maxLogoH = 16;
+   var maxLogoW = 36;
+   var lw = 0;
+   var lh = 0;
+   var logoBlockW = headerH;
+
+   if (hasLogoPdf) {
+    lw = wMmLogo;
+    lh = hMmLogo;
+    if (lh > maxLogoH) {
+     var scH = maxLogoH / lh;
+     lh = maxLogoH;
+     lw = lw * scH;
+    }
+    if (lw > maxLogoW) {
+     var scW = maxLogoW / lw;
+     lw = maxLogoW;
+     lh = lh * scW;
+    }
+    var imgFmt = logoUrlPdf.indexOf('image/png') >= 0 ? 'PNG' : 'JPEG';
+    try {
+     doc.addImage(logoUrlPdf, imgFmt, ml, y, lw, lh);
+     logoBlockW = lw;
+    } catch (e1) {
+     try {
+      doc.addImage(logoUrlPdf, 'PNG', ml, y, lw, lh);
+      logoBlockW = lw;
+     } catch (e2) {
+      try {
+       doc.addImage(logoUrlPdf, 'JPEG', ml, y, lw, lh);
+       logoBlockW = lw;
+      } catch (e3) {
+       hasLogoPdf = false;
+       lw = 0;
+       lh = 0;
+      }
+     }
+    }
+   }
+   if (!hasLogoPdf) {
+    setFillRgb(BLUE);
+    doc.roundedRect(ml, y, headerH, headerH, 1.5, 1.5, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    setTextRgb(WHITE);
+    txt('CAR', ml + 2.8, y + 7);
+    logoBlockW = headerH;
+   }
+
+   var textLeftX = ml + logoBlockW + logoGapMm;
+   var textMaxW = W - mr - textLeftX - 2;
+   var patenteLine = s.patente ? formatPatenteContrat(s.patente) : '';
+
+   if (!hasLogoPdf || showInfosPdf) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    setTextRgb(BLUE);
+    var nomLines = doc.splitTextToSize(agenceNom, textMaxW);
+    txt(nomLines[0] || agenceNom, textLeftX, y + 5);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    setTextRgb(TEXT_MED);
+    var slogLines = doc.splitTextToSize(agenceSlogan, textMaxW);
+    txt(slogLines[0] || agenceSlogan, textLeftX, y + 8.5);
+    doc.setFont('helvetica', 'normal');
+    var contactLn =
+     agenceVille + ' — Tél: ' + agenceTel + (s.email ? ' — ' + s.email : '');
+    doc.setFontSize(7.5);
+    setTextRgb(TEXT_DIM);
+    var contactLines = doc.splitTextToSize(contactLn, textMaxW);
+    txt(contactLines[0] || contactLn, textLeftX, y + 11.5);
+    var yPat = y + 14.5;
+    if (patenteLine) {
+     doc.setFontSize(7);
+     setTextRgb(TEXT_LIGHT);
+     var patLines = doc.splitTextToSize(patenteLine, textMaxW);
+     for (var pi = 0; pi < patLines.length; pi++) {
+      txt(patLines[pi], textLeftX, yPat + pi * 3.2);
+     }
+    }
+   }
+
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(TEXT_DIM);
+   txt('N° Contrat', W - mr, y + 3, { align: 'right' });
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(16);
+   setTextRgb(BLUE);
+   txt(contratNum, W - mr, y + 8, { align: 'right' });
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(TEXT_MED);
+   txt('Date : ' + new Date().toLocaleDateString('fr-FR'), W - mr, y + 11.5, { align: 'right' });
+   var yRightMetaBottom = y + 12.5;
+   if (res && res.statut) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setTextRgb(TEXT_MED);
+    txt('Statut : ' + String(res.statut), W - mr, y + 15.2, { align: 'right' });
+    yRightMetaBottom = y + 18;
+   }
+
+   var yAfterLogo = y + (hasLogoPdf ? lh : headerH);
+   var yAfterText = y;
+   if (!hasLogoPdf || showInfosPdf) {
+    var patExtra = patenteLine ? (doc.splitTextToSize(patenteLine, textMaxW).length - 1) * 3.2 : 0;
+    yAfterText = y + 14.5 + patExtra + (patenteLine ? 2.5 : 0);
+   } else {
+    yAfterText = yAfterLogo;
+   }
+   var yHeaderBottom = Math.max(yAfterLogo, yAfterText, yRightMetaBottom) + 2;
+   y = yHeaderBottom + 3;
+   setDrawRgb(BLUE);
+   doc.setLineWidth(0.6);
+   doc.line(ml, y, W - mr, y);
+   y += 3;
+
+   setFillRgb(BLUE);
+   doc.roundedRect(ml, y, cw, 6, 1, 1, 'F');
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(11);
+   setTextRgb(WHITE);
+   txt('CONTRAT DE LOCATION DE VÉHICULE', ml + cw / 2, y + 4.2, { align: 'center' });
+   y += 8;
+
+   function sectionBar(label, fillRgb) {
+    y = ensurePage(y, 12);
+    setFillRgb(fillRgb || BLUE);
+    doc.roundedRect(ml, y, cw, 5, 1, 1, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    setTextRgb(WHITE);
+    txt(label, ml + 2, y + 3.4);
+    y += 6.5;
+   }
+
+   function rowPair2Col(pairs) {
+    var colW = (cw - 4) / 2;
+    var midX = ml + colW + 4;
+    var half = Math.ceil(pairs.length / 2);
+    var left = pairs.slice(0, half);
+    var right = pairs.slice(half);
+    var rowH = 3.2;
+    var yL = y;
+    var yR = y;
+    function drawSide(list, xBase, width, yyStart) {
+     var cur = yyStart;
+     list.forEach(function (pair) {
+      cur = ensurePage(cur, rowH + 1);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      setTextRgb(TEXT_DIM);
+      txt(pair[0], xBase + 1, cur + 2.5);
+      var val = String(pair[1] != null ? pair[1] : '—');
+      var lab = pair[0];
+      var bold =
+       lab === 'Nom complet' ||
+       lab === 'Téléphone' ||
+       lab === 'Ville' ||
+       lab.indexOf('Date') === 0 ||
+       lab === 'N° Permis de conduire';
+      var blueVal =
+       lab === 'Email' ||
+       lab.indexOf('Tarif') >= 0 ||
+       lab.indexOf('Caution') >= 0 ||
+       lab === 'Caution (remboursable)';
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      setTextRgb(blueVal ? BLUE : TEXT_DARK);
+      var vlines = doc.splitTextToSize(val, width - 30);
+      txt(vlines[0] || '—', xBase + 28, cur + 2.5);
+      setDrawRgb([238, 238, 238]);
+      doc.setLineWidth(0.15);
+      doc.line(xBase, cur + rowH, xBase + width, cur + rowH);
+      cur += rowH;
+     });
+     return cur;
+    }
+    yL = drawSide(left, ml, colW, yL);
+    yR = drawSide(right, midX, colW, yR);
+    y = Math.max(yL, yR) + 2;
+   }
+
+   sectionBar('INFORMATIONS DU LOCATAIRE');
+   rowPair2Col([
     ['Nom complet', c ? c.prenom + ' ' + c.nom : '—'],
     ['CIN / Passeport', c?.cin || '—'],
     ['Téléphone', c?.tel || '—'],
-    ['N° Permis', c?.permis || '—'],
+    ['N° Permis de conduire', c?.permis || '—'],
     ['Email', c?.email || '—'],
     ['Adresse', c?.adresse || '—'],
     ['Ville', c?.ville || '—'],
     ['Nationalité', c?.nat || '—'],
    ]);
+
    const secDriversPdf =
     c && Array.isArray(c.conducteursSecondaires)
      ? c.conducteursSecondaires.filter(function (x) {
@@ -374,128 +601,245 @@
        })
      : [];
    if (secDriversPdf.length) {
-    section('CONDUCTEUR(S) ADDITIONNEL(S)');
+    sectionBar('CONDUCTEUR(S) ADDITIONNEL(S)', BLUE_LIGHT);
     secDriversPdf.forEach(function (cd) {
      const lab =
-      cd.docType === 'cin' ? 'CIN' : cd.docType === 'passeport' ? 'Passeport' : 'N° Permis';
-     grid2([
+      cd.docType === 'cin'
+       ? 'CIN'
+       : cd.docType === 'passeport'
+        ? 'Passeport'
+        : 'N° Permis de conduire';
+     rowPair2Col([
       ['Nom complet', [cd.prenom, cd.nom].filter(Boolean).join(' ') || '—'],
       [lab, cd.docNum || '—'],
      ]);
     });
    }
-   section('VÉHICULE LOUÉ');
-   grid2([
+
+   var col_w = (cw - 3) / 2;
+   var mid = ml + col_w + 3;
+   y = ensurePage(y, 8);
+   setFillRgb(BLUE);
+   doc.roundedRect(ml, y, col_w, 5, 1, 1, 'F');
+   doc.roundedRect(mid, y, col_w, 5, 1, 1, 'F');
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(9);
+   setTextRgb(WHITE);
+   txt('VÉHICULE LOUÉ', ml + 2, y + 3.4);
+   txt('DÉTAILS DE LA LOCATION', mid + 2, y + 3.4);
+   y += 6.5;
+
+   var leftRows = [
     ['Marque / Modèle', v ? v.marque + ' ' + v.modele : '—'],
     ['Immatriculation', v?.immat || '—'],
-    ['Année', v?.annee || '—'],
+    ['Année', String(v?.annee || '—')],
     ['Catégorie', v?.cat || '—'],
     ['Couleur', v?.couleur || '—'],
     ['Carburant', v?.carburant || '—'],
     ['Kilométrage départ', v?.km ? fmtNum(v.km) + ' km' : '—'],
-    ['Tarif journalier', (v?.tarif || '—') + ' MAD/j'],
-   ]);
-   if (global.invooEtatLieux && typeof global.invooEtatLieux.drawPdf === 'function') {
-    y = ensurePage(doc, y, 95);
+    ['Tarif journalier', (v?.tarif != null ? v.tarif : '—') + ' MAD/j'],
+   ];
+   var rightRows = [
+    ['Date de départ', fmt(res.debut)],
+    ['Date de retour prévue', fmt(res.fin)],
+    ['Durée', days + ' jour' + (days > 1 ? 's' : '')],
+    ['Lieu de prise en charge', res.lieu && String(res.lieu).trim() ? res.lieu : '—'],
+   ];
+   if (res.caution > 0) {
+    rightRows.push(['Caution (remboursable)', fmtNum(res.caution) + ' MAD']);
+   }
+   if (res.notes) {
+    rightRows.push(['Remarques', res.notes]);
+   }
+
+   var rowH = 3.2;
+   var y_l = y;
+   var y_r = y;
+   leftRows.forEach(function (pair) {
+    y_l = ensurePage(y_l, rowH + 1);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setTextRgb(TEXT_DIM);
+    txt(pair[0], ml + 1, y_l + 2.5);
+    var val = String(pair[1] || '—');
+    var blueV =
+     pair[0].indexOf('Tarif') >= 0 ||
+     pair[0].indexOf('Marque') >= 0 ||
+     pair[0].indexOf('Immat') >= 0 ||
+     pair[0].indexOf('Kilométrage') >= 0;
+    doc.setFont('helvetica', 'bold');
+    setTextRgb(blueV ? BLUE : TEXT_DARK);
+    txt(doc.splitTextToSize(val, col_w - 26)[0], ml + 24, y_l + 2.5);
+    setDrawRgb([238, 238, 238]);
+    doc.line(ml, y_l + rowH, ml + col_w, y_l + rowH);
+    y_l += rowH;
+   });
+   rightRows.forEach(function (pair) {
+    y_r = ensurePage(y_r, rowH + 1);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setTextRgb(TEXT_DIM);
+    txt(pair[0], mid + 1, y_r + 2.5);
+    var val = String(pair[1] || '—');
+    var blueV = pair[0].indexOf('Caution') >= 0;
+    doc.setFont('helvetica', 'bold');
+    setTextRgb(blueV ? BLUE : TEXT_DARK);
+    txt(doc.splitTextToSize(val, col_w - 26)[0], mid + 24, y_r + 2.5);
+    doc.line(mid, y_r + rowH, mid + col_w, y_r + rowH);
+    y_r += rowH;
+   });
+   var yAfterCols = Math.max(y_l, y_r) + 2;
+
+   var paid = (res.paiements || []).reduce(function (s, p) {
+    return s + (Number(p && p.montant) || 0);
+   }, 0);
+   var restedu = Math.max(0, (res.total || 0) - paid);
+   var box_x = mid;
+   var box_w = col_w;
+   var box_h = 28;
+   y = ensurePage(yAfterCols, box_h + 4);
+   var yBox = yAfterCols;
+   setFillRgb(BLUE);
+   doc.roundedRect(box_x, yBox, box_w, box_h, 1.2, 1.2, 'F');
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(BLUE_MUTED);
+   txt('Montant total de la location', box_x + 3, yBox + 5);
+   doc.setFontSize(8);
+   txt(
+    days + ' jour' + (days > 1 ? 's' : '') + ' × ' + (v?.tarif || 0) + ' MAD',
+    box_x + 3,
+    yBox + 8.5
+   );
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(16);
+   setTextRgb(WHITE);
+   txt(fmtNum(res.total || 0) + ' MAD', box_x + box_w - 3, yBox + 13, { align: 'right' });
+   setDrawRgb(BLUE_LINE);
+   doc.setLineWidth(0.2);
+   doc.line(box_x + 3, yBox + 15, box_x + box_w - 3, yBox + 15);
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(9);
+   setTextRgb(BLUE_MUTED);
+   txt('Caution (remboursable)', box_x + 3, yBox + 18);
+   doc.setFont('helvetica', 'bold');
+   setTextRgb(WHITE);
+   txt(fmtNum(res.caution || 0) + ' MAD', box_x + box_w - 3, yBox + 18, { align: 'right' });
+   doc.setFont('helvetica', 'normal');
+   setTextRgb(BLUE_MUTED);
+   txt('Reste dû', box_x + 3, yBox + 22.5);
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(11);
+   setTextRgb(ORANGE_RESTE);
+   txt(fmtNum(restedu) + ' MAD', box_x + box_w - 3, yBox + 22.5, { align: 'right' });
+   y = yBox + box_h + 3;
+
+   if (
+    useEtatLieuxContrat &&
+    global.invooEtatLieux &&
+    typeof global.invooEtatLieux.drawPdf === 'function'
+   ) {
+    y = ensurePage(y, 40);
     y = global.invooEtatLieux.drawPdf(doc, ml, y, cw, res.etatLieux);
    }
-   section('DÉTAILS DE LA LOCATION');
-   grid2(
-    [
-     ['Date de départ', fmt(res.debut)],
-     ['Date de retour', fmt(res.fin)],
-     ['Durée', days + ' jour' + (days > 1 ? 's' : '')],
-     ['Lieu de prise', res.lieu || '—'],
-    ]
-     .concat(res.caution > 0 ? [['Caution (remboursable)', fmtNum(res.caution) + ' MAD']] : [])
-     .concat(res.notes ? [['Remarques', res.notes]] : [])
-   );
-   y += 2;
-   y = ensurePage(doc, y, 22);
-   rect(ml, y, cw, 14, '#0C0E14');
-   setFont(8, 'normal', '#CCCCCC');
-   txt('Montant total de la location', ml + 4, y + 5);
-   setFont(7, 'normal', '#999999');
-   txt(days + ' jour' + (days > 1 ? 's' : '') + ' × ' + (v?.tarif || 0) + ' MAD', ml + 4, y + 10);
-   setFont(14, 'bold', '#FFFFFF');
-   txt(fmtNum(res.total || 0) + ' MAD', W - mr - 4, y + 9, { align: 'right' });
-   y += 20;
-   if ((res.paiements || []).length > 0 || res.caution > 0) {
-    section('RÉCAPITULATIF DES PAIEMENTS');
-    (res.paiements || []).forEach(function (p) {
-     y = ensurePage(doc, y, 10);
-     const typeLabel = p.type === 'avance' ? 'Avance' : p.type === 'solde' ? 'Solde' : 'Autre';
-     setFont(7, 'normal', '#555555');
-     txt(typeLabel + '(' + p.mode + ' · ' + (p.date || '') + ')', ml, y);
-     setFont(7, 'bold', '#0C0E14');
-     txt(fmtNum(p.montant) + ' MAD', W - mr, y, { align: 'right' });
-     y += 6;
-    });
-    if (res.caution > 0) {
-     y = ensurePage(doc, y, 10);
-     const cautionLbl =
-      res.cautionStatut === 'encaissee'
-       ? 'Encaissée'
-       : res.cautionStatut === 'restituee'
-        ? 'Restituée'
-        : res.cautionStatut === 'non'
-         ? ''
-         : 'En attente';
-     setFont(7, 'normal', '#555555');
-     txt(
-      'Caution (remboursable)' + (cautionLbl ? ' — ' + cautionLbl : ''),
-      ml,
-      y
-     );
-     setFont(7, 'bold', '#0C0E14');
-     txt(fmtNum(res.caution || 0) + ' MAD', W - mr, y, { align: 'right' });
-     y += 6;
+
+   sectionBar('CONDITIONS GÉNÉRALES');
+   var nC = conditions.length;
+   var halfC = Math.ceil(nC / 2);
+   var col1 = conditions.slice(0, halfC);
+   var col2 = conditions.slice(halfC);
+   var midC = ml + cw / 2;
+   var maxRows = Math.max(col1.length, col2.length);
+   var condRowH = 3;
+   for (var ri = 0; ri < maxRows; ri++) {
+    y = ensurePage(y, condRowH + 1);
+    var baseY = y;
+    if (ri < col1.length) {
+     var idx1 = ri + 1;
+     doc.setFont('helvetica', 'bold');
+     doc.setFontSize(8);
+     setTextRgb(BLUE);
+     txt(String(idx1) + '.', ml + 1, baseY + 2.5);
+     doc.setFont('helvetica', 'normal');
+     setTextRgb(TEXT_DARK);
+     var line1 = doc.splitTextToSize(col1[ri], midC - ml - 8);
+     txt(line1[0] || '', ml + 5, baseY + 2.5);
     }
-    const restedu = Math.max(
-     0,
-     (res.total || 0) -
-      (res.paiements || []).reduce(function (s, p) {
-       return s + p.montant;
-      }, 0)
-    );
-    doc.setDrawColor('#EEEEEE');
-    line(ml, y, W - mr, y, '#EEEEEE');
-    y += 4;
-    setFont(7, 'bold', '#0C0E14');
-    txt('Reste dû', ml, y);
-    setFont(8, 'bold', restedu === 0 ? '#047857' : '#B91C1C');
-    txt(fmtNum(restedu) + ' MAD', W - mr, y, { align: 'right' });
-    y += 8;
+    if (ri < col2.length) {
+     var idx2 = halfC + ri + 1;
+     doc.setFont('helvetica', 'bold');
+     setTextRgb(BLUE);
+     txt(String(idx2) + '.', midC + 1, baseY + 2.5);
+     doc.setFont('helvetica', 'normal');
+     setTextRgb(TEXT_DARK);
+     var line2 = doc.splitTextToSize(col2[ri], ml + cw - midC - 6);
+     txt(line2[0] || '', midC + 5, baseY + 2.5);
+    }
+    setDrawRgb([240, 240, 240]);
+    doc.line(ml, baseY + condRowH, ml + cw, baseY + condRowH);
+    y = baseY + condRowH;
    }
-   section('CONDITIONS GÉNÉRALES');
-   setFont(6.5, 'normal', '#333333');
-   doc.setTextColor(51, 51, 51);
-   var lineH = 3.5;
-   conditions.forEach(function (cl, i) {
-    var block = i + 1 + '. ' + cl;
-    var lines = doc.splitTextToSize(block, cw - 8);
-    var j = 0;
-    for (j = 0; j < lines.length; j++) {
-     y = ensurePage(doc, y, lineH + 2);
-     doc.text(lines[j], ml + 4, y);
-     y += lineH;
-    }
-    y += 1.5;
-   });
-   y += 4;
-   doc.setTextColor(12, 14, 20);
-   y = ensurePage(doc, y, 28);
-   const sigW = (cw - 10) / 2;
-   doc.setDrawColor('#1A1A1A');
-   doc.setLineWidth(0.4);
-   line(ml, y, ml + sigW, y, '#1A1A1A');
-   line(ml + sigW + 10, y, ml + sigW + 10 + sigW, y, '#1A1A1A');
+   y += 2;
+
+   var sigW = (cw - 4) / 2;
+   var sigH = 22;
+   y = ensurePage(y, sigH + 6);
+   setDrawRgb([221, 221, 221]);
+   doc.setLineWidth(0.5);
+   doc.roundedRect(ml, y, sigW, sigH, 1, 1, 'S');
+   doc.roundedRect(ml + sigW + 4, y, sigW, sigH, 1, 1, 'S');
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(TEXT_DIM);
+   txt('Signature du locataire', ml + 3, y + 4);
+   txt('Cachet et signature de l\'agence', ml + sigW + 7, y + 4);
+   setDrawRgb([170, 170, 170]);
    doc.setLineWidth(0.2);
-   setFont(7, 'normal', '#555555');
-   txt('Signature du locataire', ml + sigW / 2, y + 4, { align: 'center' });
-   txt(c ? c.prenom + ' ' + c.nom : '', ml + sigW / 2, y + 8, { align: 'center' });
-   txt("Cachet et signature de l'agence", ml + sigW + 10 + sigW / 2, y + 4, { align: 'center' });
-   txt(agenceNom, ml + sigW + 10 + sigW / 2, y + 8, { align: 'center' });
+   doc.line(ml + 3, y + 14, ml + sigW - 3, y + 14);
+   doc.line(ml + sigW + 7, y + 14, ml + cw - 3, y + 14);
+   doc.setFont('helvetica', 'italic');
+   doc.setFontSize(11);
+   setTextRgb(BLUE);
+   var locName = c ? c.prenom + ' ' + c.nom : '';
+   txt(locName, ml + 3, y + 12);
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(TEXT_MED);
+   txt(locName, ml + 3, y + 18);
+   var stampCx = ml + sigW + 4 + sigW / 2;
+   doc.setFont('helvetica', 'bold');
+   doc.setFontSize(8);
+   setTextRgb(BLUE);
+   txt('AGENCE', stampCx, y + 11, { align: 'center' });
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(8);
+   setTextRgb(TEXT_MED);
+   txt(agenceNom, stampCx, y + 18, { align: 'center' });
+   y += sigH + 4;
+
+   setDrawRgb(BLUE);
+   doc.setLineWidth(0.35);
+   doc.line(ml, y, ml + cw, y);
+   y += 4;
+   doc.setFont('helvetica', 'normal');
+   doc.setFontSize(7.5);
+   setTextRgb(TEXT_LIGHT);
+   var foot =
+    s.documentFooter && String(s.documentFooter).trim()
+     ? String(s.documentFooter).trim()
+     : agenceNom +
+       '  |  ' +
+       agenceVille +
+       ' — Tél: ' +
+       agenceTel +
+       (s.email ? ' — ' + s.email : '') +
+       (patenteLine ? '  |  ' + patenteLine : '');
+   var footLines = doc.splitTextToSize(foot, cw - 4).slice(0, 3);
+   footLines.forEach(function (ln) {
+    txt(ln, ml + cw / 2, y, { align: 'center' });
+    y += 3.2;
+   });
+
    doc.save('Contrat_' + contratNum + '_' + (c ? c.nom : 'client') + '.pdf');
   }
   function runPdf() {

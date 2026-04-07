@@ -32,6 +32,14 @@
   }
  }
 
+ /** Affiche ou masque le bloc schéma état des lieux selon Paramètres. */
+ function syncEtatLieuxBlockVisibility() {
+  if (!ctx) return;
+  var on = ctx.getSettings().etatLieuxContrat === true;
+  var block = document.querySelector('#res-modal .res-etat-lieux-block');
+  if (block) block.style.display = on ? '' : 'none';
+ }
+
  function populateResSelects() {
   if (!ctx) return;
   var load = ctx.load;
@@ -85,6 +93,7 @@
    global.invooEtatLieux.mount('res-etat-lieux-root');
   }
   syncResCautionFieldUi(currentRes || null);
+  syncEtatLieuxBlockVisibility();
  }
 
  function updateResTotal() {
@@ -204,10 +213,16 @@
    ? load(KEYS.res).find(function (x) { return String(x.id) === editingId; })
    : null;
   var existing = existingRaw && !existingRaw._deleted ? existingRaw : {};
-  var etatLieuxSnap =
-   global.invooEtatLieux && typeof global.invooEtatLieux.getData === 'function'
-    ? global.invooEtatLieux.getData('res-etat-lieux-root')
-    : undefined;
+  var useEtatLieux = ctx.getSettings().etatLieuxContrat === true;
+  var etatLieuxSnap;
+  if (useEtatLieux) {
+   etatLieuxSnap =
+    global.invooEtatLieux && typeof global.invooEtatLieux.getData === 'function'
+     ? global.invooEtatLieux.getData('res-etat-lieux-root')
+     : undefined;
+  } else {
+   etatLieuxSnap = undefined;
+  }
   var statEx = existing.cautionStatut || 'non';
   var cautionLocked = editingId && (statEx === 'encaissee' || statEx === 'restituee');
   var cautEl = document.getElementById('res-caution');
@@ -235,7 +250,13 @@
     : cautionMontant > 0
      ? statEx || 'non'
      : 'non',
-   etatLieux: etatLieuxSnap !== undefined ? etatLieuxSnap : existing.etatLieux || null,
+   etatLieux: useEtatLieux
+    ? etatLieuxSnap !== undefined
+      ? etatLieuxSnap
+      : existing.etatLieux || null
+    : existing.etatLieux != null
+     ? existing.etatLieux
+     : null,
   });
   delete r._deleted;
   if (!r.clientId || !r.vehId || !r.debut || !r.fin) {
@@ -506,6 +527,7 @@
   attach: function (c) {
    ctx = c;
    global.syncResCautionFieldUi = syncResCautionFieldUi;
+   global.syncEtatLieuxBlockVisibility = syncEtatLieuxBlockVisibility;
    global.populateResSelects = populateResSelects;
    global.updateResTotal = updateResTotal;
    global.saveReservation = saveReservation;
