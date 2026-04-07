@@ -2,7 +2,7 @@
 
 À cocher avant chaque déploiement ou release.
 
-> Suivi global des recommandations d’audit : voir **`AUDIT-STATUT.txt`** à la racine du dépôt.
+> État du projet et repères : voir **[AVANCEMENT.md](./AVANCEMENT.md)**.
 
 ## 1. Service worker et cache
 

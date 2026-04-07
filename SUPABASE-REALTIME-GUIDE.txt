@@ -250,7 +250,7 @@ STEP E — Avoid push storms after a merge
   js/03-supabase-sync.js     — REST + Realtime + merge + lifecycle
   index.html                 — CSP + script order (supabase.umd.js before sync)
   partials/pages/page-parametres.html — SQL schema + RLS + publication comments
-  SUPABASE_RLS.md            — RLS + Realtime notes (Markdown)
+  AVANCEMENT.md              — état projet + rappel Realtime / RLS (résumé)
 
 
 ================================================================================

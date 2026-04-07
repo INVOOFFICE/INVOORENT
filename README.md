@@ -32,7 +32,6 @@ Pas d’audit WCAG formalisé dans ce dépôt. Pour un usage professionnel large
 
 ## Documentation interne
 
-- **[AUDIT-STATUT.txt](./AUDIT-STATUT.txt)** — où en sont les recommandations d’audit (hors sécu) et la dette restante  
-- `APP-GUIDE.txt` — cible d’architecture type INVOOFFICE  
-- `NAMING.md` — préfixes `autoloc_*` / `invoo*`  
-- `TECHNIQUE.txt` — procédures admin (hors périmètre code)
+- **[AVANCEMENT.md](./AVANCEMENT.md)** — état du projet, dernières évolutions, repères code pour reprendre le travail  
+- `APP-GUIDE.txt` — cible d’architecture type INVOOFFICE (si présent)  
+- `TECHNIQUE.txt` — procédures admin (hors périmètre code, si présent)

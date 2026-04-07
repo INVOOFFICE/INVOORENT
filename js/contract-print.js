@@ -536,44 +536,85 @@
     y += 6.5;
    }
 
+   /** Ligne type tableau : label (colonne fixe) + valeur, retours à la ligne si besoin. */
+   function drawLabelValueRow(xBase, width, pair, opts) {
+    opts = opts || {};
+    var labelColW = opts.labelColW != null ? opts.labelColW : 40;
+    var valueX = xBase + labelColW;
+    var valueW = Math.max(14, width - labelColW - 2.5);
+    var lab = pair[0];
+    var val = String(pair[1] != null ? pair[1] : '—');
+    var lineStep = 3.55;
+    var firstBaseline = 3.15;
+    var valueBold =
+     opts.valueBold != null
+      ? opts.valueBold
+      : lab === 'Nom complet' ||
+        lab === 'Téléphone' ||
+        lab === 'Ville' ||
+        lab.indexOf('Date') === 0 ||
+        lab === 'N° Permis de conduire';
+    var valueBlue =
+     opts.valueBlue != null
+      ? opts.valueBlue
+      : lab === 'Email' ||
+        lab.indexOf('Tarif') >= 0 ||
+        lab.indexOf('Caution') >= 0 ||
+        lab === 'Caution (remboursable)';
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setTextRgb(TEXT_DIM);
+    var labelLines = doc.splitTextToSize(lab, labelColW - 0.5);
+
+    doc.setFont('helvetica', valueBold ? 'bold' : 'normal');
+    doc.setFontSize(8);
+    setTextRgb(valueBlue ? BLUE : TEXT_DARK);
+    var valueLines = doc.splitTextToSize(val, valueW);
+
+    var n = Math.max(labelLines.length, valueLines.length, 1);
+    var minH = firstBaseline + n * lineStep + 1.5;
+    return { lines: n, minH: minH, draw: function (curTop) {
+     var i = 0;
+     for (i = 0; i < n; i++) {
+      var yy = curTop + firstBaseline + i * lineStep;
+      if (labelLines[i]) {
+       doc.setFont('helvetica', 'normal');
+       doc.setFontSize(7.5);
+       setTextRgb(TEXT_DIM);
+       txt(labelLines[i], xBase + 0.5, yy);
+      }
+      if (valueLines[i]) {
+       doc.setFont('helvetica', valueBold ? 'bold' : 'normal');
+       doc.setFontSize(8);
+       setTextRgb(valueBlue ? BLUE : TEXT_DARK);
+       txt(valueLines[i], valueX, yy);
+      }
+     }
+     var rowH = firstBaseline + n * lineStep + 1.5;
+     setDrawRgb([238, 238, 238]);
+     doc.setLineWidth(0.15);
+     doc.line(xBase, curTop + rowH, xBase + width, curTop + rowH);
+     return curTop + rowH;
+    }};
+   }
+
    function rowPair2Col(pairs) {
-    var colW = (cw - 4) / 2;
-    var midX = ml + colW + 4;
+    var gutter = 5;
+    var colW = (cw - gutter) / 2;
+    var midX = ml + colW + gutter;
     var half = Math.ceil(pairs.length / 2);
     var left = pairs.slice(0, half);
     var right = pairs.slice(half);
-    var rowH = 3.2;
+    var labelColHalf = 40;
     var yL = y;
     var yR = y;
     function drawSide(list, xBase, width, yyStart) {
      var cur = yyStart;
      list.forEach(function (pair) {
-      cur = ensurePage(cur, rowH + 1);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      setTextRgb(TEXT_DIM);
-      txt(pair[0], xBase + 1, cur + 2.5);
-      var val = String(pair[1] != null ? pair[1] : '—');
-      var lab = pair[0];
-      var bold =
-       lab === 'Nom complet' ||
-       lab === 'Téléphone' ||
-       lab === 'Ville' ||
-       lab.indexOf('Date') === 0 ||
-       lab === 'N° Permis de conduire';
-      var blueVal =
-       lab === 'Email' ||
-       lab.indexOf('Tarif') >= 0 ||
-       lab.indexOf('Caution') >= 0 ||
-       lab === 'Caution (remboursable)';
-      doc.setFont('helvetica', bold ? 'bold' : 'normal');
-      setTextRgb(blueVal ? BLUE : TEXT_DARK);
-      var vlines = doc.splitTextToSize(val, width - 30);
-      txt(vlines[0] || '—', xBase + 28, cur + 2.5);
-      setDrawRgb([238, 238, 238]);
-      doc.setLineWidth(0.15);
-      doc.line(xBase, cur + rowH, xBase + width, cur + rowH);
-      cur += rowH;
+      var lay = drawLabelValueRow(xBase, width, pair, { labelColW: labelColHalf });
+      cur = ensurePage(cur, lay.minH + 1);
+      cur = lay.draw(cur);
      });
      return cur;
     }
@@ -616,8 +657,10 @@
     });
    }
 
-   var col_w = (cw - 3) / 2;
-   var mid = ml + col_w + 3;
+   var colGutter = 5;
+   var col_w = (cw - colGutter) / 2;
+   var mid = ml + col_w + colGutter;
+   var vehLabelW = 42;
    y = ensurePage(y, 8);
    setFillRgb(BLUE);
    doc.roundedRect(ml, y, col_w, 5, 1, 1, 'F');
@@ -652,41 +695,31 @@
     rightRows.push(['Remarques', res.notes]);
    }
 
-   var rowH = 3.2;
    var y_l = y;
    var y_r = y;
    leftRows.forEach(function (pair) {
-    y_l = ensurePage(y_l, rowH + 1);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    setTextRgb(TEXT_DIM);
-    txt(pair[0], ml + 1, y_l + 2.5);
-    var val = String(pair[1] || '—');
     var blueV =
      pair[0].indexOf('Tarif') >= 0 ||
      pair[0].indexOf('Marque') >= 0 ||
      pair[0].indexOf('Immat') >= 0 ||
      pair[0].indexOf('Kilométrage') >= 0;
-    doc.setFont('helvetica', 'bold');
-    setTextRgb(blueV ? BLUE : TEXT_DARK);
-    txt(doc.splitTextToSize(val, col_w - 26)[0], ml + 24, y_l + 2.5);
-    setDrawRgb([238, 238, 238]);
-    doc.line(ml, y_l + rowH, ml + col_w, y_l + rowH);
-    y_l += rowH;
+    var lay = drawLabelValueRow(ml, col_w, pair, {
+     labelColW: vehLabelW,
+     valueBold: true,
+     valueBlue: blueV,
+    });
+    y_l = ensurePage(y_l, lay.minH + 1);
+    y_l = lay.draw(y_l);
    });
    rightRows.forEach(function (pair) {
-    y_r = ensurePage(y_r, rowH + 1);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    setTextRgb(TEXT_DIM);
-    txt(pair[0], mid + 1, y_r + 2.5);
-    var val = String(pair[1] || '—');
     var blueV = pair[0].indexOf('Caution') >= 0;
-    doc.setFont('helvetica', 'bold');
-    setTextRgb(blueV ? BLUE : TEXT_DARK);
-    txt(doc.splitTextToSize(val, col_w - 26)[0], mid + 24, y_r + 2.5);
-    doc.line(mid, y_r + rowH, mid + col_w, y_r + rowH);
-    y_r += rowH;
+    var lay = drawLabelValueRow(mid, col_w, pair, {
+     labelColW: vehLabelW,
+     valueBold: true,
+     valueBlue: blueV,
+    });
+    y_r = ensurePage(y_r, lay.minH + 1);
+    y_r = lay.draw(y_r);
    });
    var yAfterCols = Math.max(y_l, y_r) + 2;
 
@@ -750,8 +783,13 @@
    var col2 = conditions.slice(halfC);
    var midC = ml + cw / 2;
    var maxRows = Math.max(col1.length, col2.length);
-   var condRowH = 3;
+   var condLineStep = 3.4;
+   var condTopPad = 2.6;
    for (var ri = 0; ri < maxRows; ri++) {
+    var line1 = ri < col1.length ? doc.splitTextToSize(col1[ri], midC - ml - 9) : [];
+    var line2 = ri < col2.length ? doc.splitTextToSize(col2[ri], ml + cw - midC - 9) : [];
+    var condRowH =
+     condTopPad + Math.max(line1.length, line2.length, 1) * condLineStep + 1.2;
     y = ensurePage(y, condRowH + 1);
     var baseY = y;
     if (ri < col1.length) {
@@ -759,21 +797,23 @@
      doc.setFont('helvetica', 'bold');
      doc.setFontSize(8);
      setTextRgb(BLUE);
-     txt(String(idx1) + '.', ml + 1, baseY + 2.5);
+     txt(String(idx1) + '.', ml + 1, baseY + condTopPad);
      doc.setFont('helvetica', 'normal');
      setTextRgb(TEXT_DARK);
-     var line1 = doc.splitTextToSize(col1[ri], midC - ml - 8);
-     txt(line1[0] || '', ml + 5, baseY + 2.5);
+     line1.forEach(function (ln, li) {
+      txt(ln, ml + 5.5, baseY + condTopPad + li * condLineStep);
+     });
     }
     if (ri < col2.length) {
      var idx2 = halfC + ri + 1;
      doc.setFont('helvetica', 'bold');
      setTextRgb(BLUE);
-     txt(String(idx2) + '.', midC + 1, baseY + 2.5);
+     txt(String(idx2) + '.', midC + 1, baseY + condTopPad);
      doc.setFont('helvetica', 'normal');
      setTextRgb(TEXT_DARK);
-     var line2 = doc.splitTextToSize(col2[ri], ml + cw - midC - 6);
-     txt(line2[0] || '', midC + 5, baseY + 2.5);
+     line2.forEach(function (ln, li) {
+      txt(ln, midC + 5.5, baseY + condTopPad + li * condLineStep);
+     });
     }
     setDrawRgb([240, 240, 240]);
     doc.line(ml, baseY + condRowH, ml + cw, baseY + condRowH);
