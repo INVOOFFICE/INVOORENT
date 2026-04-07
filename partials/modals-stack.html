@@ -213,6 +213,38 @@
 <label>Adresse complète</label>
 <input id="cl-adresse" placeholder="Rue, quartier" />
 </div>
+<div class="form-full cl-sec-heading" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Conducteur additionnel</div>
+<div class="form-full cl-sec-toggle-wrap">
+<label class="cl-sec-toggle-label">
+<input type="checkbox" id="cl-sec-toggle" onchange="toggleClientSecPanel()" aria-controls="cl-sec-panel" aria-expanded="false"/>
+<span>Ajouter un conducteur secondaire</span>
+</label>
+<p class="cl-sec-hint">Les informations du conducteur additionnel apparaissent sur le contrat de location.</p>
+</div>
+<div id="cl-sec-panel" class="form-full cl-sec-panel" hidden>
+<div class="form-grid cl-sec-panel-grid">
+<div class="form-group">
+<label>Prénom</label>
+<input id="cl-sec-prenom" placeholder="Prénom" autocomplete="off"/>
+</div>
+<div class="form-group">
+<label>Nom</label>
+<input id="cl-sec-nom" placeholder="Nom" autocomplete="off"/>
+</div>
+<div class="form-group">
+<label>Type de document</label>
+<select id="cl-sec-doc-type">
+<option value="cin">CIN</option>
+<option value="passeport">Passeport</option>
+<option value="permis">N° Permis de conduire</option>
+</select>
+</div>
+<div class="form-group">
+<label>Numéro du document</label>
+<input id="cl-sec-doc-num" placeholder="Numéro" autocomplete="off"/>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="modal-footer">

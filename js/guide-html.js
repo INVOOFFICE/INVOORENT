@@ -59,7 +59,7 @@ global.invooGuideHTML=function invooGuideHTML(){
  ['Historique client',['Timeline complète de toutes ses locations','Chiffre d\'affaires total généré par ce client','Nombre de locations en cours','Détail par location : véhicule, dates, montant, statut, notes']]
  )+
  steps(
- ['1','Ajouter un client','Bouton "+ Ajouter". Minimum requis : prénom, nom, téléphone. Les autres champs enrichissent le contrat.'],
+ ['1','Ajouter un client','Bouton "+ Ajouter". Minimum requis : prénom, nom. Téléphone et documents enrichissent le contrat. Option <strong>conducteur secondaire</strong> (nom, document) pour le contrat.'],
  ['2','Rechercher un client','Filtrage en temps réel par nom, prénom, téléphone ou numéro CIN depuis la barre de recherche.'],
  ['3','Consulter l\'historique','Cliquez sur "Historique" sur la fiche client pour voir toutes ses locations et son CA total.'],
  ['4','Supprimer un client','Protégé : impossible si une location est en cours. Une confirmation est demandée si un historique existe.']

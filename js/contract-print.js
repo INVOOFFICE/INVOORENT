@@ -43,6 +43,36 @@
   const conditions = (s.conditions || ctx.conditionsDefaut).split('\n').filter(function (l) {
    return l.trim();
   });
+  const secDrivers =
+   c && Array.isArray(c.conducteursSecondaires)
+    ? c.conducteursSecondaires.filter(function (x) {
+       return x && (x.prenom || x.nom || x.docNum);
+      })
+    : [];
+  var secHtml = '';
+  if (secDrivers.length) {
+   secHtml =
+    '\n<div class="contrat-section"><h4>Conducteur(s) additionnel(s)</h4><div class="contrat-grid">';
+   secDrivers.forEach(function (cd, i) {
+    const lab =
+     cd.docType === 'cin' ? 'CIN' : cd.docType === 'passeport' ? 'Passeport' : 'N° Permis de conduire';
+    secHtml +=
+     '<div class="contrat-field" style="grid-column:1/-1;padding-top:' +
+     (i > 0 ? '0.75rem' : '0') +
+     '"><span style="font-size:0.7rem;color:#9A9A9A">Conducteur additionnel ' +
+     (i + 1) +
+     '</span><strong style="display:block;margin-top:0.2rem">' +
+     window.AutoLocUtils.escapeHtml([cd.prenom, cd.nom].filter(Boolean).join(' ') || '—') +
+     '</strong></div>';
+    secHtml +=
+     '<div class="contrat-field"><span>' +
+     window.AutoLocUtils.escapeHtml(lab) +
+     '</span><strong>' +
+     window.AutoLocUtils.escapeHtml(cd.docNum || '—') +
+     '</strong></div>';
+   });
+   secHtml += '</div></div>';
+  }
   const contratNum = 'CTR-' + id.slice(-6).toUpperCase();
   document.getElementById('contrat-body').innerHTML =
    '\n<div class="contrat-header"><div class="contrat-logo"><h2>' +
@@ -85,7 +115,9 @@
    window.AutoLocUtils.escapeHtml(c?.ville || '—') +
    '</strong></div><div class="contrat-field"><span>Nationalité</span><strong>' +
    window.AutoLocUtils.escapeHtml(c?.nat || '—') +
-   '</strong></div></div></div><div class="contrat-section"><h4>Véhicule loué</h4><div class="contrat-grid"><div class="contrat-field"><span>Marque / Modèle</span><strong>' +
+   '</strong></div></div></div>' +
+   secHtml +
+   '<div class="contrat-section"><h4>Véhicule loué</h4><div class="contrat-grid"><div class="contrat-field"><span>Marque / Modèle</span><strong>' +
    (v ? window.AutoLocUtils.escapeHtml(v.marque) + ' ' + window.AutoLocUtils.escapeHtml(v.modele) : '—') +
    '</strong></div><div class="contrat-field"><span>Immatriculation</span><strong>' +
    window.AutoLocUtils.escapeHtml(v?.immat || '—') +
@@ -306,6 +338,23 @@
     ['Ville', c?.ville || '—'],
     ['Nationalité', c?.nat || '—'],
    ]);
+   const secDriversPdf =
+    c && Array.isArray(c.conducteursSecondaires)
+     ? c.conducteursSecondaires.filter(function (x) {
+        return x && (x.prenom || x.nom || x.docNum);
+       })
+     : [];
+   if (secDriversPdf.length) {
+    section('CONDUCTEUR(S) ADDITIONNEL(S)');
+    secDriversPdf.forEach(function (cd) {
+     const lab =
+      cd.docType === 'cin' ? 'CIN' : cd.docType === 'passeport' ? 'Passeport' : 'N° Permis';
+     grid2([
+      ['Nom complet', [cd.prenom, cd.nom].filter(Boolean).join(' ') || '—'],
+      [lab, cd.docNum || '—'],
+     ]);
+    });
+   }
    section('VÉHICULE LOUÉ');
    grid2([
     ['Marque / Modèle', v ? v.marque + ' ' + v.modele : '—'],

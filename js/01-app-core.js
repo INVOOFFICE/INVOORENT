@@ -829,9 +829,35 @@ function clearVehForm(){
 ['veh-assurance','veh-vignette','veh-visite','veh-assistance'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
  const t=document.getElementById('veh-modal-title');if(t)t.textContent='Ajouter un véhicule';
 }
+function toggleClientSecPanel(){
+ const p=document.getElementById('cl-sec-panel');
+ const t=document.getElementById('cl-sec-toggle');
+ if(!p||!t)return;
+ if(t.checked){
+  p.removeAttribute('hidden');
+  t.setAttribute('aria-expanded','true');
+ }else{
+  p.setAttribute('hidden','');
+  t.setAttribute('aria-expanded','false');
+ }
+}
+function clearClientSecFields(){
+['cl-sec-prenom','cl-sec-nom','cl-sec-doc-num'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+ const dt=document.getElementById('cl-sec-doc-type');if(dt)dt.selectedIndex=0;
+ const cb=document.getElementById('cl-sec-toggle');
+ if(cb){
+  cb.checked=false;
+  cb.setAttribute('aria-expanded','false');
+ }
+ const p=document.getElementById('cl-sec-panel');
+ if(p){
+  p.setAttribute('hidden','');
+ }
+}
 function clearClientForm(){
  const cm=document.getElementById('client-modal');if(cm)delete cm.dataset.editingClientId;
 ['cl-prenom','cl-nom','cl-tel','cl-email','cl-cin','cl-permis','cl-ville','cl-nat','cl-adresse'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+ clearClientSecFields();
  const t=document.getElementById('client-modal-title');if(t)t.textContent='Ajouter un client';
 }
 function clearResForm(){
@@ -1099,11 +1125,25 @@ function saveClient(){
  updatedAt: now,
  createdAt: effectiveEditId ?(load(KEYS.cl).find(x=>String(x.id)===String(effectiveEditId))?.createdAt||now): now,
 };
- if(!c.prenom||!c.nom||!c.tel){alAlert('Veuillez remplir les champs obligatoires (prénom, nom, téléphone).');return;}
+ if(!c.prenom||!c.nom){alAlert('Veuillez remplir les champs obligatoires (prénom, nom).');return;}
+ if(c.tel){
  const telClean=c.tel.replace(/[\s\-().+]/g,'');
  if(!/^\d{8,15}$/.test(telClean)){alAlert('Numéro de téléphone invalide. Exemples valides : +212 6 12 34 56 78, 0612345678');return;}
+ }
  if(c.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)){alAlert('Adresse email invalide.');return;}
  if(c.cin&&c.cin.length<4){alAlert('CIN / Passeport trop court.');return;}
+ const secToggle=document.getElementById('cl-sec-toggle');
+ let conducteursSecondaires=[];
+ if(secToggle&&secToggle.checked){
+ const sp=(document.getElementById('cl-sec-prenom')&&document.getElementById('cl-sec-prenom').value||'').trim();
+ const sn=(document.getElementById('cl-sec-nom')&&document.getElementById('cl-sec-nom').value||'').trim();
+ const sdt=document.getElementById('cl-sec-doc-type')?document.getElementById('cl-sec-doc-type').value:'cin';
+ const sdn=(document.getElementById('cl-sec-doc-num')&&document.getElementById('cl-sec-doc-num').value||'').trim();
+ if(!sp||!sn||!sdn){alAlert('Conducteur secondaire : renseignez le prénom, le nom et le numéro du document.');return;}
+ if(!['cin','passeport','permis'].includes(sdt)){alAlert('Type de document invalide pour le conducteur secondaire.');return;}
+ conducteursSecondaires=[{prenom:sp,nom:sn,docType:sdt,docNum:sdn}];
+ }
+ c.conducteursSecondaires=conducteursSecondaires;
  let data=load(KEYS.cl);
  if(effectiveEditId){
  const prev=data.find(x=>String(x.id)===String(effectiveEditId));
@@ -1127,6 +1167,19 @@ function editClient(id){
  const cm=document.getElementById('client-modal');if(cm)cm.dataset.editingClientId=sid;
  document.getElementById('client-modal-title').textContent='Modifier le client';
 ['prenom','nom','tel','email','cin','permis','ville','nat','adresse'].forEach(k=>document.getElementById('cl-'+k).value=c[k]||'');
+ clearClientSecFields();
+ const secArr=Array.isArray(c.conducteursSecondaires)?c.conducteursSecondaires:[];
+ const sec=secArr[0];
+ if(sec&&(sec.prenom||sec.nom||sec.docNum)){
+ const cb=document.getElementById('cl-sec-toggle');
+ if(cb)cb.checked=true;
+ toggleClientSecPanel();
+ if(document.getElementById('cl-sec-prenom'))document.getElementById('cl-sec-prenom').value=sec.prenom||'';
+ if(document.getElementById('cl-sec-nom'))document.getElementById('cl-sec-nom').value=sec.nom||'';
+ const sdt=document.getElementById('cl-sec-doc-type');
+ if(sdt)sdt.value=['cin','passeport','permis'].includes(sec.docType)?sec.docType:'cin';
+ if(document.getElementById('cl-sec-doc-num'))document.getElementById('cl-sec-doc-num').value=sec.docNum||'';
+ }
  openModal('client-modal');
 }
 function deleteClient(id){
