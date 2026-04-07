@@ -1372,8 +1372,10 @@ const DEMO_DURATION=60 * 60;
   }
  }
  async function createDemoToken(){
+ const existing=await readDemoToken();
+ if(existing)return existing;
  const ts=Date.now();
- // SECURITY (demo offline): pas de secret hardcodé.
+ // SECURITY (demo offline): pas de secret hardcodé — horodatage unique conservé jusqu'à fin d'essai ou abandon.
  localStorage.setItem(DEMO_KEY,btoa(JSON.stringify({ts})));
  return ts;
 }
@@ -1386,11 +1388,43 @@ const DEMO_DURATION=60 * 60;
  return (typeof ts==='number')? ts : null;
 }catch{return null;}
 }
+ function readDemoTokenSync(){
+ try{
+ const raw=localStorage.getItem(DEMO_KEY);
+ if(!raw)return null;
+ const parsed=JSON.parse(atob(raw));
+ const ts=parsed && parsed.ts;
+ return (typeof ts==='number')? ts : null;
+ }catch(e){return null;}
+ }
+ function getDemoSecondsLeftSync(){
+ const startTs=readDemoTokenSync();
+ if(!startTs)return 0;
+ return Math.max(0,DEMO_DURATION-Math.floor((Date.now()-startTs)/ 1000));
+ }
  async function getDemoSecondsLeft(){
  const startTs=await readDemoToken();
  if(!startTs)return 0;
  return Math.max(0,DEMO_DURATION-Math.floor((Date.now()-startTs)/ 1000));
 }
+ function syncDemoSectionVisibility(){
+ const demoBtn=document.getElementById('tab-demo');
+ const demoPanel=document.getElementById('demo-panel');
+ if(!demoBtn)return;
+ const started=readDemoTokenSync()!==null;
+ const left=getDemoSecondsLeftSync();
+ const hideTrial=started && left<=0;
+ demoBtn.style.display=hideTrial?'none':'';
+ demoBtn.setAttribute('aria-hidden',hideTrial?'true':'false');
+ if(hideTrial&&demoPanel)demoPanel.classList.remove('show');
+ if(hideTrial){
+ const loginScr=document.getElementById('login-screen');
+ if(loginScr&&loginScr.classList.contains('login-screen--demo')){
+ loginScr.classList.remove('login-screen--demo');
+ switchTab('admin');
+ }
+ }
+ }
  function getStoredHash(){return localStorage.getItem(LOGIN_PWD_KEY)||null;}
  const OPFS_ACTIVATION_KEY='invoo_activation_v3';
  const LICENSE_WA_SENT_KEY='invoo_license_wa_sent';
@@ -1543,6 +1577,7 @@ const DEMO_DURATION=60 * 60;
  if(back)back.style.display='';
  showPanel('admin');
 }
+ syncDemoSectionVisibility();
 }
  /** Raccourcis PWA / lien direct : index.html#vehicules, #reservations, etc. */
  function consumeInvooHashRoute(){
@@ -1575,6 +1610,7 @@ const DEMO_DURATION=60 * 60;
  const demoPanel=document.getElementById('demo-panel');
  const loginBtn=document.getElementById('btn-login-submit');
  const loginScr=document.getElementById('login-screen');
+ if(mode==='demo'&&demoBtn&&demoBtn.style.display==='none')return;
  if(loginScr)loginScr.classList.toggle('login-screen--demo',mode==='demo');
  if(mode==='admin'){
  adminBtn.className='login-option login-option--admin access-btn active';
@@ -1595,8 +1631,13 @@ const DEMO_DURATION=60 * 60;
  document.getElementById('login-error').classList.remove('show');
 }
  async function startDemo(){
- hideLogin();
  await createDemoToken();
+ if(getDemoSecondsLeftSync()<=0){
+ syncDemoSectionVisibility();
+ alAlert('La période d\'essai d\'1 heure est terminée. Connectez-vous avec le mot de passe administrateur.');
+ return;
+ }
+ hideLogin();
  document.getElementById('demo-countdown-bar').classList.add('show');
  const left0=await getDemoSecondsLeft();
  updateDemoDisplay(left0);
@@ -1617,19 +1658,25 @@ const DEMO_DURATION=60 * 60;
 }
  function endDemo(expired){
  clearInterval(demoTimer);
- localStorage.removeItem(DEMO_KEY);
+ demoTimer=null;
  document.getElementById('demo-countdown-bar').classList.remove('show');
- if(expired)document.getElementById('demo-expired-overlay').classList.add('show');
- else backToLogin();
+ if(!expired){
+ localStorage.removeItem(DEMO_KEY);
+ backToLogin();
+ return;
+ }
+ document.getElementById('demo-expired-overlay').classList.add('show');
+ syncDemoSectionVisibility();
 }
  function backToLogin(){
  clearInterval(demoTimer);
+ demoTimer=null;
  clearSession();
- localStorage.removeItem(DEMO_KEY);
  document.getElementById('demo-countdown-bar').classList.remove('show');
  document.getElementById('demo-expired-overlay').classList.remove('show');
  showLogin();
  switchTab('admin');
+ syncDemoSectionVisibility();
 }
  const SESSION_KEY='autoloc_session_token';
  const SESSION_DAYS=30;
@@ -1671,10 +1718,11 @@ const DEMO_DURATION=60 * 60;
  window.doLogout=function(){
  clearSession();
  clearInterval(demoTimer);
- localStorage.removeItem(DEMO_KEY);
+ demoTimer=null;
  document.getElementById('demo-countdown-bar').classList.remove('show');
  showLogin();
  switchTab('admin');
+ syncDemoSectionVisibility();
  const inp=document.getElementById('login-password');
  if(inp){inp.value='';inp.focus();}
 };
@@ -1877,8 +1925,15 @@ window.addEventListener('DOMContentLoaded',function(){
   console.warn('INVOORENT: interface non chargée (partials absents ou erreur avant injection). Si vous utilisez file://, servez le dossier via HTTP (voir message à l’écran).');
   return;
  }
+ syncDemoSectionVisibility();
+ setInterval(function(){
+ const ls=document.getElementById('login-screen');
+ if(ls&&!ls.classList.contains('hidden'))syncDemoSectionVisibility();
+ },15000);
  document.getElementById('tab-admin').addEventListener('click',function(){switchTab('admin');});
- document.getElementById('tab-demo').addEventListener('click',function(){startDemo();});
+ document.getElementById('tab-demo').addEventListener('click',function(){
+ createDemoToken().then(function(){syncDemoSectionVisibility();switchTab('demo');});
+ });
  document.getElementById('btn-login-submit').addEventListener('click',tryLogin);
  document.getElementById('login-password').addEventListener('keydown',function(e){if(e.key==='Enter')tryLogin();});
  const remCb=document.getElementById('remember-me');
