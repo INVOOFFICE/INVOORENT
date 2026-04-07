@@ -149,7 +149,13 @@
    (days > 1 ? 's' : '') +
    '</strong></div><div class="contrat-field"><span>Lieu de prise en charge</span><strong>' +
    window.AutoLocUtils.escapeHtml(r.lieu || '—') +
-   '</strong></div>\n ' +
+   '</strong></div>' +
+   (r.caution > 0
+    ? '<div class="contrat-field"><span>Caution (remboursable)</span><strong>' +
+      (r.caution || 0).toLocaleString('fr-FR') +
+      ' MAD</strong></div>'
+    : '') +
+   '\n ' +
    (r.notes
     ? '<div class="contrat-field" style="grid-column:1/-1"><span>Remarques</span><strong>' +
       window.AutoLocUtils.escapeHtml(r.notes) +
@@ -184,13 +190,20 @@
        .join('') +
       '\n ' +
       (r.caution > 0
-       ? '<div class="contrat-field"><span>Caution(' +
-         window.AutoLocUtils.escapeHtml(
-          r.cautionStatut === 'encaissee' ? 'Encaissée' : r.cautionStatut === 'restituee' ? 'Restituée' : 'En attente'
-         ) +
-         ')</span><strong>' +
+       ? '<div class="contrat-field"><span>Caution (remboursable)' +
+         (r.cautionStatut && r.cautionStatut !== 'non'
+          ? ' — ' +
+            window.AutoLocUtils.escapeHtml(
+             r.cautionStatut === 'encaissee'
+              ? 'Encaissée'
+              : r.cautionStatut === 'restituee'
+               ? 'Restituée'
+               : 'En attente'
+            )
+          : '') +
+         '</span><strong>' +
          (r.caution || 0).toLocaleString('fr-FR') +
-         'MAD</strong></div>'
+         ' MAD</strong></div>'
        : '') +
       '\n<div class="contrat-field" style="border-top:1px solid rgba(255,255,255,0.22);margin-top:4px;padding-top:8px"><span><strong>Reste dû</strong></span><strong style="color:' +
       (Math.max(0, (r.total || 0) - (r.paiements || []).reduce(function (s, p) {
@@ -393,7 +406,9 @@
      ['Date de retour', fmt(res.fin)],
      ['Durée', days + ' jour' + (days > 1 ? 's' : '')],
      ['Lieu de prise', res.lieu || '—'],
-    ].concat(res.notes ? [['Remarques', res.notes]] : [])
+    ]
+     .concat(res.caution > 0 ? [['Caution (remboursable)', fmtNum(res.caution) + ' MAD']] : [])
+     .concat(res.notes ? [['Remarques', res.notes]] : [])
    );
    y += 2;
    y = ensurePage(doc, y, 22);
@@ -419,9 +434,19 @@
     if (res.caution > 0) {
      y = ensurePage(doc, y, 10);
      const cautionLbl =
-      res.cautionStatut === 'encaissee' ? 'Encaissée' : res.cautionStatut === 'restituee' ? 'Restituée' : 'En attente';
+      res.cautionStatut === 'encaissee'
+       ? 'Encaissée'
+       : res.cautionStatut === 'restituee'
+        ? 'Restituée'
+        : res.cautionStatut === 'non'
+         ? ''
+         : 'En attente';
      setFont(7, 'normal', '#555555');
-     txt('Caution(' + cautionLbl + ')', ml, y);
+     txt(
+      'Caution (remboursable)' + (cautionLbl ? ' — ' + cautionLbl : ''),
+      ml,
+      y
+     );
      setFont(7, 'bold', '#0C0E14');
      txt(fmtNum(res.caution || 0) + ' MAD', W - mr, y, { align: 'right' });
      y += 6;

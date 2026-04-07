@@ -297,6 +297,10 @@
 <option>annulée</option>
 </select>
 </div>
+<div class="form-group">
+<label for="res-caution">Caution (optionnel, MAD)</label>
+<input id="res-caution" type="number" inputmode="decimal" min="0" step="any" placeholder="Remboursable — non inclus au total" oninput="typeof updateResTotal==='function'&&updateResTotal()" />
+</div>
 <div class="form-group form-full">
 <label>Remarques</label>
 <textarea id="res-notes" placeholder="Notes éventuelles">

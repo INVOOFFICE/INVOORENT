@@ -80,6 +80,10 @@
   var days = Math.max(1, Math.round((new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24)));
   var tarif = v && Number.isFinite(v.tarif) ? v.tarif : 0;
   var total = days * tarif;
+  var cautEl = document.getElementById('res-caution');
+  var cautParsed =
+   cautEl && String(cautEl.value).trim() !== '' ? parseFloat(String(cautEl.value).replace(',', '.')) : NaN;
+  var cautOk = Number.isFinite(cautParsed) && cautParsed > 0;
   preview.style.display = 'block';
   preview.innerHTML =
    '<strong>' +
@@ -90,7 +94,12 @@
    tarif.toLocaleString('fr-FR') +
    ' MAD</strong>/jour = <strong style="color:var(--success)">' +
    total.toLocaleString('fr-FR') +
-   ' MAD</strong>';
+   ' MAD</strong>' +
+   (cautOk
+    ? '<br><span style="display:block;margin-top:8px;font-size:0.84rem;color:var(--text3)">Caution (remboursable) : <strong style="color:var(--text2)">' +
+      cautParsed.toLocaleString('fr-FR') +
+      ' MAD</strong> — séparée du montant location</span>'
+    : '');
  }
 
  /** Rafraîchit toutes les vues qui lisent réservations / véhicules / clients (même page active). */
@@ -173,6 +182,9 @@
    global.invooEtatLieux && typeof global.invooEtatLieux.getData === 'function'
     ? global.invooEtatLieux.getData('res-etat-lieux-root')
     : undefined;
+  var cautEl = document.getElementById('res-caution');
+  var cautRaw = cautEl && String(cautEl.value).trim() !== '' ? parseFloat(String(cautEl.value).replace(',', '.')) : NaN;
+  var cautionMontant = Number.isFinite(cautRaw) && cautRaw > 0 ? Math.round(cautRaw * 100) / 100 : 0;
   var r = Object.assign({}, existing, {
    id: editingId || uid(),
    clientId: document.getElementById('res-client').value,
@@ -186,8 +198,8 @@
    createdAt: existing.createdAt || new Date().toISOString(),
    updatedAt: new Date().toISOString(),
    paiements: existing.paiements || [],
-   caution: existing.caution != null ? existing.caution : 0,
-   cautionStatut: existing.cautionStatut || 'non',
+   caution: cautionMontant,
+   cautionStatut: cautionMontant > 0 ? existing.cautionStatut || 'non' : 'non',
    etatLieux: etatLieuxSnap !== undefined ? etatLieuxSnap : existing.etatLieux || null,
   });
   delete r._deleted;
@@ -327,6 +339,8 @@
    document.getElementById('res-lieu').value = r.lieu || '';
    document.getElementById('res-statut').value = r.statut;
    document.getElementById('res-notes').value = r.notes || '';
+   var rc = document.getElementById('res-caution');
+   if (rc) rc.value = r.caution > 0 ? String(r.caution) : '';
    document.getElementById('res-debut').dispatchEvent(new Event('input'));
    document.getElementById('res-fin').dispatchEvent(new Event('input'));
    updateResTotal();

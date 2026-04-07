@@ -863,6 +863,7 @@ function clearClientForm(){
 function clearResForm(){
  const rm=document.getElementById('res-modal');if(rm)delete rm.dataset.editingResId;
 ['res-debut','res-fin','res-lieu','res-notes'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+ const _rc=document.getElementById('res-caution');if(_rc)_rc.value='';
 ['res-debut','res-fin'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
  const t=document.getElementById('res-total-preview');if(t)t.style.display='none';
  const h=document.getElementById('res-modal-title');if(h)h.textContent='Nouvelle réservation';
