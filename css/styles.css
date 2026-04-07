@@ -585,6 +585,17 @@ input[type="number"]{
   color:var(--text);
   font-size:0.85rem;
  }
+ #res-modal .res-caution-hint{
+  margin:6px 0 0;
+  font-size:0.72rem;
+  line-height:1.35;
+  color:var(--text3);
+ }
+ #res-modal #res-caution.input-readonly{
+  opacity:0.85;
+  cursor:not-allowed;
+  background:var(--surface3);
+ }
  #contrat-body .el-contrat-etat .el-contrat-svg-wrap{
   margin:10px 0 14px;
   padding:10px;

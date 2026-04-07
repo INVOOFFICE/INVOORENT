@@ -7,6 +7,31 @@
 
  var ctx = null;
 
+ /** État du champ caution : verrou si déjà encaissée/restituée (source de vérité = modal Paiements). */
+ function syncResCautionFieldUi(res) {
+  var rc = document.getElementById('res-caution');
+  var hint = document.getElementById('res-caution-hint');
+  if (!rc) return;
+  if (!res) {
+   rc.readOnly = false;
+   rc.classList.remove('input-readonly');
+   if (hint) {
+    hint.hidden = true;
+    hint.textContent = '';
+   }
+   return;
+  }
+  var locked = res.cautionStatut === 'encaissee' || res.cautionStatut === 'restituee';
+  rc.readOnly = !!locked;
+  rc.classList.toggle('input-readonly', !!locked);
+  if (hint) {
+   hint.hidden = false;
+   hint.textContent = locked
+    ? 'Montant et statut sont figés (caution encaissée ou restituée). Utilisez « Paiements » sur cette réservation pour ajuster.'
+    : 'Montant remboursable, distinct du total location. Encaissement et statut : bouton Paiements.';
+  }
+ }
+
  function populateResSelects() {
   if (!ctx) return;
   var load = ctx.load;
@@ -59,6 +84,7 @@
   if (global.invooEtatLieux && typeof global.invooEtatLieux.mount === 'function') {
    global.invooEtatLieux.mount('res-etat-lieux-root');
   }
+  syncResCautionFieldUi(currentRes || null);
  }
 
  function updateResTotal() {
@@ -182,9 +208,14 @@
    global.invooEtatLieux && typeof global.invooEtatLieux.getData === 'function'
     ? global.invooEtatLieux.getData('res-etat-lieux-root')
     : undefined;
+  var statEx = existing.cautionStatut || 'non';
+  var cautionLocked = editingId && (statEx === 'encaissee' || statEx === 'restituee');
   var cautEl = document.getElementById('res-caution');
   var cautRaw = cautEl && String(cautEl.value).trim() !== '' ? parseFloat(String(cautEl.value).replace(',', '.')) : NaN;
   var cautionMontant = Number.isFinite(cautRaw) && cautRaw > 0 ? Math.round(cautRaw * 100) / 100 : 0;
+  if (cautionLocked) {
+   cautionMontant = existing.caution != null ? existing.caution : 0;
+  }
   var r = Object.assign({}, existing, {
    id: editingId || uid(),
    clientId: document.getElementById('res-client').value,
@@ -199,7 +230,11 @@
    updatedAt: new Date().toISOString(),
    paiements: existing.paiements || [],
    caution: cautionMontant,
-   cautionStatut: cautionMontant > 0 ? existing.cautionStatut || 'non' : 'non',
+   cautionStatut: cautionLocked
+    ? statEx
+    : cautionMontant > 0
+     ? statEx || 'non'
+     : 'non',
    etatLieux: etatLieuxSnap !== undefined ? etatLieuxSnap : existing.etatLieux || null,
   });
   delete r._deleted;
@@ -341,6 +376,7 @@
    document.getElementById('res-notes').value = r.notes || '';
    var rc = document.getElementById('res-caution');
    if (rc) rc.value = r.caution > 0 ? String(r.caution) : '';
+   syncResCautionFieldUi(r);
    document.getElementById('res-debut').dispatchEvent(new Event('input'));
    document.getElementById('res-fin').dispatchEvent(new Event('input'));
    updateResTotal();
@@ -469,6 +505,7 @@
  global.invooReservationsModal = {
   attach: function (c) {
    ctx = c;
+   global.syncResCautionFieldUi = syncResCautionFieldUi;
    global.populateResSelects = populateResSelects;
    global.updateResTotal = updateResTotal;
    global.saveReservation = saveReservation;
