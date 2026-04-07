@@ -56,6 +56,9 @@
      );
     })
     .join('');
+  if (global.invooEtatLieux && typeof global.invooEtatLieux.mount === 'function') {
+   global.invooEtatLieux.mount('res-etat-lieux-root');
+  }
  }
 
  function updateResTotal() {
@@ -166,6 +169,10 @@
    ? load(KEYS.res).find(function (x) { return String(x.id) === editingId; })
    : null;
   var existing = existingRaw && !existingRaw._deleted ? existingRaw : {};
+  var etatLieuxSnap =
+   global.invooEtatLieux && typeof global.invooEtatLieux.getData === 'function'
+    ? global.invooEtatLieux.getData('res-etat-lieux-root')
+    : undefined;
   var r = Object.assign({}, existing, {
    id: editingId || uid(),
    clientId: document.getElementById('res-client').value,
@@ -181,6 +188,7 @@
    paiements: existing.paiements || [],
    caution: existing.caution != null ? existing.caution : 0,
    cautionStatut: existing.cautionStatut || 'non',
+   etatLieux: etatLieuxSnap !== undefined ? etatLieuxSnap : existing.etatLieux || null,
   });
   delete r._deleted;
   if (!r.clientId || !r.vehId || !r.debut || !r.fin) {
@@ -322,6 +330,9 @@
    document.getElementById('res-debut').dispatchEvent(new Event('input'));
    document.getElementById('res-fin').dispatchEvent(new Event('input'));
    updateResTotal();
+   if (global.invooEtatLieux && typeof global.invooEtatLieux.setData === 'function') {
+    global.invooEtatLieux.setData('res-etat-lieux-root', r.etatLieux || null);
+   }
   }, 50);
   ctx.openModal('res-modal');
  }

@@ -527,6 +527,116 @@ input[type="number"]{
  #client-modal .cl-sec-panel-grid{
   width:100%;
  }
+ #res-modal .res-etat-lieux-block label{
+  font-weight:600;
+  font-size:0.82rem;
+  color:var(--text2);
+  margin-bottom:8px;
+ }
+ #res-modal .el-veh-intro{
+  font-size:0.78rem;
+  color:var(--text3);
+  margin:0 0 10px;
+  line-height:1.4;
+ }
+ #res-modal .el-svg-outer{
+  max-width:100%;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface3);
+  padding:8px;
+ }
+ #res-modal .el-veh-svg{
+  display:block;
+  width:100%;
+  max-height:220px;
+ }
+ #res-modal .el-recap-block{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--border);
+ }
+ #res-modal .el-recap-title{
+  font-size:0.75rem;
+  font-weight:700;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-bottom:8px;
+ }
+ #res-modal .el-recap-row{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-bottom:10px;
+ }
+ #res-modal .el-recap-label{
+  font-size:0.8rem;
+  font-weight:600;
+  color:var(--text2);
+ }
+ #res-modal .el-recap-input{
+  width:100%;
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-size:0.85rem;
+ }
+ #contrat-body .el-contrat-etat .el-contrat-svg-wrap{
+  margin:10px 0 14px;
+  padding:10px;
+  background:var(--surface2);
+  border-radius:8px;
+  border:1px solid var(--border);
+ }
+ #contrat-body .el-contrat-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.82rem;
+  margin-top:8px;
+ }
+ #contrat-body .el-contrat-table th,
+ #contrat-body .el-contrat-table td{
+  border:1px solid var(--border);
+  padding:8px 10px;
+  text-align:left;
+ }
+ #contrat-body .el-contrat-table th{
+  background:var(--surface3);
+  color:var(--text2);
+  font-weight:600;
+ }
+ #contrat-body .el-contrat-ok{
+  font-size:0.82rem;
+  color:var(--text3);
+  margin:8px 0 0;
+ }
+ #contrat-body .el-contrat-damage-report{
+  margin-top:4px;
+ }
+ #contrat-body .el-contrat-damage-lead{
+  font-size:0.84rem;
+  font-weight:600;
+  color:var(--text2);
+  margin:10px 0 6px;
+ }
+ #contrat-body .el-contrat-damage-ul{
+  margin:0;
+  padding-left:1.15rem;
+  font-size:0.82rem;
+  color:var(--text);
+  line-height:1.45;
+ }
+ #contrat-body .el-contrat-damage-ul li{
+  margin:4px 0;
+ }
+ #contrat-body .el-contrat-damage-ul strong{
+  color:var(--text2);
+  font-weight:600;
+ }
  #res-modal .modal-footer .btn{
   min-height:48px !important;
   width:100% !important;

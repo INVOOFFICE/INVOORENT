@@ -74,6 +74,10 @@
    secHtml += '</div></div>';
   }
   const contratNum = 'CTR-' + id.slice(-6).toUpperCase();
+  const etatHtml =
+   global.invooEtatLieux && typeof global.invooEtatLieux.buildContractHtml === 'function'
+    ? global.invooEtatLieux.buildContractHtml(r.etatLieux)
+    : '';
   document.getElementById('contrat-body').innerHTML =
    '\n<div class="contrat-header"><div class="contrat-logo"><h2>' +
    window.AutoLocUtils.escapeHtml(agenceNom).replace(/(\S+)$/, '<span>$1</span>') +
@@ -133,7 +137,9 @@
    (v?.km ? v.km.toLocaleString('fr-FR') + ' km' : '—') +
    '</strong></div><div class="contrat-field"><span>Tarif journalier</span><strong>' +
    window.AutoLocUtils.escapeHtml(String(v?.tarif || '—')) +
-   'MAD / jour</strong></div></div></div><div class="contrat-section"><h4>Détails de la location</h4><div class="contrat-grid"><div class="contrat-field"><span>Date de départ</span><strong>' +
+   'MAD / jour</strong></div></div></div>' +
+   etatHtml +
+   '<div class="contrat-section"><h4>Détails de la location</h4><div class="contrat-grid"><div class="contrat-field"><span>Date de départ</span><strong>' +
    fmt(r.debut) +
    '</strong></div><div class="contrat-field"><span>Date de retour prévue</span><strong>' +
    fmt(r.fin) +
@@ -264,6 +270,12 @@
    const ml = 15;
    const mr = 15;
    const cw = W - ml - mr;
+   const PAGE_MAX_Y = 283;
+   function ensurePage(doc, y, needMm) {
+    if (y + needMm <= PAGE_MAX_Y) return y;
+    doc.addPage();
+    return 15;
+   }
    var y = 15;
    const txt = function (t, x, yy, opts) {
     doc.text(String(t || ''), x, yy, opts);
@@ -307,6 +319,7 @@
    txt('CONTRAT DE LOCATION DE VÉHICULE', W / 2, y + 2, { align: 'center' });
    y += 12;
    const section = function (title) {
+    y = ensurePage(doc, y, 14);
     setFont(7, 'bold', '#0C0E14');
     txt(title, ml, y);
     doc.setDrawColor('#E4E0D8');
@@ -314,6 +327,9 @@
     y += 6;
    };
    const grid2 = function (pairs) {
+    var rows = Math.ceil(pairs.length / 2);
+    var gh = rows * 9 + 4;
+    y = ensurePage(doc, y, gh);
     const colW = cw / 2 - 4;
     pairs.forEach(function (pair, i) {
      const col = i % 2;
@@ -325,7 +341,7 @@
      setFont(8, 'bold', '#0C0E14');
      txt(String(pair[1] || '—'), x, yy + 4);
     });
-    y += Math.ceil(pairs.length / 2) * 9 + 2;
+    y += rows * 9 + 2;
    };
    section('INFORMATIONS DU LOCATAIRE');
    grid2([
@@ -366,6 +382,10 @@
     ['Kilométrage départ', v?.km ? fmtNum(v.km) + ' km' : '—'],
     ['Tarif journalier', (v?.tarif || '—') + ' MAD/j'],
    ]);
+   if (global.invooEtatLieux && typeof global.invooEtatLieux.drawPdf === 'function') {
+    y = ensurePage(doc, y, 95);
+    y = global.invooEtatLieux.drawPdf(doc, ml, y, cw, res.etatLieux);
+   }
    section('DÉTAILS DE LA LOCATION');
    grid2(
     [
@@ -376,6 +396,7 @@
     ].concat(res.notes ? [['Remarques', res.notes]] : [])
    );
    y += 2;
+   y = ensurePage(doc, y, 22);
    rect(ml, y, cw, 14, '#0C0E14');
    setFont(8, 'normal', '#CCCCCC');
    txt('Montant total de la location', ml + 4, y + 5);
@@ -387,6 +408,7 @@
    if ((res.paiements || []).length > 0 || res.caution > 0) {
     section('RÉCAPITULATIF DES PAIEMENTS');
     (res.paiements || []).forEach(function (p) {
+     y = ensurePage(doc, y, 10);
      const typeLabel = p.type === 'avance' ? 'Avance' : p.type === 'solde' ? 'Solde' : 'Autre';
      setFont(7, 'normal', '#555555');
      txt(typeLabel + '(' + p.mode + ' · ' + (p.date || '') + ')', ml, y);
@@ -395,6 +417,7 @@
      y += 6;
     });
     if (res.caution > 0) {
+     y = ensurePage(doc, y, 10);
      const cautionLbl =
       res.cautionStatut === 'encaissee' ? 'Encaissée' : res.cautionStatut === 'restituee' ? 'Restituée' : 'En attente';
      setFont(7, 'normal', '#555555');
@@ -420,23 +443,23 @@
     y += 8;
    }
    section('CONDITIONS GÉNÉRALES');
-   doc.setDrawColor('#2dd4bf');
-   doc.setFillColor('#FAFAFA');
-   const condTextLines = [];
-   conditions.forEach(function (cl, i) {
-    condTextLines.push(i + 1 + '. ' + cl);
-   });
-   const condText = condTextLines.join('\n');
-   const condSplit = doc.splitTextToSize(condText, cw - 8);
-   const condH = condSplit.length * 3.5 + 6;
-   doc.roundedRect(ml, y - 2, cw, condH, 2, 2, 'F');
-   doc.setDrawColor('#2dd4bf');
-   doc.setLineWidth(0.8);
-   doc.line(ml, y - 2, ml, y - 2 + condH);
-   doc.setLineWidth(0.2);
    setFont(6.5, 'normal', '#333333');
-   doc.text(condSplit, ml + 4, y + 2.5, { lineHeightFactor: 1.5 });
-   y += condH + 6;
+   doc.setTextColor(51, 51, 51);
+   var lineH = 3.5;
+   conditions.forEach(function (cl, i) {
+    var block = i + 1 + '. ' + cl;
+    var lines = doc.splitTextToSize(block, cw - 8);
+    var j = 0;
+    for (j = 0; j < lines.length; j++) {
+     y = ensurePage(doc, y, lineH + 2);
+     doc.text(lines[j], ml + 4, y);
+     y += lineH;
+    }
+    y += 1.5;
+   });
+   y += 4;
+   doc.setTextColor(12, 14, 20);
+   y = ensurePage(doc, y, 28);
    const sigW = (cw - 10) / 2;
    doc.setDrawColor('#1A1A1A');
    doc.setLineWidth(0.4);

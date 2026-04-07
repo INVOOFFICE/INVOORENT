@@ -70,9 +70,10 @@
 <textarea id="p-conditions" style="min-height:220px;font-size:0.83rem;line-height:1.7">
 </textarea>
 </div>
-<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-<button class="btn btn-outline btn-sm" onclick="resetConditions()">Remettre par défaut</button>
-<p style="font-size:0.75rem;color:var(--text3);align-self:center">Chaque ligne = une clause numérotée automatiquement</p>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+<button type="button" class="btn btn-outline btn-sm" onclick="resetConditions()">Remettre par défaut</button>
+<button type="button" class="btn btn-outline btn-sm" onclick="reinitialiserConditions()" style="border-color:rgba(248,113,113,0.45);color:#fca5a5">Réinitialiser les conditions</button>
+<p style="font-size:0.75rem;color:var(--text3);margin:0;flex:1;min-width:200px">Chaque ligne = une clause numérotée automatiquement</p>
 </div>
 </div>
 <div class="param-section">

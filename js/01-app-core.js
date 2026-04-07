@@ -866,6 +866,7 @@ function clearResForm(){
 ['res-debut','res-fin'].forEach(i=>{const el=document.getElementById(i);if(el)el.dispatchEvent(new Event('input'));});
  const t=document.getElementById('res-total-preview');if(t)t.style.display='none';
  const h=document.getElementById('res-modal-title');if(h)h.textContent='Nouvelle réservation';
+ if(typeof globalThis.invooEtatLieux!=='undefined'&&typeof globalThis.invooEtatLieux.reset==='function'){globalThis.invooEtatLieux.reset('res-etat-lieux-root');}
 }
 function clearForms(){clearVehForm();clearClientForm();clearResForm();}
 function openModal(id){

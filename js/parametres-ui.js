@@ -7,13 +7,18 @@
  'use strict';
 
  global.INVOO_CONDITIONS_DEFAUT =
-  "Le véhicule doit être restitué dans l'état dans lequel il a été remis au locataire.\n" +
-  'Tout dommage causé au véhicule sera à la charge du locataire selon le contrat d\'assurance en vigueur.\n' +
-  'Le carburant est à la charge du locataire — le véhicule doit être restitué avec le même niveau.\n' +
-  'En cas de panne ou d\'accident, le locataire doit en informer immédiatement l\'agence.\n' +
-  'Le dépassement de la date de retour sans accord préalable entraîne une facturation supplémentaire.\n' +
-  "L'utilisation du véhicule hors du territoire convenu est interdite sans autorisation écrite de l'agence.\n" +
-  'La caution sera restituée intégralement après vérification du bon état du véhicule.';
+  "Le véhicule est remis au locataire en bon état de marche et de propreté. Il doit être restitué dans le même état, faute de quoi les frais de remise en état seront prélevés sur la caution.\n" +
+  "Le locataire s'engage à respecter le Code de la Route marocain en vigueur et à ne pas dépasser les limitations de vitesse autorisées.\n" +
+  "Le véhicule ne peut être conduit que par les personnes expressément mentionnées au présent contrat et titulaires d'un permis de conduire valide.\n" +
+  "Il est strictement interdit de conduire le véhicule sous l'emprise de l'alcool, de stupéfiants ou de toute autre substance altérant les facultés. Tout accident survenu dans ces conditions exclut toute couverture d'assurance et engage la pleine responsabilité du locataire.\n" +
+  "Le véhicule ne peut quitter le territoire du Royaume du Maroc sans autorisation écrite et préalable de l'agence. Toute infraction à cette clause annule automatiquement la couverture d'assurance.\n" +
+  "Le carburant est à la charge exclusive du locataire. Le véhicule doit être restitué avec le même niveau de carburant qu'au départ, sous peine de facturation au tarif en vigueur majoré de 20%.\n" +
+  "En cas d'accident, de panne, de vol ou de tentative de vol, le locataire doit immédiatement contacter l'agence et les autorités compétentes (Police / Gendarmerie). Un constat amiable signé par les deux parties doit être établi sans délai.\n" +
+  "Toute contravention, amende ou infraction au Code de la Route intervenue pendant la période de location est à la charge exclusive du locataire, y compris les frais administratifs de traitement.\n" +
+  "En cas de restitution tardive sans accord écrit préalable de l'agence, une journée supplémentaire complète sera facturée au tarif contractuel pour toute heure de dépassement.\n" +
+  "La caution versée au départ sera restituée intégralement dans un délai de 24h après vérification du bon état du véhicule et du kilométrage. Tout dommage non signalé à l'état des lieux de départ sera déduit de la caution sans préavis.\n" +
+  "L'agence se réserve le droit de récupérer le véhicule sans préavis en cas de non-paiement, d'utilisation frauduleuse, ou de mise en danger manifeste du véhicule, sans qu'aucun remboursement ne soit dû.\n" +
+  "Tout litige relatif au présent contrat sera soumis à la juridiction compétente du lieu du siège de l'agence, conformément à la législation marocaine en vigueur.";
 
  var ctx = null;
 
@@ -101,7 +106,8 @@
   document.getElementById('p-site').value = s.site || '';
   document.getElementById('p-patente').value = s.patente || '';
   document.getElementById('p-iban').value = s.iban || '';
-  document.getElementById('p-conditions').value = s.conditions || condDef();
+  document.getElementById('p-conditions').value =
+   typeof s.conditions === 'string' ? s.conditions : condDef();
  }
 
  function saveParametres() {
@@ -173,12 +179,28 @@
   });
  }
 
+ function reinitialiserConditions() {
+  ctx.alConfirm({
+   icon: '🔄',
+   danger: true,
+   title: 'Réinitialiser les conditions ?',
+   msg:
+    'Le texte des conditions générales sera effacé. Vous pourrez le saisir à nouveau, ou utiliser « Remettre par défaut » pour recharger les clauses officielles. Pensez à enregistrer les paramètres après modification.',
+   okLabel: 'Effacer le texte',
+   onOk: function () {
+    var ta = document.getElementById('p-conditions');
+    if (ta) ta.value = '';
+   },
+  });
+ }
+
  global.invooParametresUi = {
   attach: function (c) {
    ctx = c;
    global.renderParametres = renderParametres;
    global.saveParametres = saveParametres;
    global.resetConditions = resetConditions;
+   global.reinitialiserConditions = reinitialiserConditions;
    global.renderStorageGauge = renderStorageGauge;
   },
  };
