@@ -544,8 +544,9 @@
     var valueW = Math.max(14, width - labelColW - 2.5);
     var lab = pair[0];
     var val = String(pair[1] != null ? pair[1] : '—');
-    var lineStep = 3.55;
-    var firstBaseline = 3.15;
+    var lineStep = 2.75;
+    var firstBaseline = 2.15;
+    var tailBelowLastLine = 1.35;
     var valueBold =
      opts.valueBold != null
       ? opts.valueBold
@@ -573,7 +574,9 @@
     var valueLines = doc.splitTextToSize(val, valueW);
 
     var n = Math.max(labelLines.length, valueLines.length, 1);
-    var minH = firstBaseline + n * lineStep + 1.5;
+    var rowH =
+     firstBaseline + (n > 1 ? (n - 1) * lineStep : 0) + tailBelowLastLine;
+    var minH = rowH;
     return { lines: n, minH: minH, draw: function (curTop) {
      var i = 0;
      for (i = 0; i < n; i++) {
@@ -591,11 +594,12 @@
        txt(valueLines[i], valueX, yy);
       }
      }
-     var rowH = firstBaseline + n * lineStep + 1.5;
+     var rowHDraw =
+      firstBaseline + (n > 1 ? (n - 1) * lineStep : 0) + tailBelowLastLine;
      setDrawRgb([238, 238, 238]);
      doc.setLineWidth(0.15);
-     doc.line(xBase, curTop + rowH, xBase + width, curTop + rowH);
-     return curTop + rowH;
+     doc.line(xBase, curTop + rowHDraw, xBase + width, curTop + rowHDraw);
+     return curTop + rowHDraw;
     }};
    }
 
@@ -613,14 +617,14 @@
      var cur = yyStart;
      list.forEach(function (pair) {
       var lay = drawLabelValueRow(xBase, width, pair, { labelColW: labelColHalf });
-      cur = ensurePage(cur, lay.minH + 1);
+      cur = ensurePage(cur, lay.minH + 0.2);
       cur = lay.draw(cur);
      });
      return cur;
     }
     yL = drawSide(left, ml, colW, yL);
     yR = drawSide(right, midX, colW, yR);
-    y = Math.max(yL, yR) + 2;
+    y = Math.max(yL, yR) + 0.5;
    }
 
    sectionBar('INFORMATIONS DU LOCATAIRE');
@@ -708,7 +712,7 @@
      valueBold: true,
      valueBlue: blueV,
     });
-    y_l = ensurePage(y_l, lay.minH + 1);
+    y_l = ensurePage(y_l, lay.minH + 0.2);
     y_l = lay.draw(y_l);
    });
    rightRows.forEach(function (pair) {
@@ -718,10 +722,10 @@
      valueBold: true,
      valueBlue: blueV,
     });
-    y_r = ensurePage(y_r, lay.minH + 1);
+    y_r = ensurePage(y_r, lay.minH + 0.2);
     y_r = lay.draw(y_r);
    });
-   var yAfterCols = Math.max(y_l, y_r) + 2;
+   var yAfterCols = Math.max(y_l, y_r) + 0.5;
 
    var paid = (res.paiements || []).reduce(function (s, p) {
     return s + (Number(p && p.montant) || 0);
@@ -783,14 +787,18 @@
    var col2 = conditions.slice(halfC);
    var midC = ml + cw / 2;
    var maxRows = Math.max(col1.length, col2.length);
-   var condLineStep = 3.4;
-   var condTopPad = 2.6;
+   var condLineStep = 2.65;
+   var condTopPad = 1.9;
    for (var ri = 0; ri < maxRows; ri++) {
     var line1 = ri < col1.length ? doc.splitTextToSize(col1[ri], midC - ml - 9) : [];
     var line2 = ri < col2.length ? doc.splitTextToSize(col2[ri], ml + cw - midC - 9) : [];
+    var condLines = Math.max(line1.length, line2.length, 1);
     var condRowH =
-     condTopPad + Math.max(line1.length, line2.length, 1) * condLineStep + 1.2;
-    y = ensurePage(y, condRowH + 1);
+     condTopPad +
+     (condLines > 1 ? (condLines - 1) * condLineStep : 0) +
+     2 +
+     0.35;
+    y = ensurePage(y, condRowH + 0.2);
     var baseY = y;
     if (ri < col1.length) {
      var idx1 = ri + 1;
